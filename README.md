@@ -72,6 +72,25 @@ console.log(response.content);
 console.log(`Tokens: ${response.usage?.totalTokens}`);
 ```
 
+### Chat (Advanced Options)
+
+```ts
+const response = await client.agents.chat("agent-id", {
+  messages: [{ role: "user", content: "Hello!" }],
+  userId: "user-123",
+  userDisplayName: "Alex",
+  provider: "openai",
+  model: "gpt-4o",
+  language: "en",
+  timezone: "America/New_York",
+  compiledSystemPrompt: "You are a helpful assistant.",
+  toolCapabilities: { web_search: true, remember_name: true, image_generation: false },
+  toolDefinitions: [
+    { name: "get_weather", description: "Get current weather", parameters: { type: "object", properties: { city: { type: "string" } } } },
+  ],
+});
+```
+
 ### Memory
 
 ```ts
