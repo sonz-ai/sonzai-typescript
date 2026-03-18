@@ -1,11 +1,17 @@
 import type { HTTPClient } from "../http.js";
 import type {
+  FactListOptions,
+  FactListResponse,
   MemoryListOptions,
+  MemoryResetOptions,
+  MemoryResetResponse,
   MemoryResponse,
   MemorySearchOptions,
   MemorySearchResponse,
   MemoryTimelineOptions,
   MemoryTimelineResponse,
+  SeedMemoriesOptions,
+  SeedMemoriesResponse,
 } from "../types.js";
 
 export class Memory {
@@ -55,6 +61,53 @@ export class Memory {
         instance_id: options.instanceId,
         start: options.start,
         end: options.end,
+      },
+    );
+  }
+
+  /** Seed bulk memories for an agent. */
+  async seed(
+    agentId: string,
+    options: SeedMemoriesOptions,
+  ): Promise<SeedMemoriesResponse> {
+    const body: Record<string, unknown> = {
+      user_id: options.userId,
+      memories: options.memories,
+    };
+    if (options.instanceId) body.instance_id = options.instanceId;
+
+    return this.http.post<SeedMemoriesResponse>(
+      `/api/v1/agents/${agentId}/memory/seed`,
+      body,
+    );
+  }
+
+  /** List extracted facts for an agent. */
+  async listFacts(
+    agentId: string,
+    options: FactListOptions = {},
+  ): Promise<FactListResponse> {
+    return this.http.get<FactListResponse>(
+      `/api/v1/agents/${agentId}/memory/facts`,
+      {
+        user_id: options.userId,
+        category: options.category,
+        limit: options.limit,
+        offset: options.offset,
+      },
+    );
+  }
+
+  /** Reset (delete) all memory for an agent, optionally scoped to a user. */
+  async reset(
+    agentId: string,
+    options: MemoryResetOptions = {},
+  ): Promise<MemoryResetResponse> {
+    return this.http.delete<MemoryResetResponse>(
+      `/api/v1/agents/${agentId}/memory`,
+      {
+        user_id: options.userId,
+        instance_id: options.instanceId,
       },
     );
   }

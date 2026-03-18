@@ -457,6 +457,510 @@ export interface EvalRunListOptions {
 }
 
 // ---------------------------------------------------------------------------
+// Agent CRUD
+// ---------------------------------------------------------------------------
+
+export interface SDKPersonalityDimensions {
+  intellect: number;
+  aesthetic: number;
+  industriousness: number;
+  orderliness: number;
+  enthusiasm: number;
+  assertiveness: number;
+  compassion: number;
+  politeness: number;
+  withdrawal: number;
+  volatility: number;
+}
+
+export interface Big5Scores {
+  openness: number;
+  conscientiousness: number;
+  extraversion: number;
+  agreeableness: number;
+  neuroticism: number;
+  confidence?: number;
+}
+
+export interface AgentToolCapabilities {
+  web_search: boolean;
+  remember_name: boolean;
+  image_generation: boolean;
+}
+
+export interface SeedMemory {
+  content: string;
+  fact_type?: string;
+  importance?: number;
+  entities?: string[];
+}
+
+export interface CreateAgentOptions {
+  agentId?: string;
+  userId?: string;
+  userDisplayName?: string;
+  name: string;
+  gender?: string;
+  bio?: string;
+  avatarUrl?: string;
+  projectId?: string;
+  personalityPrompt?: string;
+  speechPatterns?: string[];
+  trueInterests?: string[];
+  trueDislikes?: string[];
+  primaryTraits?: string[];
+  big5?: Big5Scores;
+  dimensions?: SDKPersonalityDimensions;
+  preferences?: Record<string, string>;
+  behaviors?: Record<string, string>;
+  toolCapabilities?: AgentToolCapabilities;
+  language?: string;
+  seedMemories?: SeedMemory[];
+  loreContext?: Record<string, unknown>;
+  generateOriginStory?: boolean;
+  generatePersonalizedMemories?: boolean;
+}
+
+export interface Agent {
+  agent_id: string;
+  name: string;
+  bio?: string;
+  gender?: string;
+  avatar_url?: string;
+  status?: string;
+  personality_prompt?: string;
+  speech_patterns?: string[];
+  true_interests?: string[];
+  true_dislikes?: string[];
+  created_at?: string;
+}
+
+export interface UpdateAgentOptions {
+  name?: string;
+  bio?: string;
+  avatarUrl?: string;
+  personalityPrompt?: string;
+  speechPatterns?: string[];
+  trueInterests?: string[];
+  trueDislikes?: string[];
+  big5?: Big5Scores;
+  dimensions?: SDKPersonalityDimensions;
+  toolCapabilities?: AgentToolCapabilities;
+}
+
+// ---------------------------------------------------------------------------
+// Events
+// ---------------------------------------------------------------------------
+
+export interface TriggerEventOptions {
+  userId: string;
+  eventType: string;
+  eventDescription?: string;
+  metadata?: Record<string, string>;
+  language?: string;
+  instanceId?: string;
+}
+
+export interface TriggerEventResponse {
+  accepted: boolean;
+  event_id: string;
+}
+
+// ---------------------------------------------------------------------------
+// Dialogue
+// ---------------------------------------------------------------------------
+
+export interface DialogueOptions {
+  userId?: string;
+  enrichedContext?: Record<string, unknown>;
+  messages?: ChatMessage[];
+  requestType?: string;
+  sceneGuidance?: string;
+  toolConfig?: Record<string, unknown>;
+  instanceId?: string;
+}
+
+export interface DialogueResponse {
+  response: string;
+  side_effects?: Record<string, unknown>;
+}
+
+// ---------------------------------------------------------------------------
+// Memory Facts
+// ---------------------------------------------------------------------------
+
+export interface Fact {
+  fact_id: string;
+  agent_id: string;
+  user_id?: string;
+  content: string;
+  category: string;
+  confidence: number;
+  mention_count: number;
+  created_at?: string;
+  last_mentioned_at?: string;
+  context_examples?: string[];
+}
+
+export interface FactListResponse {
+  facts: Fact[];
+  total_count: number;
+  has_more: boolean;
+}
+
+export interface FactListOptions {
+  userId?: string;
+  category?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface MemoryResetOptions {
+  userId?: string;
+  instanceId?: string;
+}
+
+export interface MemoryResetResponse {
+  agent_id: string;
+  user_id?: string;
+  status: string;
+  facts_deleted: number;
+  relationships_deleted: number;
+}
+
+export interface SeedMemoriesOptions {
+  userId: string;
+  memories: SeedMemory[];
+  instanceId?: string;
+}
+
+export interface SeedMemoriesResponse {
+  memories_created: number;
+}
+
+// ---------------------------------------------------------------------------
+// Personality Update
+// ---------------------------------------------------------------------------
+
+export interface PersonalityUpdateOptions {
+  big5: Big5Scores;
+  assessmentMethod?: string;
+  totalExchanges?: number;
+}
+
+export interface PersonalityUpdateResponse {
+  agent_id: string;
+  status: string;
+}
+
+// ---------------------------------------------------------------------------
+// Voice
+// ---------------------------------------------------------------------------
+
+export interface VoiceMatchOptions {
+  big5?: Big5Scores;
+  preferredGender?: string;
+}
+
+export interface VoiceMatchResponse {
+  voice_id: string;
+  voice_name: string;
+  match_score: number;
+  reasoning?: string;
+}
+
+export interface EmotionalContext {
+  themes?: string[];
+  tone?: string;
+}
+
+export interface TTSOptions {
+  text: string;
+  voiceName?: string;
+  language?: string;
+  emotionalContext?: EmotionalContext;
+}
+
+export interface TTSResponse {
+  audio: string;
+  content_type: string;
+  voice_name?: string;
+  duration_ms?: number;
+}
+
+export interface VoiceChatOptions {
+  userId?: string;
+  audio: string;
+  audioFormat?: string;
+  voiceName?: string;
+  continuationToken?: string;
+  language?: string;
+}
+
+export interface VoiceChatResponse {
+  transcript: string;
+  response: string;
+  audio: string;
+  content_type: string;
+  continuation_token?: string;
+}
+
+export interface VoiceEntry {
+  voice_id: string;
+  voice_name: string;
+  gender: string;
+  tier: number;
+  provider: string;
+  language: string;
+  accent?: string;
+  age_profile?: string;
+  description?: string;
+  sample_audio_url?: string;
+  availability: string;
+}
+
+export interface VoiceListResponse {
+  voices: VoiceEntry[];
+  total_count: number;
+  has_more: boolean;
+}
+
+export interface VoiceListOptions {
+  tier?: number;
+  gender?: string;
+  language?: string;
+  limit?: number;
+  offset?: number;
+}
+
+// ---------------------------------------------------------------------------
+// Generation
+// ---------------------------------------------------------------------------
+
+export interface GenerateBioOptions {
+  name?: string;
+  gender?: string;
+  description?: string;
+  userId?: string;
+  enrichedContextJson?: Record<string, unknown>;
+  currentBio?: string;
+  style?: string;
+  instanceId?: string;
+}
+
+export interface GenerateBioResponse {
+  bio: string;
+  tone?: string;
+  confidence?: number;
+}
+
+export interface GenerateCharacterOptions {
+  name: string;
+  gender?: string;
+  description?: string;
+  fields?: string[];
+}
+
+export interface SDKInteractionPreferences {
+  conversation_pace: string;
+  formality: string;
+  humor_style: string;
+  emotional_expression: string;
+}
+
+export interface SDKBehavioralTraits {
+  response_length: string;
+  question_frequency: string;
+  empathy_style: string;
+  conflict_approach: string;
+}
+
+export interface GenerateCharacterResponse {
+  bio: string;
+  personality_prompt: string;
+  big5?: Big5Scores;
+  speech_patterns?: string[];
+  true_interests?: string[];
+  true_dislikes?: string[];
+  primary_traits?: string[];
+  dimensions?: SDKPersonalityDimensions;
+  preferences?: SDKInteractionPreferences;
+  behaviors?: SDKBehavioralTraits;
+}
+
+export interface LoreGenerationContext {
+  worldDescription: string;
+  entityTerminology?: Record<string, string>;
+  originPromptInstructions?: string;
+}
+
+export interface IdentityMemory {
+  template: string;
+  factType?: string;
+  importance?: number;
+  entities?: string[];
+}
+
+export interface ModelConfig {
+  provider: string;
+  model: string;
+  temperature: number;
+  max_tokens: number;
+}
+
+export interface GenerateSeedMemoriesOptions {
+  userId?: string;
+  agentName?: string;
+  big5?: Big5Scores;
+  personalityPrompt?: string;
+  guideSummary?: string;
+  trueInterests?: string[];
+  trueDislikes?: string[];
+  speechPatterns?: string[];
+  creatorDisplayName?: string;
+  staticLoreMemories?: SeedMemory[];
+  loreGenerationContext?: LoreGenerationContext;
+  identityMemoryTemplates?: IdentityMemory[];
+  generateOriginStory?: boolean;
+  generatePersonalizedMemories?: boolean;
+  modelConfig?: ModelConfig;
+  storeMemories?: boolean;
+}
+
+export interface GenerateSeedMemoriesResponse {
+  memories: SeedMemory[];
+  memories_stored?: number;
+}
+
+export interface ImageGenerateOptions {
+  prompt: string;
+  negativePrompt?: string;
+  model?: string;
+  provider?: string;
+  outputBucket?: string;
+  outputPath?: string;
+}
+
+export interface ImageGenerateResponse {
+  image_id: string;
+  public_url: string;
+  mime_type: string;
+  generation_time_ms: number;
+}
+
+// ---------------------------------------------------------------------------
+// Custom States
+// ---------------------------------------------------------------------------
+
+export interface CustomStateListOptions {
+  scope?: string;
+  userId?: string;
+  instanceId?: string;
+}
+
+export interface CustomStateCreateOptions {
+  key: string;
+  value: unknown;
+  scope?: string;
+  contentType?: string;
+  userId?: string;
+  instanceId?: string;
+}
+
+export interface CustomStateUpdateOptions {
+  value: unknown;
+  contentType?: string;
+}
+
+export interface CustomState {
+  state_id: string;
+  agent_id: string;
+  scope: string;
+  key: string;
+  value: unknown;
+  content_type: string;
+  user_id?: string;
+  instance_id?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CustomStateListResponse {
+  states: CustomState[];
+}
+
+// ---------------------------------------------------------------------------
+// Wakeups
+// ---------------------------------------------------------------------------
+
+export interface ScheduleWakeupOptions {
+  userId: string;
+  scheduledAt: string;
+  checkType: string;
+  intent?: string;
+  occasion?: string;
+  interestTopic?: string;
+  eventDescription?: string;
+}
+
+export interface ScheduledWakeup {
+  wakeup_id: string;
+  agent_id: string;
+  user_id: string;
+  scheduled_at: string;
+  check_type: string;
+  status: string;
+  intent?: string;
+  last_topic?: string;
+  event_description?: string;
+  occasion?: string;
+  interest_topic?: string;
+  executed_at?: string;
+  created_at?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Webhooks
+// ---------------------------------------------------------------------------
+
+export interface WebhookEndpoint {
+  event_type: string;
+  webhook_url: string;
+  auth_header?: string;
+}
+
+export interface WebhookRegisterOptions {
+  webhookUrl: string;
+  authHeader?: string;
+}
+
+export interface WebhookRegisterResponse {
+  success: boolean;
+  signing_secret?: string;
+}
+
+export interface WebhookListResponse {
+  webhooks: WebhookEndpoint[];
+}
+
+export interface WebhookDeliveryAttempt {
+  attempt_id: string;
+  event_type: string;
+  webhook_url: string;
+  response_code: number;
+  response_body?: string;
+  error_message?: string;
+  duration_ms: number;
+  attempt_number: number;
+  status: string;
+  created_at: string;
+}
+
+export interface DeliveryAttemptsResponse {
+  attempts: WebhookDeliveryAttempt[];
+}
+
+// ---------------------------------------------------------------------------
 // Client Config
 // ---------------------------------------------------------------------------
 

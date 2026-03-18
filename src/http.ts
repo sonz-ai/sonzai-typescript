@@ -92,8 +92,11 @@ export class HTTPClient {
     return this.request<T>("PATCH", path, { body });
   }
 
-  async delete<T = unknown>(path: string): Promise<T> {
-    return this.request<T>("DELETE", path);
+  async delete<T = unknown>(
+    path: string,
+    params?: Record<string, string | number | boolean | undefined>,
+  ): Promise<T> {
+    return this.request<T>("DELETE", path, { params });
   }
 
   async *streamSSE(

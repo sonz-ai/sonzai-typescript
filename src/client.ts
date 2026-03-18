@@ -2,6 +2,8 @@ import { HTTPClient } from "./http.js";
 import { Agents } from "./resources/agents.js";
 import { EvalRuns } from "./resources/eval-runs.js";
 import { EvalTemplates } from "./resources/eval-templates.js";
+import { Voices } from "./resources/voice.js";
+import { Webhooks } from "./resources/webhooks.js";
 import type { SonzaiConfig } from "./types.js";
 
 const DEFAULT_BASE_URL = "https://api.sonz.ai";
@@ -91,6 +93,8 @@ export class Sonzai {
   readonly agents: Agents;
   readonly evalTemplates: EvalTemplates;
   readonly evalRuns: EvalRuns;
+  readonly voices: Voices;
+  readonly webhooks: Webhooks;
 
   private readonly http: HTTPClient;
 
@@ -108,5 +112,7 @@ export class Sonzai {
     this.agents = new Agents(this.http);
     this.evalTemplates = new EvalTemplates(this.http);
     this.evalRuns = new EvalRuns(this.http);
+    this.voices = new Voices(this.http);
+    this.webhooks = new Webhooks(this.http);
   }
 }

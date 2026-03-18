@@ -17,6 +17,14 @@ export {
 export type {
   // Config
   SonzaiConfig,
+  // Agent CRUD
+  Agent,
+  CreateAgentOptions,
+  UpdateAgentOptions,
+  SDKPersonalityDimensions,
+  Big5Scores,
+  AgentToolCapabilities,
+  SeedMemory,
   // Chat
   ChatMessage,
   ChatChoice,
@@ -24,6 +32,12 @@ export type {
   ChatStreamEvent,
   ChatResponse,
   ChatOptions,
+  // Dialogue
+  DialogueOptions,
+  DialogueResponse,
+  // Events
+  TriggerEventOptions,
+  TriggerEventResponse,
   // Memory
   MemoryNode,
   AtomicFact,
@@ -35,6 +49,13 @@ export type {
   MemoryListOptions,
   MemorySearchOptions,
   MemoryTimelineOptions,
+  Fact,
+  FactListResponse,
+  FactListOptions,
+  MemoryResetOptions,
+  MemoryResetResponse,
+  SeedMemoriesOptions,
+  SeedMemoriesResponse,
   // Personality
   Big5Trait,
   Big5,
@@ -45,6 +66,8 @@ export type {
   PersonalityDelta,
   PersonalityResponse,
   PersonalityGetOptions,
+  PersonalityUpdateOptions,
+  PersonalityUpdateResponse,
   // Sessions
   SessionStartOptions,
   SessionEndOptions,
@@ -59,6 +82,47 @@ export type {
   NotificationListOptions,
   // Context data
   ContextDataOptions,
+  // Voice
+  VoiceMatchOptions,
+  VoiceMatchResponse,
+  EmotionalContext,
+  TTSOptions,
+  TTSResponse,
+  VoiceChatOptions,
+  VoiceChatResponse,
+  VoiceEntry,
+  VoiceListResponse,
+  VoiceListOptions,
+  // Generation
+  GenerateBioOptions,
+  GenerateBioResponse,
+  GenerateCharacterOptions,
+  GenerateCharacterResponse,
+  SDKInteractionPreferences,
+  SDKBehavioralTraits,
+  GenerateSeedMemoriesOptions,
+  GenerateSeedMemoriesResponse,
+  LoreGenerationContext,
+  IdentityMemory,
+  ModelConfig,
+  ImageGenerateOptions,
+  ImageGenerateResponse,
+  // Custom States
+  CustomState,
+  CustomStateListOptions,
+  CustomStateCreateOptions,
+  CustomStateUpdateOptions,
+  CustomStateListResponse,
+  // Wakeups
+  ScheduleWakeupOptions,
+  ScheduledWakeup,
+  // Webhooks
+  WebhookEndpoint,
+  WebhookRegisterOptions,
+  WebhookRegisterResponse,
+  WebhookListResponse,
+  WebhookDeliveryAttempt,
+  DeliveryAttemptsResponse,
   // Evaluation
   EvalCategory,
   EvaluationResult,

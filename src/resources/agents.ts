@@ -1,23 +1,34 @@
 import type { HTTPClient } from "../http.js";
 import type {
-  ChatMessage,
+  Agent,
   ChatOptions,
   ChatResponse,
   ChatStreamEvent,
   ChatUsage,
   ContextDataOptions,
+  CreateAgentOptions,
+  DialogueOptions,
+  DialogueResponse,
   EvalOnlyOptions,
   EvaluateOptions,
   EvaluationResult,
   RunEvalOptions,
+  ScheduleWakeupOptions,
+  ScheduledWakeup,
   SimulateOptions,
   SimulationEvent,
+  TriggerEventOptions,
+  TriggerEventResponse,
+  UpdateAgentOptions,
 } from "../types.js";
+import { CustomStates } from "./custom-states.js";
+import { Generation } from "./generation.js";
 import { Instances } from "./instances.js";
 import { Memory } from "./memory.js";
 import { Notifications } from "./notifications.js";
 import { Personality } from "./personality.js";
 import { Sessions } from "./sessions.js";
+import { Voice } from "./voice.js";
 
 export class Agents {
   readonly memory: Memory;
@@ -25,6 +36,9 @@ export class Agents {
   readonly sessions: Sessions;
   readonly instances: Instances;
   readonly notifications: Notifications;
+  readonly customStates: CustomStates;
+  readonly voice: Voice;
+  readonly generation: Generation;
 
   constructor(private readonly http: HTTPClient) {
     this.memory = new Memory(http);
@@ -32,7 +46,79 @@ export class Agents {
     this.sessions = new Sessions(http);
     this.instances = new Instances(http);
     this.notifications = new Notifications(http);
+    this.customStates = new CustomStates(http);
+    this.voice = new Voice(http);
+    this.generation = new Generation(http);
   }
+
+  // -- Agent CRUD --
+
+  /** Create a new agent. */
+  async create(options: CreateAgentOptions): Promise<Agent> {
+    const body: Record<string, unknown> = { name: options.name };
+    if (options.agentId) body.agent_id = options.agentId;
+    if (options.userId) body.user_id = options.userId;
+    if (options.userDisplayName)
+      body.user_display_name = options.userDisplayName;
+    if (options.gender) body.gender = options.gender;
+    if (options.bio) body.bio = options.bio;
+    if (options.avatarUrl) body.avatar_url = options.avatarUrl;
+    if (options.projectId) body.project_id = options.projectId;
+    if (options.personalityPrompt)
+      body.personality_prompt = options.personalityPrompt;
+    if (options.speechPatterns) body.speech_patterns = options.speechPatterns;
+    if (options.trueInterests) body.true_interests = options.trueInterests;
+    if (options.trueDislikes) body.true_dislikes = options.trueDislikes;
+    if (options.primaryTraits) body.primary_traits = options.primaryTraits;
+    if (options.big5) body.big5 = options.big5;
+    if (options.dimensions) body.dimensions = options.dimensions;
+    if (options.preferences) body.preferences = options.preferences;
+    if (options.behaviors) body.behaviors = options.behaviors;
+    if (options.toolCapabilities)
+      body.tool_capabilities = options.toolCapabilities;
+    if (options.language) body.language = options.language;
+    if (options.seedMemories) body.seed_memories = options.seedMemories;
+    if (options.loreContext)
+      body.lore_generation_context = options.loreContext;
+    if (options.generateOriginStory != null)
+      body.generate_origin_story = options.generateOriginStory;
+    if (options.generatePersonalizedMemories != null)
+      body.generate_personalized_memories =
+        options.generatePersonalizedMemories;
+
+    return this.http.post<Agent>("/api/v1/agents", body);
+  }
+
+  /** Get an agent by ID. */
+  async get(agentId: string): Promise<Agent> {
+    return this.http.get<Agent>(`/api/v1/agents/${agentId}`);
+  }
+
+  /** Update an agent's profile. */
+  async update(agentId: string, options: UpdateAgentOptions): Promise<Agent> {
+    const body: Record<string, unknown> = {};
+    if (options.name) body.name = options.name;
+    if (options.bio) body.bio = options.bio;
+    if (options.avatarUrl) body.avatar_url = options.avatarUrl;
+    if (options.personalityPrompt)
+      body.personality_prompt = options.personalityPrompt;
+    if (options.speechPatterns) body.speech_patterns = options.speechPatterns;
+    if (options.trueInterests) body.true_interests = options.trueInterests;
+    if (options.trueDislikes) body.true_dislikes = options.trueDislikes;
+    if (options.big5) body.big5 = options.big5;
+    if (options.dimensions) body.dimensions = options.dimensions;
+    if (options.toolCapabilities)
+      body.tool_capabilities = options.toolCapabilities;
+
+    return this.http.patch<Agent>(`/api/v1/agents/${agentId}/profile`, body);
+  }
+
+  /** Delete an agent. */
+  async delete(agentId: string): Promise<void> {
+    await this.http.delete(`/api/v1/agents/${agentId}`);
+  }
+
+  // -- Chat --
 
   /** Send a chat message (non-streaming). Consumes the SSE stream and returns aggregated content. */
   async chat(agentId: string, options: ChatOptions): Promise<ChatResponse> {
@@ -68,6 +154,89 @@ export class Agents {
       yield event as ChatStreamEvent;
     }
   }
+
+  // -- Dialogue --
+
+  /** Initiate a dialogue with an agent. */
+  async dialogue(
+    agentId: string,
+    options: DialogueOptions,
+  ): Promise<DialogueResponse> {
+    const body: Record<string, unknown> = {};
+    if (options.userId) body.user_id = options.userId;
+    if (options.enrichedContext)
+      body.enriched_context = options.enrichedContext;
+    if (options.messages) body.messages = options.messages;
+    if (options.requestType) body.request_type = options.requestType;
+    if (options.sceneGuidance) body.scene_guidance = options.sceneGuidance;
+    if (options.toolConfig) body.tool_config = options.toolConfig;
+    if (options.instanceId) body.instance_id = options.instanceId;
+
+    return this.http.post<DialogueResponse>(
+      `/api/v1/agents/${agentId}/dialogue`,
+      body,
+    );
+  }
+
+  // -- Events --
+
+  /** Trigger a game event / activity for an agent. */
+  async triggerGameEvent(
+    agentId: string,
+    options: TriggerEventOptions,
+  ): Promise<TriggerEventResponse> {
+    const body: Record<string, unknown> = {
+      user_id: options.userId,
+      event_type: options.eventType,
+    };
+    if (options.eventDescription)
+      body.event_description = options.eventDescription;
+    if (options.metadata) body.metadata = options.metadata;
+    if (options.language) body.language = options.language;
+    if (options.instanceId) body.instance_id = options.instanceId;
+
+    return this.http.post<TriggerEventResponse>(
+      `/api/v1/agents/${agentId}/events`,
+      body,
+    );
+  }
+
+  // -- Wakeups --
+
+  /** Schedule a wakeup for an agent. */
+  async scheduleWakeup(
+    agentId: string,
+    options: ScheduleWakeupOptions,
+  ): Promise<ScheduledWakeup> {
+    const body: Record<string, unknown> = {
+      user_id: options.userId,
+      scheduled_at: options.scheduledAt,
+      check_type: options.checkType,
+    };
+    if (options.intent) body.intent = options.intent;
+    if (options.occasion) body.occasion = options.occasion;
+    if (options.interestTopic) body.interest_topic = options.interestTopic;
+    if (options.eventDescription)
+      body.event_description = options.eventDescription;
+
+    return this.http.post<ScheduledWakeup>(
+      `/api/v1/agents/${agentId}/wakeups`,
+      body,
+    );
+  }
+
+  /** Get wakeups for an agent. */
+  async getWakeups(
+    agentId: string,
+    options: ContextDataOptions = {},
+  ): Promise<Record<string, unknown>> {
+    return this.http.get(`/api/v1/agents/${agentId}/wakeups`, {
+      user_id: options.userId,
+      instance_id: options.instanceId,
+    });
+  }
+
+  // -- Evaluation --
 
   /** Evaluate an agent against a template. */
   async evaluate(
@@ -176,6 +345,17 @@ export class Agents {
     });
   }
 
+  /** Get aggregated mood statistics for an agent. */
+  async getMoodAggregate(
+    agentId: string,
+    options: ContextDataOptions = {},
+  ): Promise<Record<string, unknown>> {
+    return this.http.get(`/api/v1/agents/${agentId}/mood/aggregate`, {
+      user_id: options.userId,
+      instance_id: options.instanceId,
+    });
+  }
+
   async getRelationships(
     agentId: string,
     options: ContextDataOptions = {},
@@ -228,6 +408,28 @@ export class Agents {
 
   async getUsers(agentId: string): Promise<Record<string, unknown>> {
     return this.http.get(`/api/v1/agents/${agentId}/users`);
+  }
+
+  /** Get constellation data for an agent. */
+  async getConstellation(
+    agentId: string,
+    options: ContextDataOptions = {},
+  ): Promise<Record<string, unknown>> {
+    return this.http.get(`/api/v1/agents/${agentId}/constellation`, {
+      user_id: options.userId,
+      instance_id: options.instanceId,
+    });
+  }
+
+  /** Get breakthroughs for an agent. */
+  async getBreakthroughs(
+    agentId: string,
+    options: ContextDataOptions = {},
+  ): Promise<Record<string, unknown>> {
+    return this.http.get(`/api/v1/agents/${agentId}/breakthroughs`, {
+      user_id: options.userId,
+      instance_id: options.instanceId,
+    });
   }
 
   private buildChatBody(options: ChatOptions): Record<string, unknown> {
