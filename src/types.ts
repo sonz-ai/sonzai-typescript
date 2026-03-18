@@ -25,6 +25,23 @@ export interface ChatStreamEvent {
   type?: string;
   data?: Record<string, unknown>;
   error?: { message: string };
+
+  // Rich event fields (populated based on type)
+  message_index?: number;
+  is_follow_up?: boolean;
+  replacement?: boolean;
+  full_content?: string;
+  finish_reason?: string;
+  continuation_token?: string;
+  response_cookie?: string;
+  message_count?: number;
+  side_effects?: Record<string, unknown>;
+  enriched_context?: Record<string, unknown>;
+  build_duration_ms?: number;
+  used_fast_path?: boolean;
+  error_message?: string;
+  error_code?: string;
+  is_token_error?: boolean;
 }
 
 export interface ChatResponse {
@@ -33,11 +50,29 @@ export interface ChatResponse {
   usage?: ChatUsage;
 }
 
+export interface ToolDefinition {
+  name: string;
+  description: string;
+  parameters?: Record<string, unknown>;
+}
+
 export interface ChatOptions {
   messages: ChatMessage[];
   userId?: string;
+  userDisplayName?: string;
   sessionId?: string;
   instanceId?: string;
+  provider?: string;
+  model?: string;
+  continuationToken?: string;
+  aiServiceCookie?: string;
+  requestType?: string;
+  language?: string;
+  compiledSystemPrompt?: string;
+  interactionRole?: string;
+  timezone?: string;
+  toolCapabilities?: AgentToolCapabilities;
+  toolDefinitions?: ToolDefinition[];
 }
 
 // ---------------------------------------------------------------------------
@@ -281,6 +316,18 @@ export interface ContextDataOptions {
   instanceId?: string;
 }
 
+export interface MoodResponse extends Record<string, unknown> {}
+export interface MoodAggregateResponse extends Record<string, unknown> {}
+export interface RelationshipResponse extends Record<string, unknown> {}
+export interface HabitsResponse extends Record<string, unknown> {}
+export interface GoalsResponse extends Record<string, unknown> {}
+export interface InterestsResponse extends Record<string, unknown> {}
+export interface DiaryResponse extends Record<string, unknown> {}
+export interface UsersResponse extends Record<string, unknown> {}
+export interface ConstellationResponse extends Record<string, unknown> {}
+export interface BreakthroughsResponse extends Record<string, unknown> {}
+export interface WakeupsResponse extends Record<string, unknown> {}
+
 // ---------------------------------------------------------------------------
 // Evaluation
 // ---------------------------------------------------------------------------
@@ -327,6 +374,7 @@ export interface SimulationSession {
 }
 
 export interface UserPersona {
+  id?: string;
   name: string;
   background: string;
   personality_traits: string[];
@@ -461,16 +509,14 @@ export interface EvalRunListOptions {
 // ---------------------------------------------------------------------------
 
 export interface SDKPersonalityDimensions {
-  intellect: number;
-  aesthetic: number;
-  industriousness: number;
-  orderliness: number;
-  enthusiasm: number;
-  assertiveness: number;
-  compassion: number;
-  politeness: number;
-  withdrawal: number;
-  volatility: number;
+  warmth: number;
+  energy: number;
+  openness: number;
+  emotional_depth: number;
+  playfulness: number;
+  supportiveness: number;
+  curiosity: number;
+  wisdom: number;
 }
 
 export interface Big5Scores {
@@ -762,17 +808,16 @@ export interface GenerateCharacterOptions {
 }
 
 export interface SDKInteractionPreferences {
-  conversation_pace: string;
+  pace: string;
   formality: string;
   humor_style: string;
   emotional_expression: string;
 }
 
 export interface SDKBehavioralTraits {
-  response_length: string;
-  question_frequency: string;
-  empathy_style: string;
-  conflict_approach: string;
+  proactivity: string;
+  reliability: string;
+  humor: string;
 }
 
 export interface GenerateCharacterResponse {

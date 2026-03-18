@@ -82,6 +82,19 @@ export type {
   NotificationListOptions,
   // Context data
   ContextDataOptions,
+  MoodResponse,
+  MoodAggregateResponse,
+  RelationshipResponse,
+  HabitsResponse,
+  GoalsResponse,
+  InterestsResponse,
+  DiaryResponse,
+  UsersResponse,
+  ConstellationResponse,
+  BreakthroughsResponse,
+  WakeupsResponse,
+  // Tool definitions
+  ToolDefinition,
   // Voice
   VoiceMatchOptions,
   VoiceMatchResponse,

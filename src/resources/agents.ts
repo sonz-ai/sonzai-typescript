@@ -1,17 +1,26 @@
 import type { HTTPClient } from "../http.js";
 import type {
   Agent,
+  BreakthroughsResponse,
   ChatOptions,
   ChatResponse,
   ChatStreamEvent,
   ChatUsage,
+  ConstellationResponse,
   ContextDataOptions,
   CreateAgentOptions,
   DialogueOptions,
   DialogueResponse,
+  DiaryResponse,
   EvalOnlyOptions,
   EvaluateOptions,
   EvaluationResult,
+  GoalsResponse,
+  HabitsResponse,
+  InterestsResponse,
+  MoodAggregateResponse,
+  MoodResponse,
+  RelationshipResponse,
   RunEvalOptions,
   ScheduleWakeupOptions,
   ScheduledWakeup,
@@ -20,6 +29,8 @@ import type {
   TriggerEventOptions,
   TriggerEventResponse,
   UpdateAgentOptions,
+  UsersResponse,
+  WakeupsResponse,
 } from "../types.js";
 import { CustomStates } from "./custom-states.js";
 import { Generation } from "./generation.js";
@@ -229,7 +240,7 @@ export class Agents {
   async getWakeups(
     agentId: string,
     options: ContextDataOptions = {},
-  ): Promise<Record<string, unknown>> {
+  ): Promise<WakeupsResponse> {
     return this.http.get(`/api/v1/agents/${agentId}/wakeups`, {
       user_id: options.userId,
       instance_id: options.instanceId,
@@ -328,7 +339,7 @@ export class Agents {
   async getMood(
     agentId: string,
     options: ContextDataOptions = {},
-  ): Promise<Record<string, unknown>> {
+  ): Promise<MoodResponse> {
     return this.http.get(`/api/v1/agents/${agentId}/mood`, {
       user_id: options.userId,
       instance_id: options.instanceId,
@@ -338,7 +349,7 @@ export class Agents {
   async getMoodHistory(
     agentId: string,
     options: ContextDataOptions = {},
-  ): Promise<Record<string, unknown>> {
+  ): Promise<MoodResponse> {
     return this.http.get(`/api/v1/agents/${agentId}/mood-history`, {
       user_id: options.userId,
       instance_id: options.instanceId,
@@ -349,7 +360,7 @@ export class Agents {
   async getMoodAggregate(
     agentId: string,
     options: ContextDataOptions = {},
-  ): Promise<Record<string, unknown>> {
+  ): Promise<MoodAggregateResponse> {
     return this.http.get(`/api/v1/agents/${agentId}/mood/aggregate`, {
       user_id: options.userId,
       instance_id: options.instanceId,
@@ -359,7 +370,7 @@ export class Agents {
   async getRelationships(
     agentId: string,
     options: ContextDataOptions = {},
-  ): Promise<Record<string, unknown>> {
+  ): Promise<RelationshipResponse> {
     return this.http.get(`/api/v1/agents/${agentId}/relationships`, {
       user_id: options.userId,
       instance_id: options.instanceId,
@@ -369,7 +380,7 @@ export class Agents {
   async getHabits(
     agentId: string,
     options: ContextDataOptions = {},
-  ): Promise<Record<string, unknown>> {
+  ): Promise<HabitsResponse> {
     return this.http.get(`/api/v1/agents/${agentId}/habits`, {
       user_id: options.userId,
       instance_id: options.instanceId,
@@ -379,7 +390,7 @@ export class Agents {
   async getGoals(
     agentId: string,
     options: ContextDataOptions = {},
-  ): Promise<Record<string, unknown>> {
+  ): Promise<GoalsResponse> {
     return this.http.get(`/api/v1/agents/${agentId}/goals`, {
       user_id: options.userId,
       instance_id: options.instanceId,
@@ -389,7 +400,7 @@ export class Agents {
   async getInterests(
     agentId: string,
     options: ContextDataOptions = {},
-  ): Promise<Record<string, unknown>> {
+  ): Promise<InterestsResponse> {
     return this.http.get(`/api/v1/agents/${agentId}/interests`, {
       user_id: options.userId,
       instance_id: options.instanceId,
@@ -399,14 +410,14 @@ export class Agents {
   async getDiary(
     agentId: string,
     options: ContextDataOptions = {},
-  ): Promise<Record<string, unknown>> {
+  ): Promise<DiaryResponse> {
     return this.http.get(`/api/v1/agents/${agentId}/diary`, {
       user_id: options.userId,
       instance_id: options.instanceId,
     });
   }
 
-  async getUsers(agentId: string): Promise<Record<string, unknown>> {
+  async getUsers(agentId: string): Promise<UsersResponse> {
     return this.http.get(`/api/v1/agents/${agentId}/users`);
   }
 
@@ -414,7 +425,7 @@ export class Agents {
   async getConstellation(
     agentId: string,
     options: ContextDataOptions = {},
-  ): Promise<Record<string, unknown>> {
+  ): Promise<ConstellationResponse> {
     return this.http.get(`/api/v1/agents/${agentId}/constellation`, {
       user_id: options.userId,
       instance_id: options.instanceId,
@@ -425,7 +436,7 @@ export class Agents {
   async getBreakthroughs(
     agentId: string,
     options: ContextDataOptions = {},
-  ): Promise<Record<string, unknown>> {
+  ): Promise<BreakthroughsResponse> {
     return this.http.get(`/api/v1/agents/${agentId}/breakthroughs`, {
       user_id: options.userId,
       instance_id: options.instanceId,
@@ -435,8 +446,27 @@ export class Agents {
   private buildChatBody(options: ChatOptions): Record<string, unknown> {
     const body: Record<string, unknown> = { messages: options.messages };
     if (options.userId) body.user_id = options.userId;
+    if (options.userDisplayName)
+      body.user_display_name = options.userDisplayName;
     if (options.sessionId) body.session_id = options.sessionId;
     if (options.instanceId) body.instance_id = options.instanceId;
+    if (options.provider) body.provider = options.provider;
+    if (options.model) body.model = options.model;
+    if (options.continuationToken)
+      body.continuation_token = options.continuationToken;
+    if (options.aiServiceCookie)
+      body.ai_service_cookie = options.aiServiceCookie;
+    if (options.requestType) body.request_type = options.requestType;
+    if (options.language) body.language = options.language;
+    if (options.compiledSystemPrompt)
+      body.compiled_system_prompt = options.compiledSystemPrompt;
+    if (options.interactionRole)
+      body.interaction_role = options.interactionRole;
+    if (options.timezone) body.timezone = options.timezone;
+    if (options.toolCapabilities)
+      body.tool_capabilities = options.toolCapabilities;
+    if (options.toolDefinitions)
+      body.tool_definitions = options.toolDefinitions;
     return body;
   }
 }
