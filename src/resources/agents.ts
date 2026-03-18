@@ -1,14 +1,22 @@
 import type { HTTPClient } from "../http.js";
 import type {
   Agent,
+  AgentCapabilities,
+  AgentListOptions,
+  AgentListResponse,
   BreakthroughsResponse,
   ChatOptions,
   ChatResponse,
   ChatStreamEvent,
   ChatUsage,
+  ConsolidateOptions,
+  ConsolidateResponse,
   ConstellationResponse,
   ContextDataOptions,
   CreateAgentOptions,
+  CreateCustomToolOptions,
+  CustomToolDefinition,
+  CustomToolListResponse,
   DialogueOptions,
   DialogueResponse,
   DiaryResponse,
@@ -24,11 +32,21 @@ import type {
   RunEvalOptions,
   ScheduleWakeupOptions,
   ScheduledWakeup,
+  SetStatusOptions,
+  SetStatusResponse,
   SimulateOptions,
   SimulationEvent,
+  SummariesOptions,
+  SummariesResponse,
+  TimeMachineOptions,
+  TimeMachineResponse,
   TriggerEventOptions,
   TriggerEventResponse,
   UpdateAgentOptions,
+  UpdateCapabilitiesOptions,
+  UpdateCustomToolOptions,
+  UpdateProjectOptions,
+  UpdateProjectResponse,
   UsersResponse,
   WakeupsResponse,
 } from "../types.js";
@@ -441,6 +459,91 @@ export class Agents {
       user_id: options.userId,
       instance_id: options.instanceId,
     });
+  }
+
+  // -- Agent List --
+
+  /** List agents with optional pagination, search, and project filtering. */
+  async list(options?: AgentListOptions): Promise<AgentListResponse> {
+    const params: Record<string, string> = {};
+    if (options?.pageSize) params.page_size = String(options.pageSize);
+    if (options?.cursor) params.cursor = options.cursor;
+    if (options?.search) params.search = options.search;
+    if (options?.projectId) params.project_id = options.projectId;
+    return this.http.get<AgentListResponse>("/api/v1/agents", params);
+  }
+
+  // -- Agent Status --
+
+  /** Set the active status of an agent. */
+  async setStatus(agentId: string, options: SetStatusOptions): Promise<SetStatusResponse> {
+    return this.http.patch<SetStatusResponse>(`/api/v1/agents/${agentId}/status`, options as unknown as Record<string, unknown>);
+  }
+
+  // -- Project Association --
+
+  /** Update an agent's project association. */
+  async updateProject(agentId: string, options: UpdateProjectOptions): Promise<UpdateProjectResponse> {
+    return this.http.patch<UpdateProjectResponse>(`/api/v1/agents/${agentId}/project`, options as unknown as Record<string, unknown>);
+  }
+
+  // -- Capabilities --
+
+  /** Get an agent's capabilities. */
+  async getCapabilities(agentId: string): Promise<AgentCapabilities> {
+    return this.http.get<AgentCapabilities>(`/api/v1/agents/${agentId}/capabilities`);
+  }
+
+  /** Update an agent's capabilities. */
+  async updateCapabilities(agentId: string, options: UpdateCapabilitiesOptions): Promise<AgentCapabilities> {
+    return this.http.patch<AgentCapabilities>(`/api/v1/agents/${agentId}/capabilities`, options as unknown as Record<string, unknown>);
+  }
+
+  // -- Custom Tools --
+
+  /** List custom tools for an agent. */
+  async listCustomTools(agentId: string): Promise<CustomToolListResponse> {
+    return this.http.get<CustomToolListResponse>(`/api/v1/agents/${agentId}/tools`);
+  }
+
+  /** Create a custom tool for an agent. */
+  async createCustomTool(agentId: string, options: CreateCustomToolOptions): Promise<CustomToolDefinition> {
+    return this.http.post<CustomToolDefinition>(`/api/v1/agents/${agentId}/tools`, options as unknown as Record<string, unknown>);
+  }
+
+  /** Update a custom tool for an agent. */
+  async updateCustomTool(agentId: string, toolName: string, options: UpdateCustomToolOptions): Promise<{ success: boolean }> {
+    return this.http.put<{ success: boolean }>(`/api/v1/agents/${agentId}/tools/${toolName}`, options as unknown as Record<string, unknown>);
+  }
+
+  /** Delete a custom tool from an agent. */
+  async deleteCustomTool(agentId: string, toolName: string): Promise<void> {
+    return this.http.delete<void>(`/api/v1/agents/${agentId}/tools/${toolName}`);
+  }
+
+  // -- Consolidation --
+
+  /** Trigger memory consolidation for an agent. */
+  async consolidate(agentId: string, options?: ConsolidateOptions): Promise<ConsolidateResponse> {
+    return this.http.post<ConsolidateResponse>(`/api/v1/agents/${agentId}/consolidate`, (options ?? {}) as Record<string, unknown>);
+  }
+
+  /** Get memory summaries for an agent. */
+  async getSummaries(agentId: string, options?: SummariesOptions): Promise<SummariesResponse> {
+    const params: Record<string, string> = {};
+    if (options?.period) params.period = options.period;
+    if (options?.limit) params.limit = String(options.limit);
+    return this.http.get<SummariesResponse>(`/api/v1/agents/${agentId}/summaries`, params);
+  }
+
+  // -- Time Machine --
+
+  /** Get a point-in-time snapshot of an agent's personality and mood. */
+  async getTimeMachine(agentId: string, options: TimeMachineOptions): Promise<TimeMachineResponse> {
+    const params: Record<string, string> = { at: options.at };
+    if (options.userId) params.user_id = options.userId;
+    if (options.instanceId) params.instance_id = options.instanceId;
+    return this.http.get<TimeMachineResponse>(`/api/v1/agents/${agentId}/timemachine`, params);
   }
 
   private buildChatBody(options: ChatOptions): Record<string, unknown> {

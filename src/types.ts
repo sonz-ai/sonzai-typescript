@@ -1015,3 +1015,263 @@ export interface SonzaiConfig {
   timeout?: number;
   maxRetries?: number;
 }
+
+// ---------------------------------------------------------------------------
+// Agent List (paginated)
+// ---------------------------------------------------------------------------
+
+export interface AgentListOptions {
+  pageSize?: number;
+  cursor?: string;
+  search?: string;
+  projectId?: string;
+}
+
+export interface AgentIndex {
+  id: string;
+  name: string;
+  bio?: string;
+  gender?: string;
+  avatar_url?: string;
+  status?: string;
+  project_id?: string;
+  created_at?: string;
+}
+
+export interface AgentListResponse {
+  items: AgentIndex[];
+  next_cursor?: string;
+  has_more: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Batch Personality
+// ---------------------------------------------------------------------------
+
+export interface BatchPersonalityEntry {
+  profile: PersonalityProfile;
+  evolution_count: number;
+}
+
+export interface BatchPersonalityResponse {
+  personalities: Record<string, BatchPersonalityEntry>;
+}
+
+// ---------------------------------------------------------------------------
+// Session Tools
+// ---------------------------------------------------------------------------
+
+export interface SetSessionToolsOptions {
+  tools: ToolDefinition[];
+}
+
+// ---------------------------------------------------------------------------
+// Personality Extensions
+// ---------------------------------------------------------------------------
+
+export interface SignificantMoment {
+  agent_id?: string;
+  moment_id?: string;
+  timestamp?: string;
+  description?: string;
+  significance_score?: number;
+  [key: string]: unknown;
+}
+
+export interface SignificantMomentsResponse {
+  moments: SignificantMoment[];
+}
+
+export interface PersonalityShift {
+  agent_id?: string;
+  trait_name?: string;
+  trait_category?: string;
+  old_value?: number;
+  new_value?: number;
+  delta?: number;
+  timestamp?: string;
+  reason?: string;
+  [key: string]: unknown;
+}
+
+export interface RecentShiftsResponse {
+  shifts: PersonalityShift[];
+}
+
+export interface UserPersonalityOverlay {
+  agent_id: string;
+  user_id: string;
+  big5?: Big5;
+  dimensions?: PersonalityDimensions;
+  preferences?: PersonalityPreferences;
+  behaviors?: PersonalityBehaviors;
+  primary_traits?: string[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface UserOverlaysListResponse {
+  overlays: UserPersonalityOverlay[];
+}
+
+export interface UserOverlayDetailResponse {
+  overlay: UserPersonalityOverlay;
+  base: PersonalityProfile;
+  evolution: PersonalityShift[];
+}
+
+export interface UserOverlayOptions {
+  instanceId?: string;
+  since?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Fact History
+// ---------------------------------------------------------------------------
+
+export interface FactHistoryResponse {
+  current: AtomicFact;
+  previous_versions: AtomicFact[];
+}
+
+// ---------------------------------------------------------------------------
+// Time Machine
+// ---------------------------------------------------------------------------
+
+export interface TimeMachineOptions {
+  at: string; // RFC3339 timestamp
+  userId?: string;
+  instanceId?: string;
+}
+
+export interface TimeMachineMoodSnapshot {
+  valence?: number;
+  arousal?: number;
+  tension?: number;
+  affiliation?: number;
+  label?: string;
+}
+
+export interface TimeMachineResponse {
+  personality_at?: Record<string, unknown>;
+  current_personality?: Record<string, unknown>;
+  evolution_events?: PersonalityShift[];
+  mood_at?: TimeMachineMoodSnapshot;
+  requested_at?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Agent Status
+// ---------------------------------------------------------------------------
+
+export interface SetStatusOptions {
+  is_active: boolean;
+}
+
+export interface SetStatusResponse {
+  success: boolean;
+  agent_id: string;
+  is_active: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Capabilities
+// ---------------------------------------------------------------------------
+
+export interface AgentCapabilities {
+  webSearch: boolean;
+  rememberName: boolean;
+  imageGeneration: boolean;
+  customTools?: CustomToolDefinition[];
+}
+
+export interface UpdateCapabilitiesOptions {
+  webSearch?: boolean;
+  rememberName?: boolean;
+  imageGeneration?: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Custom Tools
+// ---------------------------------------------------------------------------
+
+export interface CustomToolDefinition {
+  name: string;
+  description: string;
+  parameters?: Record<string, unknown>;
+}
+
+export interface CustomToolListResponse {
+  tools: CustomToolDefinition[];
+}
+
+export interface CreateCustomToolOptions {
+  name: string;
+  description: string;
+  parameters?: Record<string, unknown>;
+}
+
+export interface UpdateCustomToolOptions {
+  description?: string;
+  parameters?: Record<string, unknown>;
+}
+
+// ---------------------------------------------------------------------------
+// Consolidation
+// ---------------------------------------------------------------------------
+
+export interface ConsolidateOptions {
+  period?: string;
+  user_id?: string;
+}
+
+export interface ConsolidateResponse {
+  success: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Summaries
+// ---------------------------------------------------------------------------
+
+export interface SummariesOptions {
+  period?: string;
+  limit?: number;
+}
+
+export interface MemorySummary {
+  agent_id?: string;
+  stage?: string;
+  summary_text?: string;
+  timestamp?: string;
+  fact_count?: number;
+  confidence?: number;
+  [key: string]: unknown;
+}
+
+export interface SummariesResponse {
+  summaries: MemorySummary[];
+}
+
+// ---------------------------------------------------------------------------
+// Update Project Association
+// ---------------------------------------------------------------------------
+
+export interface UpdateProjectOptions {
+  project_id: string;
+}
+
+export interface UpdateProjectResponse {
+  success: boolean;
+  agent_id: string;
+  project_id?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Update Instance
+// ---------------------------------------------------------------------------
+
+export interface UpdateInstanceOptions {
+  name?: string;
+  description?: string;
+  status?: string;
+}

@@ -1,5 +1,6 @@
 import type { HTTPClient } from "../http.js";
 import type {
+  FactHistoryResponse,
   FactListOptions,
   FactListResponse,
   MemoryListOptions,
@@ -110,5 +111,10 @@ export class Memory {
         instance_id: options.instanceId,
       },
     );
+  }
+
+  /** Get the version history of a specific fact. */
+  async getFactHistory(agentId: string, factId: string): Promise<FactHistoryResponse> {
+    return this.http.get<FactHistoryResponse>(`/api/v1/agents/${agentId}/memory/fact/${factId}/history`);
   }
 }

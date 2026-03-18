@@ -3,6 +3,7 @@ import type {
   SessionEndOptions,
   SessionResponse,
   SessionStartOptions,
+  ToolDefinition,
 } from "../types.js";
 
 export class Sessions {
@@ -43,5 +44,10 @@ export class Sessions {
       `/api/v1/agents/${agentId}/sessions/end`,
       body,
     );
+  }
+
+  /** Set the tools available for a specific session. */
+  async setTools(agentId: string, sessionId: string, tools: ToolDefinition[]): Promise<SessionResponse> {
+    return this.http.put<SessionResponse>(`/api/v1/agents/${agentId}/sessions/${sessionId}/tools`, tools as unknown as Record<string, unknown>);
   }
 }

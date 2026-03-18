@@ -158,4 +158,51 @@ export type {
   EvalRun,
   EvalRunListResponse,
   EvalRunListOptions,
+  // Agent list
+  AgentListOptions,
+  AgentIndex,
+  AgentListResponse,
+  // Batch personality
+  BatchPersonalityEntry,
+  BatchPersonalityResponse,
+  // Session tools
+  SetSessionToolsOptions,
+  // Personality extensions
+  SignificantMoment,
+  SignificantMomentsResponse,
+  PersonalityShift,
+  RecentShiftsResponse,
+  UserPersonalityOverlay,
+  UserOverlaysListResponse,
+  UserOverlayDetailResponse,
+  UserOverlayOptions,
+  // Fact history
+  FactHistoryResponse,
+  // Time machine
+  TimeMachineOptions,
+  TimeMachineMoodSnapshot,
+  TimeMachineResponse,
+  // Agent status
+  SetStatusOptions,
+  SetStatusResponse,
+  // Capabilities
+  AgentCapabilities,
+  UpdateCapabilitiesOptions,
+  // Custom tools
+  CustomToolDefinition,
+  CustomToolListResponse,
+  CreateCustomToolOptions,
+  UpdateCustomToolOptions,
+  // Consolidation
+  ConsolidateOptions,
+  ConsolidateResponse,
+  // Summaries
+  SummariesOptions,
+  MemorySummary,
+  SummariesResponse,
+  // Project association
+  UpdateProjectOptions,
+  UpdateProjectResponse,
+  // Instance update
+  UpdateInstanceOptions,
 } from "./types.js";

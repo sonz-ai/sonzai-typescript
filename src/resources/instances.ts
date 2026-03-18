@@ -4,6 +4,7 @@ import type {
   InstanceCreateOptions,
   InstanceListResponse,
   SessionResponse,
+  UpdateInstanceOptions,
 } from "../types.js";
 
 export class Instances {
@@ -49,5 +50,10 @@ export class Instances {
     return this.http.post<AgentInstance>(
       `/api/v1/agents/${agentId}/instances/${instanceId}/reset`,
     );
+  }
+
+  /** Update an instance's name, description, or status. */
+  async update(agentId: string, instanceId: string, options: UpdateInstanceOptions): Promise<AgentInstance> {
+    return this.http.patch<AgentInstance>(`/api/v1/agents/${agentId}/instances/${instanceId}`, options as unknown as Record<string, unknown>);
   }
 }
