@@ -78,7 +78,6 @@ export class Generation {
       body.generateOriginStory = options.generateOriginStory;
     if (options.generatePersonalizedMemories != null)
       body.generatePersonalizedMemories = options.generatePersonalizedMemories;
-    if (options.modelConfig) body.model_config = options.modelConfig;
     if (options.storeMemories != null)
       body.store_memories = options.storeMemories;
 
@@ -97,8 +96,6 @@ export class Generation {
     if (options.negativePrompt) body.negative_prompt = options.negativePrompt;
     if (options.model) body.model = options.model;
     if (options.provider) body.provider = options.provider;
-    if (options.outputBucket) body.output_bucket = options.outputBucket;
-    if (options.outputPath) body.output_path = options.outputPath;
 
     return this.http.post<ImageGenerateResponse>(
       `/api/v1/agents/${agentId}/image/generate`,

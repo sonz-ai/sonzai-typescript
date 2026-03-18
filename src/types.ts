@@ -33,12 +33,8 @@ export interface ChatStreamEvent {
   full_content?: string;
   finish_reason?: string;
   continuation_token?: string;
-  response_cookie?: string;
   message_count?: number;
   side_effects?: Record<string, unknown>;
-  enriched_context?: Record<string, unknown>;
-  build_duration_ms?: number;
-  used_fast_path?: boolean;
   error_message?: string;
   error_code?: string;
   is_token_error?: boolean;
@@ -65,7 +61,6 @@ export interface ChatOptions {
   provider?: string;
   model?: string;
   continuationToken?: string;
-  aiServiceCookie?: string;
   requestType?: string;
   language?: string;
   compiledSystemPrompt?: string;
@@ -618,7 +613,6 @@ export interface TriggerEventResponse {
 
 export interface DialogueOptions {
   userId?: string;
-  enrichedContext?: Record<string, unknown>;
   messages?: ChatMessage[];
   requestType?: string;
   sceneGuidance?: string;
@@ -846,13 +840,6 @@ export interface IdentityMemory {
   entities?: string[];
 }
 
-export interface ModelConfig {
-  provider: string;
-  model: string;
-  temperature: number;
-  max_tokens: number;
-}
-
 export interface GenerateSeedMemoriesOptions {
   userId?: string;
   agentName?: string;
@@ -868,7 +855,6 @@ export interface GenerateSeedMemoriesOptions {
   identityMemoryTemplates?: IdentityMemory[];
   generateOriginStory?: boolean;
   generatePersonalizedMemories?: boolean;
-  modelConfig?: ModelConfig;
   storeMemories?: boolean;
 }
 
@@ -882,8 +868,6 @@ export interface ImageGenerateOptions {
   negativePrompt?: string;
   model?: string;
   provider?: string;
-  outputBucket?: string;
-  outputPath?: string;
 }
 
 export interface ImageGenerateResponse {

@@ -193,8 +193,6 @@ export class Agents {
   ): Promise<DialogueResponse> {
     const body: Record<string, unknown> = {};
     if (options.userId) body.user_id = options.userId;
-    if (options.enrichedContext)
-      body.enriched_context = options.enrichedContext;
     if (options.messages) body.messages = options.messages;
     if (options.requestType) body.request_type = options.requestType;
     if (options.sceneGuidance) body.scene_guidance = options.sceneGuidance;
@@ -557,8 +555,6 @@ export class Agents {
     if (options.model) body.model = options.model;
     if (options.continuationToken)
       body.continuation_token = options.continuationToken;
-    if (options.aiServiceCookie)
-      body.ai_service_cookie = options.aiServiceCookie;
     if (options.requestType) body.request_type = options.requestType;
     if (options.language) body.language = options.language;
     if (options.compiledSystemPrompt)

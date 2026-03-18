@@ -117,7 +117,6 @@ export type {
   GenerateSeedMemoriesResponse,
   LoreGenerationContext,
   IdentityMemory,
-  ModelConfig,
   ImageGenerateOptions,
   ImageGenerateResponse,
   // Custom States
