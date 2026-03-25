@@ -23,6 +23,7 @@ import type {
   EvalOnlyOptions,
   EvaluateOptions,
   EvaluationResult,
+  RunRef,
   GoalsResponse,
   HabitsResponse,
   InterestsResponse,
@@ -285,11 +286,25 @@ export class Agents {
     );
   }
 
-  /** Run a simulation and stream events. */
+  /** Run a simulation and stream events (two-step: POST to start, then stream SSE). */
   async *simulate(
     agentId: string,
     options: SimulateOptions = {},
   ): AsyncGenerator<SimulationEvent> {
+    const ref = await this.simulateAsync(agentId, options);
+    for await (const event of this.http.streamSSE(
+      "GET",
+      `/api/v1/eval-runs/${ref.run_id}/events?from=0`,
+    )) {
+      yield event as SimulationEvent;
+    }
+  }
+
+  /** Start a simulation without waiting for results. Returns a RunRef for later streaming. */
+  async simulateAsync(
+    agentId: string,
+    options: SimulateOptions = {},
+  ): Promise<RunRef> {
     const body: Record<string, unknown> = {};
     if (options.sessions) body.sessions = options.sessions;
     if (options.userPersona) body.user_persona = options.userPersona;
@@ -297,20 +312,31 @@ export class Agents {
     if (options.model) body.model = options.model;
     if (options.configOverride) body.config_override = options.configOverride;
 
-    for await (const event of this.http.streamSSE(
-      "POST",
+    return this.http.post<RunRef>(
       `/api/v1/agents/${agentId}/simulate`,
       body,
+    );
+  }
+
+  /** Run simulation + evaluation combined (two-step: POST to start, then stream SSE). */
+  async *runEval(
+    agentId: string,
+    options: RunEvalOptions,
+  ): AsyncGenerator<SimulationEvent> {
+    const ref = await this.runEvalAsync(agentId, options);
+    for await (const event of this.http.streamSSE(
+      "GET",
+      `/api/v1/eval-runs/${ref.run_id}/events?from=0`,
     )) {
       yield event as SimulationEvent;
     }
   }
 
-  /** Run simulation + evaluation combined. */
-  async *runEval(
+  /** Start simulation + evaluation without waiting for results. Returns a RunRef for later streaming. */
+  async runEvalAsync(
     agentId: string,
     options: RunEvalOptions,
-  ): AsyncGenerator<SimulationEvent> {
+  ): Promise<RunRef> {
     const body: Record<string, unknown> = {
       template_id: options.templateId,
     };
@@ -322,35 +348,45 @@ export class Agents {
     if (options.configOverride) body.config_override = options.configOverride;
     if (options.adaptationTemplateId)
       body.adaptation_template_id = options.adaptationTemplateId;
+    if (options.qualityOnly != null) body.quality_only = options.qualityOnly;
 
-    for await (const event of this.http.streamSSE(
-      "POST",
+    return this.http.post<RunRef>(
       `/api/v1/agents/${agentId}/run-eval`,
       body,
+    );
+  }
+
+  /** Re-evaluate an existing run (two-step: POST to start, then stream SSE). */
+  async *evalOnly(
+    agentId: string,
+    options: EvalOnlyOptions,
+  ): AsyncGenerator<SimulationEvent> {
+    const ref = await this.evalOnlyAsync(agentId, options);
+    for await (const event of this.http.streamSSE(
+      "GET",
+      `/api/v1/eval-runs/${ref.run_id}/events?from=0`,
     )) {
       yield event as SimulationEvent;
     }
   }
 
-  /** Re-evaluate an existing run. */
-  async *evalOnly(
+  /** Re-evaluate an existing run without waiting for results. Returns a RunRef for later streaming. */
+  async evalOnlyAsync(
     agentId: string,
     options: EvalOnlyOptions,
-  ): AsyncGenerator<SimulationEvent> {
+  ): Promise<RunRef> {
     const body: Record<string, unknown> = {
       template_id: options.templateId,
       source_run_id: options.sourceRunId,
     };
     if (options.adaptationTemplateId)
       body.adaptation_template_id = options.adaptationTemplateId;
+    if (options.qualityOnly != null) body.quality_only = options.qualityOnly;
 
-    for await (const event of this.http.streamSSE(
-      "POST",
+    return this.http.post<RunRef>(
       `/api/v1/agents/${agentId}/eval-only`,
       body,
-    )) {
-      yield event as SimulationEvent;
-    }
+    );
   }
 
   // -- Context Engine convenience accessors --

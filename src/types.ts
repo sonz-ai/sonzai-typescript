@@ -346,6 +346,15 @@ export interface EvaluateOptions {
 }
 
 // ---------------------------------------------------------------------------
+// Run Reference (async eval/simulation kickoff)
+// ---------------------------------------------------------------------------
+
+export interface RunRef {
+  run_id: string;
+  status: string;
+}
+
+// ---------------------------------------------------------------------------
 // Simulation
 // ---------------------------------------------------------------------------
 
@@ -401,12 +410,14 @@ export interface RunEvalOptions {
   model?: string;
   configOverride?: Record<string, unknown>;
   adaptationTemplateId?: string;
+  qualityOnly?: boolean;
 }
 
 export interface EvalOnlyOptions {
   templateId: string;
   sourceRunId: string;
   adaptationTemplateId?: string;
+  qualityOnly?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -484,6 +495,11 @@ export interface EvalRun {
   total_turns: number;
   simulated_minutes: number;
   total_cost_usd: number;
+  error_reason?: string;
+  simulation_cost_usd?: number;
+  evaluation_cost_usd?: number;
+  adaptation_template_id?: string;
+  adaptation_template_snapshot?: Record<string, unknown>;
   created_at?: string;
   completed_at?: string;
 }

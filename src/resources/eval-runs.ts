@@ -4,6 +4,7 @@ import type {
   EvalRunListOptions,
   EvalRunListResponse,
   SessionResponse,
+  SimulationEvent,
 } from "../types.js";
 
 export class EvalRuns {
@@ -26,5 +27,18 @@ export class EvalRuns {
   /** Delete an eval run. */
   async delete(runId: string): Promise<SessionResponse> {
     return this.http.delete<SessionResponse>(`/api/v1/eval-runs/${runId}`);
+  }
+
+  /** Stream SSE events from a running eval. Supports reconnection via fromIndex. */
+  async *streamEvents(
+    runId: string,
+    fromIndex = 0,
+  ): AsyncGenerator<SimulationEvent> {
+    for await (const event of this.http.streamSSE(
+      "GET",
+      `/api/v1/eval-runs/${runId}/events?from=${fromIndex}`,
+    )) {
+      yield event as SimulationEvent;
+    }
   }
 }
