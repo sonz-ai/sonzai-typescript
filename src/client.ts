@@ -2,6 +2,7 @@ import { HTTPClient } from "./http.js";
 import { Agents } from "./resources/agents.js";
 import { EvalRuns } from "./resources/eval-runs.js";
 import { EvalTemplates } from "./resources/eval-templates.js";
+import { Knowledge } from "./resources/knowledge.js";
 import { Voices } from "./resources/voice.js";
 import { Webhooks } from "./resources/webhooks.js";
 import type { SonzaiConfig } from "./types.js";
@@ -91,6 +92,8 @@ declare const Deno: {
  */
 export class Sonzai {
   readonly agents: Agents;
+  /** Project-scoped knowledge base (documents, graph, schemas, search, analytics). */
+  readonly knowledge: Knowledge;
   readonly evalTemplates: EvalTemplates;
   readonly evalRuns: EvalRuns;
   readonly voices: Voices;
@@ -110,6 +113,7 @@ export class Sonzai {
     });
 
     this.agents = new Agents(this.http);
+    this.knowledge = new Knowledge(this.http);
     this.evalTemplates = new EvalTemplates(this.http);
     this.evalRuns = new EvalRuns(this.http);
     this.voices = new Voices(this.http);

@@ -1259,3 +1259,393 @@ export interface UpdateInstanceOptions {
   description?: string;
   status?: string;
 }
+
+// ---------------------------------------------------------------------------
+// Knowledge Base
+// ---------------------------------------------------------------------------
+
+export interface KBDocument {
+  project_id: string;
+  document_id: string;
+  file_name: string;
+  content_type: string;
+  file_size: number;
+  gcs_path: string;
+  checksum: string;
+  status: "pending" | "parsing" | "extracting" | "indexed" | "failed";
+  uploaded_by?: string;
+  extraction_tokens?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface KBDocumentListResponse {
+  documents: KBDocument[];
+  total: number;
+}
+
+export interface KBNode {
+  project_id: string;
+  node_id: string;
+  node_type: string;
+  label: string;
+  norm_label?: string;
+  properties: Record<string, unknown>;
+  source_type: string;
+  version: number;
+  is_active: boolean;
+  confidence: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface KBNodeListResponse {
+  nodes: KBNode[];
+  total: number;
+}
+
+export interface KBEdge {
+  project_id: string;
+  edge_id: string;
+  from_node_id: string;
+  to_node_id: string;
+  edge_type: string;
+  confidence: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface KBNodeHistory {
+  project_id: string;
+  node_id: string;
+  version: number;
+  properties: Record<string, unknown>;
+  changed_by: string;
+  change_type: string;
+  changed_at?: string;
+}
+
+export interface KBNodeDetailResponse {
+  node: KBNode;
+  outgoing: KBEdge[];
+  incoming: KBEdge[];
+  history: KBNodeHistory[];
+}
+
+export interface KBNodeHistoryResponse {
+  history: KBNodeHistory[];
+  total: number;
+}
+
+export interface KBRelatedNode {
+  node_id: string;
+  label: string;
+  node_type: string;
+  edge_type: string;
+  properties?: Record<string, unknown>;
+}
+
+export interface KBSearchResult {
+  node_id: string;
+  node_type: string;
+  label: string;
+  properties: Record<string, unknown>;
+  source: string;
+  updated_at: string;
+  score: number;
+  related?: KBRelatedNode[];
+  history?: KBNodeHistory[];
+}
+
+export interface KBSearchResponse {
+  query: string;
+  results: KBSearchResult[];
+  total: number;
+}
+
+export interface KBSearchOptions {
+  query: string;
+  limit?: number;
+  includeHistory?: boolean;
+  entityTypes?: string;
+  filters?: string;
+}
+
+export interface KBSchemaField {
+  name: string;
+  type: string;
+  required?: boolean;
+}
+
+export interface KBSimilarityConfig {
+  match_fields?: string[];
+  threshold?: number;
+}
+
+export interface KBEntitySchema {
+  project_id: string;
+  schema_id: string;
+  entity_type: string;
+  fields: KBSchemaField[];
+  description?: string;
+  similarity_config?: KBSimilarityConfig;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface KBSchemaListResponse {
+  schemas: KBEntitySchema[];
+  total: number;
+}
+
+export interface KBStats {
+  documents: { total: number; indexed: number; pending: number; failed: number };
+  nodes: { total: number; active: number };
+  edges: number;
+  extraction_tokens: number;
+}
+
+export interface InsertFactEntry {
+  entity_type: string;
+  label: string;
+  properties?: Record<string, unknown>;
+}
+
+export interface InsertRelEntry {
+  from_label: string;
+  to_label: string;
+  edge_type: string;
+}
+
+export interface InsertFactsOptions {
+  source?: string;
+  facts: InsertFactEntry[];
+  relationships?: InsertRelEntry[];
+}
+
+export interface InsertFactDetail {
+  label: string;
+  type: string;
+  action: "created" | "updated";
+  node_id: string;
+  version: number;
+}
+
+export interface InsertFactsResponse {
+  processed: number;
+  created: number;
+  updated: number;
+  details: InsertFactDetail[];
+}
+
+export interface CreateSchemaOptions {
+  entity_type: string;
+  fields: KBSchemaField[];
+  description?: string;
+  similarity_config?: KBSimilarityConfig;
+}
+
+export interface KBAnalyticsRule {
+  project_id: string;
+  rule_id: string;
+  rule_type: "recommendation" | "trend";
+  name: string;
+  config: unknown;
+  enabled: boolean;
+  schedule?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface KBAnalyticsRuleListResponse {
+  rules: KBAnalyticsRule[];
+  total: number;
+}
+
+export interface CreateAnalyticsRuleOptions {
+  rule_type: "recommendation" | "trend";
+  name: string;
+  config: unknown;
+  enabled: boolean;
+  schedule?: string;
+}
+
+export interface UpdateAnalyticsRuleOptions {
+  name?: string;
+  config?: unknown;
+  enabled: boolean;
+  schedule?: string;
+}
+
+export interface KBRecommendationScore {
+  project_id: string;
+  rule_id: string;
+  source_id: string;
+  target_id: string;
+  target_type: string;
+  score: number;
+}
+
+export interface KBRecommendationsResponse {
+  recommendations: KBRecommendationScore[];
+  total: number;
+}
+
+export interface KBTrendAggregation {
+  project_id: string;
+  node_id: string;
+  rule_id: string;
+  window: string;
+  value: number;
+  direction: string;
+}
+
+export interface KBTrendsResponse {
+  trends: KBTrendAggregation[];
+  total: number;
+}
+
+export interface KBTrendRanking {
+  project_id: string;
+  node_id: string;
+  rule_id: string;
+  type: string;
+  window: string;
+  rank: number;
+  score: number;
+}
+
+export interface KBTrendRankingsResponse {
+  rankings: KBTrendRanking[];
+  total: number;
+}
+
+export interface KBConversionStats {
+  project_id: string;
+  rule_id: string;
+  segment_key: string;
+  target_type: string;
+  shown_count: number;
+  conversion_count: number;
+  conversion_rate: number;
+}
+
+export interface KBConversionsResponse {
+  conversions: KBConversionStats[];
+  total: number;
+}
+
+export interface RecordFeedbackOptions {
+  source_node_id: string;
+  target_node_id: string;
+  rule_id: string;
+  converted: boolean;
+  score_at_time: number;
+}
+
+// ---------------------------------------------------------------------------
+// User Priming
+// ---------------------------------------------------------------------------
+
+export interface PrimeUserMetadata {
+  company?: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  custom?: Record<string, string>;
+}
+
+export interface PrimeContentBlock {
+  type: string;
+  body: string;
+}
+
+export interface PrimeUserOptions {
+  display_name?: string;
+  metadata?: PrimeUserMetadata;
+  content?: PrimeContentBlock[];
+  source?: string;
+}
+
+export interface PrimeUserResponse {
+  job_id: string;
+  status: string;
+  facts_created: number;
+}
+
+export interface AddContentOptions {
+  content: PrimeContentBlock[];
+  source?: string;
+}
+
+export interface AddContentResponse {
+  job_id: string;
+  status: string;
+}
+
+export interface UserPrimingMetadata {
+  agent_id: string;
+  user_id: string;
+  display_name?: string;
+  company?: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  source_type?: string;
+  custom_fields?: Record<string, string>;
+  primed_at?: string;
+}
+
+export interface UpdateMetadataOptions {
+  display_name?: string;
+  company?: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  custom?: Record<string, string>;
+}
+
+export interface UpdateMetadataResponse {
+  metadata: UserPrimingMetadata;
+  facts_created: number;
+}
+
+export interface BatchImportUser {
+  user_id: string;
+  display_name?: string;
+  metadata?: PrimeUserMetadata;
+  content?: PrimeContentBlock[];
+}
+
+export interface BatchImportOptions {
+  users: BatchImportUser[];
+  source?: string;
+}
+
+export interface BatchImportResponse {
+  job_id: string;
+  status: string;
+  total_users: number;
+  facts_created: number;
+}
+
+export interface ImportJob {
+  job_id: string;
+  tenant_id?: string;
+  agent_id?: string;
+  job_type?: string;
+  user_id?: string;
+  source?: string;
+  status: string;
+  total_users?: number;
+  processed_users?: number;
+  facts_created?: number;
+  error_message?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ImportJobListResponse {
+  jobs: ImportJob[];
+  count: number;
+}
