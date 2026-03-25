@@ -57,6 +57,7 @@ import { Memory } from "./memory.js";
 import { Notifications } from "./notifications.js";
 import { Personality } from "./personality.js";
 import { Sessions } from "./sessions.js";
+import { Priming } from "./priming.js";
 import { Voice } from "./voice.js";
 
 export class Agents {
@@ -68,6 +69,7 @@ export class Agents {
   readonly customStates: CustomStates;
   readonly voice: Voice;
   readonly generation: Generation;
+  readonly priming: Priming;
 
   constructor(private readonly http: HTTPClient) {
     this.memory = new Memory(http);
@@ -78,6 +80,7 @@ export class Agents {
     this.customStates = new CustomStates(http);
     this.voice = new Voice(http);
     this.generation = new Generation(http);
+    this.priming = new Priming(http);
   }
 
   // -- Agent CRUD --
@@ -193,8 +196,6 @@ export class Agents {
   ): Promise<DialogueResponse> {
     const body: Record<string, unknown> = {};
     if (options.userId) body.user_id = options.userId;
-    if (options.enrichedContext)
-      body.enriched_context = options.enrichedContext;
     if (options.messages) body.messages = options.messages;
     if (options.requestType) body.request_type = options.requestType;
     if (options.sceneGuidance) body.scene_guidance = options.sceneGuidance;
@@ -557,8 +558,6 @@ export class Agents {
     if (options.model) body.model = options.model;
     if (options.continuationToken)
       body.continuation_token = options.continuationToken;
-    if (options.aiServiceCookie)
-      body.ai_service_cookie = options.aiServiceCookie;
     if (options.requestType) body.request_type = options.requestType;
     if (options.language) body.language = options.language;
     if (options.compiledSystemPrompt)
