@@ -918,6 +918,29 @@ export interface CustomStateListResponse {
   states: CustomState[];
 }
 
+export interface CustomStateUpsertOptions {
+  key: string;
+  value: unknown;
+  scope?: string;
+  contentType?: string;
+  userId?: string;
+  instanceId?: string;
+}
+
+export interface CustomStateGetByKeyOptions {
+  key: string;
+  scope?: string;
+  userId?: string;
+  instanceId?: string;
+}
+
+export interface CustomStateDeleteByKeyOptions {
+  key: string;
+  scope?: string;
+  userId?: string;
+  instanceId?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Wakeups
 // ---------------------------------------------------------------------------
