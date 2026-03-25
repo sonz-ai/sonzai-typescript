@@ -213,6 +213,7 @@ console.log(`Feedback: ${result.feedback}`);
 ### Simulation
 
 ```ts
+// Streaming — launches run, then streams events
 for await (const event of client.agents.simulate("agent-id", {
   userPersona: {
     name: "Alex",
@@ -227,18 +228,90 @@ for await (const event of client.agents.simulate("agent-id", {
 })) {
   console.log(`[${event.type}] ${event.message}`);
 }
+
+// Fire-and-forget (returns RunRef immediately)
+const ref = await client.agents.simulateAsync("agent-id", {
+  userPersona: { name: "Alex", background: "Student" },
+  config: { max_sessions: 2 },
+});
+console.log(`Run started: ${ref.run_id}`);
+
+// Reconnect to stream later (supports resuming via fromIndex)
+for await (const event of client.evalRuns.streamEvents(ref.run_id, 0)) {
+  console.log(`[${event.type}] ${event.message}`);
+}
 ```
 
 ### Run Eval (Simulation + Evaluation)
 
 ```ts
+// Combined simulation + evaluation
 for await (const event of client.agents.runEval("agent-id", {
   templateId: "template-uuid",
-  userPersona: { name: "Alex", background: "Student", personality_traits: [], communication_style: "casual" },
+  userPersona: { name: "Alex", background: "Student" },
   simulationConfig: { max_sessions: 2, max_turns_per_session: 5 },
 })) {
   console.log(`[${event.type}] ${event.message}`);
 }
+
+// Fire-and-forget
+const ref = await client.agents.runEvalAsync("agent-id", {
+  templateId: "template-uuid",
+  simulationConfig: { max_sessions: 2 },
+});
+console.log(`Run started: ${ref.run_id}`);
+```
+
+### Re-evaluate (Eval Only)
+
+```ts
+// Re-evaluate an existing run with a different template
+for await (const event of client.agents.evalOnly("agent-id", {
+  templateId: "new-template-uuid",
+  sourceRunId: "existing-run-uuid",
+})) {
+  console.log(`[${event.type}] ${event.message}`);
+}
+```
+
+### Custom States
+
+```ts
+// Create a custom state
+const state = await client.agents.customStates.create("agent-id", {
+  key: "player_level",
+  value: { level: 15, xp: 2400 },
+  scope: "user",
+  contentType: "json",
+  userId: "user-123",
+});
+
+// List states
+const states = await client.agents.customStates.list("agent-id", {
+  scope: "global",
+});
+
+// Upsert by composite key (create or update)
+const updated = await client.agents.customStates.upsert("agent-id", {
+  key: "player_level",
+  value: { level: 16, xp: 3000 },
+  scope: "user",
+  userId: "user-123",
+});
+
+// Get by composite key
+const found = await client.agents.customStates.getByKey("agent-id", {
+  key: "player_level",
+  scope: "user",
+  userId: "user-123",
+});
+
+// Delete by composite key
+await client.agents.customStates.deleteByKey("agent-id", {
+  key: "player_level",
+  scope: "user",
+  userId: "user-123",
+});
 ```
 
 ### Eval Templates
@@ -270,6 +343,11 @@ await client.evalTemplates.delete(template.id);
 const runs = await client.evalRuns.list({ agentId: "agent-id" });
 const run = await client.evalRuns.get("run-id");
 await client.evalRuns.delete("run-id");
+
+// Stream events from a running eval (reconnectable)
+for await (const event of client.evalRuns.streamEvents("run-id")) {
+  console.log(`[${event.type}] ${event.message}`);
+}
 ```
 
 ## Configuration
