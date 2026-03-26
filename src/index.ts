@@ -150,6 +150,7 @@ export type {
   SimulateOptions,
   RunEvalOptions,
   EvalOnlyOptions,
+  RunRef,
   // Eval templates
   EvalTemplateCategory,
   EvalTemplate,
