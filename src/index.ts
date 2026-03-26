@@ -125,6 +125,9 @@ export type {
   CustomStateCreateOptions,
   CustomStateUpdateOptions,
   CustomStateListResponse,
+  CustomStateUpsertOptions,
+  CustomStateGetByKeyOptions,
+  CustomStateDeleteByKeyOptions,
   // Wakeups
   ScheduleWakeupOptions,
   ScheduledWakeup,
