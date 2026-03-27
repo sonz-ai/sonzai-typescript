@@ -15,8 +15,10 @@ import type {
   ContextDataOptions,
   CreateAgentOptions,
   CreateCustomToolOptions,
+  CreateGoalOptions,
   CustomToolDefinition,
   CustomToolListResponse,
+  DeleteGoalOptions,
   DialogueOptions,
   DialogueResponse,
   DiaryResponse,
@@ -24,6 +26,7 @@ import type {
   EvaluateOptions,
   EvaluationResult,
   RunRef,
+  Goal,
   GoalsResponse,
   HabitsResponse,
   InterestsResponse,
@@ -46,6 +49,7 @@ import type {
   UpdateAgentOptions,
   UpdateCapabilitiesOptions,
   UpdateCustomToolOptions,
+  UpdateGoalOptions,
   UpdateProjectOptions,
   UpdateProjectResponse,
   UsersResponse,
@@ -121,6 +125,15 @@ export class Agents {
     if (options.generatePersonalizedMemories != null)
       body.generate_personalized_memories =
         options.generatePersonalizedMemories;
+    if (options.initialGoals) {
+      body.initial_goals = options.initialGoals.map((g) => ({
+        type: g.type,
+        title: g.title,
+        description: g.description,
+        priority: g.priority,
+        related_traits: g.relatedTraits,
+      }));
+    }
 
     return this.http.post<Agent>("/api/v1/agents", body);
   }
@@ -452,6 +465,61 @@ export class Agents {
       user_id: options.userId,
       instance_id: options.instanceId,
     });
+  }
+
+  /** Create a goal for an agent. Set userId to create a per-user goal. */
+  async createGoal(
+    agentId: string,
+    options: CreateGoalOptions,
+  ): Promise<Goal> {
+    const body: Record<string, unknown> = {
+      title: options.title,
+      description: options.description,
+    };
+    if (options.userId) body.user_id = options.userId;
+    if (options.type) body.type = options.type;
+    if (options.priority != null) body.priority = options.priority;
+    if (options.relatedTraits) body.related_traits = options.relatedTraits;
+
+    return this.http.post<Goal>(
+      `/api/v1/agents/${agentId}/goals`,
+      body,
+    );
+  }
+
+  /** Update an existing goal. Set userId for per-user goals. */
+  async updateGoal(
+    agentId: string,
+    goalId: string,
+    options: UpdateGoalOptions,
+  ): Promise<Goal> {
+    const body: Record<string, unknown> = {};
+    if (options.userId) body.user_id = options.userId;
+    if (options.title) body.title = options.title;
+    if (options.description) body.description = options.description;
+    if (options.priority != null) body.priority = options.priority;
+    if (options.status) body.status = options.status;
+    if (options.relatedTraits) body.related_traits = options.relatedTraits;
+
+    return this.http.put<Goal>(
+      `/api/v1/agents/${agentId}/goals/${goalId}`,
+      body,
+    );
+  }
+
+  /** Delete (soft-abandon) a goal. Set userId for per-user goals. */
+  async deleteGoal(
+    agentId: string,
+    goalId: string,
+    options: DeleteGoalOptions = {},
+  ): Promise<void> {
+    const params: Record<string, string> = {};
+    if (options.userId) params.user_id = options.userId;
+
+    await this.http.delete(
+      `/api/v1/agents/${agentId}/goals/${goalId}`,
+      params,
+    );
   }
 
   async getInterests(

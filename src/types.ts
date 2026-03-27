@@ -317,7 +317,74 @@ export interface MoodResponse extends Record<string, unknown> {}
 export interface MoodAggregateResponse extends Record<string, unknown> {}
 export interface RelationshipResponse extends Record<string, unknown> {}
 export interface HabitsResponse extends Record<string, unknown> {}
-export interface GoalsResponse extends Record<string, unknown> {}
+// ---------------------------------------------------------------------------
+// Goals
+// ---------------------------------------------------------------------------
+
+export type GoalType =
+  | "personal_growth"
+  | "skill_mastery"
+  | "relationship"
+  | "learning_discovery";
+
+export type GoalStatus = "active" | "achieved" | "abandoned";
+
+export type GoalPriority = 0 | 1 | 2;
+
+export interface Goal {
+  goal_id: string;
+  agent_id: string;
+  user_id?: string;
+  type: GoalType;
+  title: string;
+  description: string;
+  priority: GoalPriority;
+  status: GoalStatus;
+  related_traits?: string[];
+  created_at: string;
+  achieved_at?: string;
+  updated_at: string;
+}
+
+export interface GoalsResponse {
+  goals: Goal[];
+}
+
+export interface CreateGoalOptions {
+  /** When set, creates a per-user goal instead of an agent-global goal. */
+  userId?: string;
+  type?: GoalType;
+  title: string;
+  description: string;
+  /** 0 = low, 1 = medium, 2 = high */
+  priority?: GoalPriority;
+  relatedTraits?: string[];
+}
+
+export interface UpdateGoalOptions {
+  /** Required for per-user goals. */
+  userId?: string;
+  title?: string;
+  description?: string;
+  /** 0 = low, 1 = medium, 2 = high */
+  priority?: GoalPriority;
+  status?: GoalStatus;
+  relatedTraits?: string[];
+}
+
+export interface DeleteGoalOptions {
+  /** Required for per-user goals. */
+  userId?: string;
+}
+
+export interface InitialGoal {
+  type?: GoalType;
+  title: string;
+  description: string;
+  /** 0 = low, 1 = medium, 2 = high */
+  priority?: GoalPriority;
+  relatedTraits?: string[];
+}
 export interface InterestsResponse extends Record<string, unknown> {}
 export interface DiaryResponse extends Record<string, unknown> {}
 export interface UsersResponse extends Record<string, unknown> {}
@@ -579,6 +646,7 @@ export interface CreateAgentOptions {
   loreContext?: Record<string, unknown>;
   generateOriginStory?: boolean;
   generatePersonalizedMemories?: boolean;
+  initialGoals?: InitialGoal[];
 }
 
 export interface Agent {
@@ -865,6 +933,13 @@ export interface SDKBehavioralTraits {
   humor: string;
 }
 
+export interface GeneratedGoal {
+  type?: string;
+  title: string;
+  description: string;
+  priority?: number;
+}
+
 export interface GenerateCharacterResponse {
   bio: string;
   personality_prompt: string;
@@ -876,6 +951,9 @@ export interface GenerateCharacterResponse {
   dimensions?: SDKPersonalityDimensions;
   preferences?: SDKInteractionPreferences;
   behaviors?: SDKBehavioralTraits;
+  initial_goals?: GeneratedGoal[];
+  world_description?: string;
+  origin_prompt_instructions?: string;
 }
 
 export interface LoreGenerationContext {
