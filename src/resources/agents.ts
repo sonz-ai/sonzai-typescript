@@ -154,14 +154,14 @@ export class Agents {
   // -- Chat --
 
   /** Send a chat message (non-streaming). Consumes the SSE stream and returns aggregated content. */
-  async chat(agentId: string, options: ChatOptions): Promise<ChatResponse> {
+  async chat(options: ChatOptions): Promise<ChatResponse> {
     const body = this.buildChatBody(options);
     const parts: string[] = [];
     let usage: ChatUsage | undefined;
 
     for await (const event of this.http.streamSSE(
       "POST",
-      `/api/v1/agents/${agentId}/chat`,
+      `/api/v1/agents/${options.agent}/chat`,
       body,
     )) {
       const parsed = event as ChatStreamEvent;
@@ -175,13 +175,12 @@ export class Agents {
 
   /** Send a chat message and stream events as an async iterator. */
   async *chatStream(
-    agentId: string,
     options: ChatOptions,
   ): AsyncGenerator<ChatStreamEvent> {
     const body = this.buildChatBody(options);
     for await (const event of this.http.streamSSE(
       "POST",
-      `/api/v1/agents/${agentId}/chat`,
+      `/api/v1/agents/${options.agent}/chat`,
       body,
     )) {
       yield event as ChatStreamEvent;

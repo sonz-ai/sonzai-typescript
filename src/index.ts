@@ -1,4 +1,5 @@
 export { Sonzai } from "./client.js";
+export { VoiceStreamInstance } from "./resources/voice.js";
 
 // Errors
 export {
@@ -103,6 +104,9 @@ export type {
   TTSResponse,
   VoiceChatOptions,
   VoiceChatResponse,
+  VoiceStreamToken,
+  VoiceTokenOptions,
+  VoiceStreamEvent,
   VoiceEntry,
   VoiceListResponse,
   VoiceListOptions,

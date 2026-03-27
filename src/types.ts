@@ -53,6 +53,7 @@ export interface ToolDefinition {
 }
 
 export interface ChatOptions {
+  agent: string;
   messages: ChatMessage[];
   userId?: string;
   userDisplayName?: string;
@@ -759,6 +760,38 @@ export interface VoiceChatResponse {
   audio: string;
   content_type: string;
   continuation_token?: string;
+}
+
+/** Token for establishing a voice WebSocket connection. */
+export interface VoiceStreamToken {
+  wsUrl: string;
+  authToken: string;
+}
+
+/** Options for requesting a voice WebSocket token. */
+export interface VoiceTokenOptions {
+  voiceName?: string;
+  language?: string;
+  entityContext?: { name?: string; personality?: string };
+}
+
+/**
+ * Server event from the voice WebSocket stream.
+ *
+ * Event types: "ready", "vad", "transcript", "response_delta",
+ * "turn_complete", "error", or "audio" (binary audio data).
+ */
+export interface VoiceStreamEvent {
+  type: string;
+  sessionId?: string;
+  speaking?: boolean;
+  text?: string;
+  continuationToken?: string;
+  contentType?: string;
+  error?: string;
+  errorCode?: string;
+  /** Raw binary audio data (set when type is "audio"). */
+  audio?: Uint8Array;
 }
 
 export interface VoiceEntry {
