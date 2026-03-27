@@ -1,6 +1,6 @@
 {
   "name": "@sonzai/sdk",
-  "version": "1.13.0",
+  "version": "1.0.0",
   "description": "TypeScript SDK for the Sonzai Character Engine API",
   "license": "MIT",
   "author": "Sonzai Labs <eng@sonz.ai>",
