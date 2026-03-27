@@ -97,6 +97,7 @@ export interface AtomicFact {
   importance: number;
   supersedes_id: string;
   session_id: string;
+  metadata?: Record<string, unknown>;
   created_at?: string;
 }
 
@@ -544,6 +545,7 @@ export interface AgentToolCapabilities {
   web_search: boolean;
   remember_name: boolean;
   image_generation: boolean;
+  inventory: boolean;
 }
 
 export interface SeedMemory {
@@ -1238,6 +1240,7 @@ export interface AgentCapabilities {
   webSearch: boolean;
   rememberName: boolean;
   imageGeneration: boolean;
+  inventory: boolean;
   customTools?: CustomToolDefinition[];
 }
 
@@ -1245,6 +1248,7 @@ export interface UpdateCapabilitiesOptions {
   webSearch?: boolean;
   rememberName?: boolean;
   imageGeneration?: boolean;
+  inventory?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -1632,17 +1636,34 @@ export interface PrimeContentBlock {
   body: string;
 }
 
+export interface StructuredColumnMapping {
+  property: string;
+  is_label?: boolean;
+  type?: string;
+}
+
+export interface StructuredImportSpec {
+  entity_type: string;
+  content_csv: string;
+  column_mapping: Record<string, StructuredColumnMapping>;
+  project_id?: string;
+}
+
 export interface PrimeUserOptions {
   display_name?: string;
   metadata?: PrimeUserMetadata;
   content?: PrimeContentBlock[];
   source?: string;
+  structured_import?: StructuredImportSpec;
 }
 
 export interface PrimeUserResponse {
   job_id: string;
   status: string;
   facts_created: number;
+  rows_parsed?: number;
+  kb_resolved?: number;
+  unresolved?: number;
 }
 
 export interface AddContentOptions {
@@ -1720,4 +1741,150 @@ export interface ImportJob {
 export interface ImportJobListResponse {
   jobs: ImportJob[];
   count: number;
+}
+
+// ---------------------------------------------------------------------------
+// Inventory
+// ---------------------------------------------------------------------------
+
+export interface InventoryUpdateOptions {
+  action: "add" | "update" | "remove";
+  item_type: string;
+  description?: string;
+  kb_node_id?: string;
+  properties?: Record<string, unknown>;
+  project_id?: string;
+}
+
+export interface KBResolutionInfo {
+  resolved: boolean;
+  kb_node_id?: string;
+  kb_label?: string;
+  kb_properties?: Record<string, unknown>;
+}
+
+export interface KBCandidate {
+  kb_node_id: string;
+  label: string;
+  properties?: Record<string, unknown>;
+}
+
+export interface InventoryUpdateResponse {
+  status: string;
+  fact_id?: string;
+  kb_resolution?: KBResolutionInfo;
+  candidates?: KBCandidate[];
+  error?: string;
+}
+
+export interface InventoryQueryOptions {
+  mode?: "list" | "value" | "aggregate";
+  item_type?: string;
+  query?: string;
+  project_id?: string;
+  aggregations?: string;
+  group_by?: string;
+  limit?: number;
+  instanceId?: string;
+}
+
+export interface InventoryItem {
+  fact_id: string;
+  item_label: string;
+  kb_node_id?: string;
+  user_properties: Record<string, unknown>;
+  market_properties?: Record<string, unknown>;
+  gain_loss?: number;
+}
+
+export interface InventoryGroupResult {
+  group: string;
+  values: Record<string, unknown>;
+}
+
+export interface InventoryQueryResponse {
+  items: InventoryItem[];
+  total_items: number;
+  totals?: Record<string, unknown>;
+  groups?: InventoryGroupResult[];
+}
+
+export interface InventoryBatchItem {
+  item_type: string;
+  description?: string;
+  kb_node_id?: string;
+  properties?: Record<string, unknown>;
+}
+
+export interface InventoryBatchImportOptions {
+  items: InventoryBatchItem[];
+  project_id?: string;
+}
+
+export interface InventoryBatchImportResponse {
+  status: string;
+  added: number;
+  failed: number;
+  total: number;
+  error?: string;
+}
+
+export interface InventoryDirectUpdateOptions {
+  properties: Record<string, unknown>;
+}
+
+export interface InventoryDirectUpdateResponse {
+  status: string;
+  fact_id?: string;
+  error?: string;
+}
+
+export interface ListAllFactsOptions {
+  has_metadata?: boolean;
+  item_type?: string;
+  limit?: number;
+  instanceId?: string;
+}
+
+export interface ListAllFactsResponse {
+  facts: StoredFact[];
+  total: number;
+}
+
+export interface StoredFact {
+  fact_id: string;
+  content: string;
+  fact_type: string;
+  importance: number;
+  confidence: number;
+  entity?: string;
+  source_type?: string;
+  mention_count: number;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---------------------------------------------------------------------------
+// KB Bulk Update
+// ---------------------------------------------------------------------------
+
+export interface KBBulkUpdateEntry {
+  entity_type: string;
+  label: string;
+  properties: Record<string, unknown>;
+}
+
+export interface KBBulkUpdateOptions {
+  source?: string;
+  updates: KBBulkUpdateEntry[];
+}
+
+export interface KBBulkUpdateResponse {
+  processed?: number;
+  updated?: number;
+  not_found?: number;
+  created?: number;
+  status?: string;
+  count?: number;
 }

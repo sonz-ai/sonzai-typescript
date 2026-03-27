@@ -22,6 +22,8 @@ import type {
   KBTrendRankingsResponse,
   KBConversionsResponse,
   RecordFeedbackOptions,
+  KBBulkUpdateOptions,
+  KBBulkUpdateResponse,
 } from "../types.js";
 
 /** Project-scoped knowledge base operations. */
@@ -334,6 +336,23 @@ export class Knowledge {
   ): Promise<void> {
     await this.http.post(
       `/api/v1/projects/${projectId}/knowledge/analytics/feedback`,
+      options as unknown as Record<string, unknown>,
+    );
+  }
+
+  // -- Bulk Update --
+
+  /**
+   * Batch-update KB node properties. Merges properties into existing nodes
+   * matched by label + entity_type. Creates nodes that don't exist yet.
+   * Sync for <=100 items; async via NATS for larger batches.
+   */
+  async bulkUpdate(
+    projectId: string,
+    options: KBBulkUpdateOptions,
+  ): Promise<KBBulkUpdateResponse> {
+    return this.http.patch<KBBulkUpdateResponse>(
+      `/api/v1/projects/${projectId}/knowledge/bulk-update`,
       options as unknown as Record<string, unknown>,
     );
   }

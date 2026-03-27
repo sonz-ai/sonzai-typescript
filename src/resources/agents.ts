@@ -58,6 +58,7 @@ import { Memory } from "./memory.js";
 import { Notifications } from "./notifications.js";
 import { Personality } from "./personality.js";
 import { Sessions } from "./sessions.js";
+import { Inventory } from "./inventory.js";
 import { Priming } from "./priming.js";
 import { Voice } from "./voice.js";
 
@@ -71,6 +72,7 @@ export class Agents {
   readonly voice: Voice;
   readonly generation: Generation;
   readonly priming: Priming;
+  readonly inventory: Inventory;
 
   constructor(private readonly http: HTTPClient) {
     this.memory = new Memory(http);
@@ -82,6 +84,7 @@ export class Agents {
     this.voice = new Voice(http);
     this.generation = new Generation(http);
     this.priming = new Priming(http);
+    this.inventory = new Inventory(http);
   }
 
   // -- Agent CRUD --
