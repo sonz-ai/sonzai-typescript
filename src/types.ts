@@ -53,6 +53,7 @@ export interface ToolDefinition {
 }
 
 export interface ChatOptions {
+  /** Agent UUID or agent name. Names are resolved to deterministic UUIDs on the server. */
   agent: string;
   messages: ChatMessage[];
   userId?: string;
@@ -914,6 +915,8 @@ export interface GenerateBioResponse {
 }
 
 export interface GenerateCharacterOptions {
+  /** Optional agent UUID. If omitted, a deterministic ID is derived from the name. */
+  agentId?: string;
   name: string;
   gender?: string;
   description?: string;
@@ -941,6 +944,10 @@ export interface GeneratedGoal {
 }
 
 export interface GenerateCharacterResponse {
+  /** The resolved agent ID (provided or derived from name). */
+  agent_id?: string;
+  /** True when the agent already existed and the LLM was not called. */
+  existing?: boolean;
   bio: string;
   personality_prompt: string;
   big5?: Big5Scores;
