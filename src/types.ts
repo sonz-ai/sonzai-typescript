@@ -963,6 +963,32 @@ export interface GenerateCharacterResponse {
   origin_prompt_instructions?: string;
 }
 
+export interface GenerateAndCreateOptions {
+  /** Optional agent UUID. If omitted, a deterministic ID is derived from the name. */
+  agentId?: string;
+  name: string;
+  gender?: string;
+  description?: string;
+  fields?: string[];
+  projectId?: string;
+  language?: string;
+}
+
+export interface GenerateAndCreateResponse {
+  agent_id: string;
+  name: string;
+  /** True when the agent already existed and the LLM was skipped. */
+  existing: boolean;
+  /** Generated character fields (only present when existing=false). */
+  generated?: Record<string, unknown>;
+  usage: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+    model?: string;
+  };
+}
+
 export interface LoreGenerationContext {
   worldDescription: string;
   entityTerminology?: Record<string, string>;
