@@ -6,6 +6,7 @@ import {
   NotFoundError,
   PermissionDeniedError,
   RateLimitError,
+  SonzaiError,
 } from "./errors.js";
 
 export interface HTTPClientOptions {
@@ -19,6 +20,7 @@ export class HTTPClient {
   private readonly baseUrl: string;
   private readonly headers: Record<string, string>;
   private readonly timeout: number;
+  private readonly maxRetries: number;
 
   constructor(options: HTTPClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/$/, "");
@@ -28,6 +30,7 @@ export class HTTPClient {
       "User-Agent": "sonzai-typescript/1.13.0",
     };
     this.timeout = options.timeout;
+    this.maxRetries = options.maxRetries;
   }
 
   async request<T = unknown>(
@@ -39,28 +42,63 @@ export class HTTPClient {
     },
   ): Promise<T> {
     const url = this.buildUrl(path, options?.params);
+    const isIdempotent = method === "GET" || method === "DELETE";
+    const maxAttempts = isIdempotent ? this.maxRetries + 1 : 1;
 
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), this.timeout);
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), this.timeout);
 
-    try {
-      const response = await fetch(url, {
-        method,
-        headers: this.headers,
-        body: options?.body ? JSON.stringify(options.body) : undefined,
-        signal: controller.signal,
-      });
+      try {
+        const response = await fetch(url, {
+          method,
+          headers: this.headers,
+          body: options?.body ? JSON.stringify(options.body) : undefined,
+          signal: controller.signal,
+        });
 
-      await this.throwOnError(response);
+        // Retry on 5xx for idempotent methods
+        if (response.status >= 500 && isIdempotent && attempt < maxAttempts - 1) {
+          clearTimeout(timer);
+          await this.backoff(attempt);
+          continue;
+        }
 
-      const contentType = response.headers.get("content-type") ?? "";
-      if (contentType.includes("application/json")) {
-        return (await response.json()) as T;
+        await this.throwOnError(response);
+
+        const contentType = response.headers.get("content-type") ?? "";
+        if (contentType.includes("application/json")) {
+          return (await response.json()) as T;
+        }
+        return (await response.text()) as T;
+      } catch (error) {
+        clearTimeout(timer);
+        // Retry on network errors for idempotent methods
+        if (isIdempotent && attempt < maxAttempts - 1 && this.isNetworkError(error)) {
+          await this.backoff(attempt);
+          continue;
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
       }
-      return (await response.text()) as T;
-    } finally {
-      clearTimeout(timer);
     }
+
+    // Unreachable, but satisfies TypeScript
+    throw new InternalServerError("Max retries exceeded");
+  }
+
+  private async backoff(attempt: number): Promise<void> {
+    const delay = Math.min(1000 * 2 ** attempt, 10000) + Math.random() * 500;
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
+
+  private isNetworkError(error: unknown): boolean {
+    if (error instanceof SonzaiError) return false;
+    return (
+      error instanceof TypeError ||
+      (error instanceof DOMException && error.name === "AbortError")
+    );
   }
 
   async get<T = unknown>(
@@ -131,40 +169,52 @@ export class HTTPClient {
       const decoder = new TextDecoder();
       let buffer = "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        // Keep the last incomplete line in the buffer
-        buffer = lines.pop() ?? "";
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          // Keep the last incomplete line in the buffer
+          buffer = lines.pop() ?? "";
 
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed) continue;
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+            if (trimmed === "data: [DONE]") return;
+            if (trimmed.startsWith("data: ")) {
+              try {
+                yield JSON.parse(trimmed.slice(6));
+              } catch (e) {
+                console.warn(
+                  "[sonzai-sdk] Malformed SSE JSON event skipped:",
+                  trimmed.slice(6),
+                  e,
+                );
+              }
+            }
+          }
+        }
+
+        // Process remaining buffer
+        if (buffer.trim()) {
+          const trimmed = buffer.trim();
           if (trimmed === "data: [DONE]") return;
           if (trimmed.startsWith("data: ")) {
             try {
               yield JSON.parse(trimmed.slice(6));
-            } catch {
-              // Skip malformed JSON
+            } catch (e) {
+              console.warn(
+                "[sonzai-sdk] Malformed SSE JSON event skipped:",
+                trimmed.slice(6),
+                e,
+              );
             }
           }
         }
-      }
-
-      // Process remaining buffer
-      if (buffer.trim()) {
-        const trimmed = buffer.trim();
-        if (trimmed === "data: [DONE]") return;
-        if (trimmed.startsWith("data: ")) {
-          try {
-            yield JSON.parse(trimmed.slice(6));
-          } catch {
-            // Skip malformed JSON
-          }
-        }
+      } finally {
+        await reader.cancel();
       }
     } finally {
       clearTimeout(timer);
@@ -211,8 +261,14 @@ export class HTTPClient {
         throw new NotFoundError(message);
       case 400:
         throw new BadRequestError(message);
-      case 429:
-        throw new RateLimitError(message);
+      case 429: {
+        const retryAfterRaw = response.headers.get("Retry-After");
+        const retryAfter = retryAfterRaw ? Number(retryAfterRaw) : undefined;
+        throw new RateLimitError(
+          message,
+          retryAfter && !Number.isNaN(retryAfter) ? retryAfter : undefined,
+        );
+      }
       default:
         if (status >= 500) throw new InternalServerError(message);
         throw new APIError(status, message);

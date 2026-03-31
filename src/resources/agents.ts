@@ -1,4 +1,11 @@
 import type { HTTPClient } from "../http.js";
+
+function requireNonEmpty(value: string, name: string): void {
+  if (!value || typeof value !== "string" || value.trim() === "") {
+    throw new Error(`${name} must be a non-empty string`);
+  }
+}
+
 import type {
   Agent,
   AgentCapabilities,
@@ -140,11 +147,13 @@ export class Agents {
 
   /** Get an agent by ID. */
   async get(agentId: string): Promise<Agent> {
+    requireNonEmpty(agentId, "agentId");
     return this.http.get<Agent>(`/api/v1/agents/${agentId}`);
   }
 
   /** Update an agent's profile. */
   async update(agentId: string, options: UpdateAgentOptions): Promise<Agent> {
+    requireNonEmpty(agentId, "agentId");
     const body: Record<string, unknown> = {};
     if (options.name) body.name = options.name;
     if (options.bio) body.bio = options.bio;
@@ -164,6 +173,7 @@ export class Agents {
 
   /** Delete an agent. */
   async delete(agentId: string): Promise<void> {
+    requireNonEmpty(agentId, "agentId");
     await this.http.delete(`/api/v1/agents/${agentId}`);
   }
 
@@ -193,6 +203,7 @@ export class Agents {
   async *chatStream(
     options: ChatOptions,
   ): AsyncGenerator<ChatStreamEvent> {
+    requireNonEmpty(agentId, "agentId");
     const body = this.buildChatBody(options);
     for await (const event of this.http.streamSSE(
       "POST",

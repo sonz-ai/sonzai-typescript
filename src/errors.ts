@@ -34,9 +34,12 @@ export class PermissionDeniedError extends SonzaiError {
 }
 
 export class RateLimitError extends SonzaiError {
-  constructor(message: string) {
+  retryAfter?: number;
+
+  constructor(message: string, retryAfter?: number) {
     super(message);
     this.name = "RateLimitError";
+    this.retryAfter = retryAfter;
   }
 }
 
