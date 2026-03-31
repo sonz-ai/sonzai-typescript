@@ -22,8 +22,10 @@ import type {
   ContextDataOptions,
   CreateAgentOptions,
   CreateCustomToolOptions,
+  CreateGoalOptions,
   CustomToolDefinition,
   CustomToolListResponse,
+  DeleteGoalOptions,
   DialogueOptions,
   DialogueResponse,
   DiaryResponse,
@@ -31,6 +33,7 @@ import type {
   EvaluateOptions,
   EvaluationResult,
   RunRef,
+  Goal,
   GoalsResponse,
   HabitsResponse,
   InterestsResponse,
@@ -53,6 +56,7 @@ import type {
   UpdateAgentOptions,
   UpdateCapabilitiesOptions,
   UpdateCustomToolOptions,
+  UpdateGoalOptions,
   UpdateProjectOptions,
   UpdateProjectResponse,
   UsersResponse,
@@ -65,6 +69,7 @@ import { Memory } from "./memory.js";
 import { Notifications } from "./notifications.js";
 import { Personality } from "./personality.js";
 import { Sessions } from "./sessions.js";
+import { Inventory } from "./inventory.js";
 import { Priming } from "./priming.js";
 import { Voice } from "./voice.js";
 
@@ -78,6 +83,7 @@ export class Agents {
   readonly voice: Voice;
   readonly generation: Generation;
   readonly priming: Priming;
+  readonly inventory: Inventory;
 
   constructor(private readonly http: HTTPClient) {
     this.memory = new Memory(http);
@@ -89,6 +95,7 @@ export class Agents {
     this.voice = new Voice(http);
     this.generation = new Generation(http);
     this.priming = new Priming(http);
+    this.inventory = new Inventory(http);
   }
 
   // -- Agent CRUD --
@@ -125,6 +132,15 @@ export class Agents {
     if (options.generatePersonalizedMemories != null)
       body.generate_personalized_memories =
         options.generatePersonalizedMemories;
+    if (options.initialGoals) {
+      body.initial_goals = options.initialGoals.map((g) => ({
+        type: g.type,
+        title: g.title,
+        description: g.description,
+        priority: g.priority,
+        related_traits: g.relatedTraits,
+      }));
+    }
 
     return this.http.post<Agent>("/api/v1/agents", body);
   }
@@ -164,15 +180,14 @@ export class Agents {
   // -- Chat --
 
   /** Send a chat message (non-streaming). Consumes the SSE stream and returns aggregated content. */
-  async chat(agentId: string, options: ChatOptions): Promise<ChatResponse> {
-    requireNonEmpty(agentId, "agentId");
+  async chat(options: ChatOptions): Promise<ChatResponse> {
     const body = this.buildChatBody(options);
     const parts: string[] = [];
     let usage: ChatUsage | undefined;
 
     for await (const event of this.http.streamSSE(
       "POST",
-      `/api/v1/agents/${agentId}/chat`,
+      `/api/v1/agents/${options.agent}/chat`,
       body,
     )) {
       const parsed = event as ChatStreamEvent;
@@ -186,14 +201,13 @@ export class Agents {
 
   /** Send a chat message and stream events as an async iterator. */
   async *chatStream(
-    agentId: string,
     options: ChatOptions,
   ): AsyncGenerator<ChatStreamEvent> {
     requireNonEmpty(agentId, "agentId");
     const body = this.buildChatBody(options);
     for await (const event of this.http.streamSSE(
       "POST",
-      `/api/v1/agents/${agentId}/chat`,
+      `/api/v1/agents/${options.agent}/chat`,
       body,
     )) {
       yield event as ChatStreamEvent;
@@ -462,6 +476,61 @@ export class Agents {
       user_id: options.userId,
       instance_id: options.instanceId,
     });
+  }
+
+  /** Create a goal for an agent. Set userId to create a per-user goal. */
+  async createGoal(
+    agentId: string,
+    options: CreateGoalOptions,
+  ): Promise<Goal> {
+    const body: Record<string, unknown> = {
+      title: options.title,
+      description: options.description,
+    };
+    if (options.userId) body.user_id = options.userId;
+    if (options.type) body.type = options.type;
+    if (options.priority != null) body.priority = options.priority;
+    if (options.relatedTraits) body.related_traits = options.relatedTraits;
+
+    return this.http.post<Goal>(
+      `/api/v1/agents/${agentId}/goals`,
+      body,
+    );
+  }
+
+  /** Update an existing goal. Set userId for per-user goals. */
+  async updateGoal(
+    agentId: string,
+    goalId: string,
+    options: UpdateGoalOptions,
+  ): Promise<Goal> {
+    const body: Record<string, unknown> = {};
+    if (options.userId) body.user_id = options.userId;
+    if (options.title) body.title = options.title;
+    if (options.description) body.description = options.description;
+    if (options.priority != null) body.priority = options.priority;
+    if (options.status) body.status = options.status;
+    if (options.relatedTraits) body.related_traits = options.relatedTraits;
+
+    return this.http.put<Goal>(
+      `/api/v1/agents/${agentId}/goals/${goalId}`,
+      body,
+    );
+  }
+
+  /** Delete (soft-abandon) a goal. Set userId for per-user goals. */
+  async deleteGoal(
+    agentId: string,
+    goalId: string,
+    options: DeleteGoalOptions = {},
+  ): Promise<void> {
+    const params: Record<string, string> = {};
+    if (options.userId) params.user_id = options.userId;
+
+    await this.http.delete(
+      `/api/v1/agents/${agentId}/goals/${goalId}`,
+      params,
+    );
   }
 
   async getInterests(

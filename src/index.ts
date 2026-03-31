@@ -1,4 +1,5 @@
 export { Sonzai } from "./client.js";
+export { VoiceStreamInstance } from "./resources/voice.js";
 
 // Errors
 export {
@@ -86,7 +87,15 @@ export type {
   MoodAggregateResponse,
   RelationshipResponse,
   HabitsResponse,
+  Goal,
+  GoalType,
+  GoalStatus,
+  GoalPriority,
   GoalsResponse,
+  CreateGoalOptions,
+  UpdateGoalOptions,
+  DeleteGoalOptions,
+  InitialGoal,
   InterestsResponse,
   DiaryResponse,
   UsersResponse,
@@ -103,6 +112,9 @@ export type {
   TTSResponse,
   VoiceChatOptions,
   VoiceChatResponse,
+  VoiceStreamToken,
+  VoiceTokenOptions,
+  VoiceStreamEvent,
   VoiceEntry,
   VoiceListResponse,
   VoiceListOptions,
@@ -111,6 +123,7 @@ export type {
   GenerateBioResponse,
   GenerateCharacterOptions,
   GenerateCharacterResponse,
+  GeneratedGoal,
   SDKInteractionPreferences,
   SDKBehavioralTraits,
   GenerateSeedMemoriesOptions,
@@ -260,4 +273,27 @@ export type {
   BatchImportResponse,
   ImportJob,
   ImportJobListResponse,
+  StructuredColumnMapping,
+  StructuredImportSpec,
+  // Inventory
+  InventoryUpdateOptions,
+  InventoryUpdateResponse,
+  KBResolutionInfo,
+  KBCandidate,
+  InventoryQueryOptions,
+  InventoryQueryResponse,
+  InventoryItem,
+  InventoryGroupResult,
+  InventoryBatchItem,
+  InventoryBatchImportOptions,
+  InventoryBatchImportResponse,
+  InventoryDirectUpdateOptions,
+  InventoryDirectUpdateResponse,
+  ListAllFactsOptions,
+  ListAllFactsResponse,
+  StoredFact,
+  // KB Bulk Update
+  KBBulkUpdateEntry,
+  KBBulkUpdateOptions,
+  KBBulkUpdateResponse,
 } from "./types.js";

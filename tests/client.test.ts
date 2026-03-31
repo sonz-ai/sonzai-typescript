@@ -59,7 +59,8 @@ describe("Chat", () => {
       }),
     );
 
-    const res = await client().agents.chat("agent-1", {
+    const res = await client().agents.chat({
+      agent: "agent-1",
       messages: [{ role: "user", content: "Hi" }],
     });
 
@@ -85,7 +86,8 @@ describe("Chat", () => {
     );
 
     const events = [];
-    for await (const event of client().agents.chatStream("agent-1", {
+    for await (const event of client().agents.chatStream({
+      agent: "agent-1",
       messages: [{ role: "user", content: "Hi" }],
     })) {
       events.push(event);

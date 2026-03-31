@@ -1,5 +1,7 @@
 import type { HTTPClient } from "../http.js";
 import type {
+  GenerateAndCreateOptions,
+  GenerateAndCreateResponse,
   GenerateBioOptions,
   GenerateBioResponse,
   GenerateCharacterOptions,
@@ -36,17 +38,41 @@ export class Generation {
     );
   }
 
-  /** Generate a full character profile from a description. */
+  /** Generate a full character profile from a description.
+   *  If an agent with the resolved ID already exists, the LLM is skipped and the existing profile is returned.
+   */
   async generateCharacter(
     options: GenerateCharacterOptions,
   ): Promise<GenerateCharacterResponse> {
     const body: Record<string, unknown> = { name: options.name };
+    if (options.agentId) body.agent_id = options.agentId;
     if (options.gender) body.gender = options.gender;
     if (options.description) body.description = options.description;
     if (options.fields) body.fields = options.fields;
 
     return this.http.post<GenerateCharacterResponse>(
       "/api/v1/agents/generate-character",
+      body,
+    );
+  }
+
+  /** Generate a character and create the agent in one idempotent call.
+   *  If the agent already exists, the LLM is skipped and the existing agent is returned.
+   *  Safe to call on every app startup.
+   */
+  async generateAndCreate(
+    options: GenerateAndCreateOptions,
+  ): Promise<GenerateAndCreateResponse> {
+    const body: Record<string, unknown> = { name: options.name };
+    if (options.agentId) body.agent_id = options.agentId;
+    if (options.gender) body.gender = options.gender;
+    if (options.description) body.description = options.description;
+    if (options.fields) body.fields = options.fields;
+    if (options.projectId) body.project_id = options.projectId;
+    if (options.language) body.language = options.language;
+
+    return this.http.post<GenerateAndCreateResponse>(
+      "/api/v1/agents/generate-and-create",
       body,
     );
   }

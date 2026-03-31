@@ -77,13 +77,15 @@ declare const Deno: {
  * const client = new Sonzai({ apiKey: "your-api-key" });
  *
  * // Chat with an agent
- * const response = await client.agents.chat("agent-id", {
+ * const response = await client.agents.chat({
+ *   agent: "agent-id",
  *   messages: [{ role: "user", content: "Hello!" }],
  * });
  * console.log(response.content);
  *
  * // Stream chat
- * for await (const event of client.agents.chatStream("agent-id", {
+ * for await (const event of client.agents.chatStream({
+ *   agent: "agent-id",
  *   messages: [{ role: "user", content: "Tell me a story" }],
  * })) {
  *   process.stdout.write(event.choices?.[0]?.delta?.content ?? "");

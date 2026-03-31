@@ -53,6 +53,8 @@ export interface ToolDefinition {
 }
 
 export interface ChatOptions {
+  /** Agent UUID or agent name. Names are resolved to deterministic UUIDs on the server. */
+  agent: string;
   messages: ChatMessage[];
   userId?: string;
   userDisplayName?: string;
@@ -96,6 +98,7 @@ export interface AtomicFact {
   importance: number;
   supersedes_id: string;
   session_id: string;
+  metadata?: Record<string, unknown>;
   created_at?: string;
 }
 
@@ -315,7 +318,74 @@ export interface MoodResponse extends Record<string, unknown> {}
 export interface MoodAggregateResponse extends Record<string, unknown> {}
 export interface RelationshipResponse extends Record<string, unknown> {}
 export interface HabitsResponse extends Record<string, unknown> {}
-export interface GoalsResponse extends Record<string, unknown> {}
+// ---------------------------------------------------------------------------
+// Goals
+// ---------------------------------------------------------------------------
+
+export type GoalType =
+  | "personal_growth"
+  | "skill_mastery"
+  | "relationship"
+  | "learning_discovery";
+
+export type GoalStatus = "active" | "achieved" | "abandoned";
+
+export type GoalPriority = 0 | 1 | 2;
+
+export interface Goal {
+  goal_id: string;
+  agent_id: string;
+  user_id?: string;
+  type: GoalType;
+  title: string;
+  description: string;
+  priority: GoalPriority;
+  status: GoalStatus;
+  related_traits?: string[];
+  created_at: string;
+  achieved_at?: string;
+  updated_at: string;
+}
+
+export interface GoalsResponse {
+  goals: Goal[];
+}
+
+export interface CreateGoalOptions {
+  /** When set, creates a per-user goal instead of an agent-global goal. */
+  userId?: string;
+  type?: GoalType;
+  title: string;
+  description: string;
+  /** 0 = low, 1 = medium, 2 = high */
+  priority?: GoalPriority;
+  relatedTraits?: string[];
+}
+
+export interface UpdateGoalOptions {
+  /** Required for per-user goals. */
+  userId?: string;
+  title?: string;
+  description?: string;
+  /** 0 = low, 1 = medium, 2 = high */
+  priority?: GoalPriority;
+  status?: GoalStatus;
+  relatedTraits?: string[];
+}
+
+export interface DeleteGoalOptions {
+  /** Required for per-user goals. */
+  userId?: string;
+}
+
+export interface InitialGoal {
+  type?: GoalType;
+  title: string;
+  description: string;
+  /** 0 = low, 1 = medium, 2 = high */
+  priority?: GoalPriority;
+  relatedTraits?: string[];
+}
 export interface InterestsResponse extends Record<string, unknown> {}
 export interface DiaryResponse extends Record<string, unknown> {}
 export interface UsersResponse extends Record<string, unknown> {}
@@ -543,6 +613,7 @@ export interface AgentToolCapabilities {
   web_search: boolean;
   remember_name: boolean;
   image_generation: boolean;
+  inventory: boolean;
 }
 
 export interface SeedMemory {
@@ -576,6 +647,7 @@ export interface CreateAgentOptions {
   loreContext?: Record<string, unknown>;
   generateOriginStory?: boolean;
   generatePersonalizedMemories?: boolean;
+  initialGoals?: InitialGoal[];
 }
 
 export interface Agent {
@@ -761,6 +833,38 @@ export interface VoiceChatResponse {
   continuation_token?: string;
 }
 
+/** Token for establishing a voice WebSocket connection. */
+export interface VoiceStreamToken {
+  wsUrl: string;
+  authToken: string;
+}
+
+/** Options for requesting a voice WebSocket token. */
+export interface VoiceTokenOptions {
+  voiceName?: string;
+  language?: string;
+  entityContext?: { name?: string; personality?: string };
+}
+
+/**
+ * Server event from the voice WebSocket stream.
+ *
+ * Event types: "ready", "vad", "transcript", "response_delta",
+ * "turn_complete", "error", or "audio" (binary audio data).
+ */
+export interface VoiceStreamEvent {
+  type: string;
+  sessionId?: string;
+  speaking?: boolean;
+  text?: string;
+  continuationToken?: string;
+  contentType?: string;
+  error?: string;
+  errorCode?: string;
+  /** Raw binary audio data (set when type is "audio"). */
+  audio?: Uint8Array;
+}
+
 export interface VoiceEntry {
   voice_id: string;
   voice_name: string;
@@ -811,6 +915,8 @@ export interface GenerateBioResponse {
 }
 
 export interface GenerateCharacterOptions {
+  /** Optional agent UUID. If omitted, a deterministic ID is derived from the name. */
+  agentId?: string;
   name: string;
   gender?: string;
   description?: string;
@@ -830,7 +936,18 @@ export interface SDKBehavioralTraits {
   humor: string;
 }
 
+export interface GeneratedGoal {
+  type?: string;
+  title: string;
+  description: string;
+  priority?: number;
+}
+
 export interface GenerateCharacterResponse {
+  /** The resolved agent ID (provided or derived from name). */
+  agent_id?: string;
+  /** True when the agent already existed and the LLM was not called. */
+  existing?: boolean;
   bio: string;
   personality_prompt: string;
   big5?: Big5Scores;
@@ -841,6 +958,35 @@ export interface GenerateCharacterResponse {
   dimensions?: SDKPersonalityDimensions;
   preferences?: SDKInteractionPreferences;
   behaviors?: SDKBehavioralTraits;
+  initial_goals?: GeneratedGoal[];
+  world_description?: string;
+  origin_prompt_instructions?: string;
+}
+
+export interface GenerateAndCreateOptions {
+  /** Optional agent UUID. If omitted, a deterministic ID is derived from the name. */
+  agentId?: string;
+  name: string;
+  gender?: string;
+  description?: string;
+  fields?: string[];
+  projectId?: string;
+  language?: string;
+}
+
+export interface GenerateAndCreateResponse {
+  agent_id: string;
+  name: string;
+  /** True when the agent already existed and the LLM was skipped. */
+  existing: boolean;
+  /** Generated character fields (only present when existing=false). */
+  generated?: Record<string, unknown>;
+  usage: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+    model?: string;
+  };
 }
 
 export interface LoreGenerationContext {
@@ -1205,6 +1351,7 @@ export interface AgentCapabilities {
   webSearch: boolean;
   rememberName: boolean;
   imageGeneration: boolean;
+  inventory: boolean;
   customTools?: CustomToolDefinition[];
 }
 
@@ -1212,6 +1359,7 @@ export interface UpdateCapabilitiesOptions {
   webSearch?: boolean;
   rememberName?: boolean;
   imageGeneration?: boolean;
+  inventory?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -1599,17 +1747,34 @@ export interface PrimeContentBlock {
   body: string;
 }
 
+export interface StructuredColumnMapping {
+  property: string;
+  is_label?: boolean;
+  type?: string;
+}
+
+export interface StructuredImportSpec {
+  entity_type: string;
+  content_csv: string;
+  column_mapping: Record<string, StructuredColumnMapping>;
+  project_id?: string;
+}
+
 export interface PrimeUserOptions {
   display_name?: string;
   metadata?: PrimeUserMetadata;
   content?: PrimeContentBlock[];
   source?: string;
+  structured_import?: StructuredImportSpec;
 }
 
 export interface PrimeUserResponse {
   job_id: string;
   status: string;
   facts_created: number;
+  rows_parsed?: number;
+  kb_resolved?: number;
+  unresolved?: number;
 }
 
 export interface AddContentOptions {
@@ -1687,4 +1852,150 @@ export interface ImportJob {
 export interface ImportJobListResponse {
   jobs: ImportJob[];
   count: number;
+}
+
+// ---------------------------------------------------------------------------
+// Inventory
+// ---------------------------------------------------------------------------
+
+export interface InventoryUpdateOptions {
+  action: "add" | "update" | "remove";
+  item_type: string;
+  description?: string;
+  kb_node_id?: string;
+  properties?: Record<string, unknown>;
+  project_id?: string;
+}
+
+export interface KBResolutionInfo {
+  resolved: boolean;
+  kb_node_id?: string;
+  kb_label?: string;
+  kb_properties?: Record<string, unknown>;
+}
+
+export interface KBCandidate {
+  kb_node_id: string;
+  label: string;
+  properties?: Record<string, unknown>;
+}
+
+export interface InventoryUpdateResponse {
+  status: string;
+  fact_id?: string;
+  kb_resolution?: KBResolutionInfo;
+  candidates?: KBCandidate[];
+  error?: string;
+}
+
+export interface InventoryQueryOptions {
+  mode?: "list" | "value" | "aggregate";
+  item_type?: string;
+  query?: string;
+  project_id?: string;
+  aggregations?: string;
+  group_by?: string;
+  limit?: number;
+  instanceId?: string;
+}
+
+export interface InventoryItem {
+  fact_id: string;
+  item_label: string;
+  kb_node_id?: string;
+  user_properties: Record<string, unknown>;
+  market_properties?: Record<string, unknown>;
+  gain_loss?: number;
+}
+
+export interface InventoryGroupResult {
+  group: string;
+  values: Record<string, unknown>;
+}
+
+export interface InventoryQueryResponse {
+  items: InventoryItem[];
+  total_items: number;
+  totals?: Record<string, unknown>;
+  groups?: InventoryGroupResult[];
+}
+
+export interface InventoryBatchItem {
+  item_type: string;
+  description?: string;
+  kb_node_id?: string;
+  properties?: Record<string, unknown>;
+}
+
+export interface InventoryBatchImportOptions {
+  items: InventoryBatchItem[];
+  project_id?: string;
+}
+
+export interface InventoryBatchImportResponse {
+  status: string;
+  added: number;
+  failed: number;
+  total: number;
+  error?: string;
+}
+
+export interface InventoryDirectUpdateOptions {
+  properties: Record<string, unknown>;
+}
+
+export interface InventoryDirectUpdateResponse {
+  status: string;
+  fact_id?: string;
+  error?: string;
+}
+
+export interface ListAllFactsOptions {
+  has_metadata?: boolean;
+  item_type?: string;
+  limit?: number;
+  instanceId?: string;
+}
+
+export interface ListAllFactsResponse {
+  facts: StoredFact[];
+  total: number;
+}
+
+export interface StoredFact {
+  fact_id: string;
+  content: string;
+  fact_type: string;
+  importance: number;
+  confidence: number;
+  entity?: string;
+  source_type?: string;
+  mention_count: number;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---------------------------------------------------------------------------
+// KB Bulk Update
+// ---------------------------------------------------------------------------
+
+export interface KBBulkUpdateEntry {
+  entity_type: string;
+  label: string;
+  properties: Record<string, unknown>;
+}
+
+export interface KBBulkUpdateOptions {
+  source?: string;
+  updates: KBBulkUpdateEntry[];
+}
+
+export interface KBBulkUpdateResponse {
+  processed?: number;
+  updated?: number;
+  not_found?: number;
+  created?: number;
+  status?: string;
+  count?: number;
 }
