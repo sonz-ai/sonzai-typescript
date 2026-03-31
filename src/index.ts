@@ -105,16 +105,10 @@ export type {
   // Tool definitions
   ToolDefinition,
   // Voice
-  VoiceMatchOptions,
-  VoiceMatchResponse,
-  EmotionalContext,
-  TTSOptions,
-  TTSResponse,
-  VoiceChatOptions,
-  VoiceChatResponse,
   VoiceStreamToken,
   VoiceTokenOptions,
   VoiceStreamEvent,
+  VoiceUsage,
   VoiceEntry,
   VoiceListResponse,
   VoiceListOptions,

@@ -785,83 +785,77 @@ export interface PersonalityUpdateResponse {
 // Voice
 // ---------------------------------------------------------------------------
 
-export interface VoiceMatchOptions {
-  big5?: Big5Scores;
-  preferredGender?: string;
-}
-
-export interface VoiceMatchResponse {
-  voice_id: string;
-  voice_name: string;
-  match_score: number;
-  reasoning?: string;
-}
-
-export interface EmotionalContext {
-  themes?: string[];
-  tone?: string;
-}
-
-export interface TTSOptions {
-  text: string;
-  voiceName?: string;
-  language?: string;
-  emotionalContext?: EmotionalContext;
-}
-
-export interface TTSResponse {
-  audio: string;
-  content_type: string;
-  voice_name?: string;
-  duration_ms?: number;
-}
-
-export interface VoiceChatOptions {
-  userId?: string;
-  audio: string;
-  audioFormat?: string;
-  voiceName?: string;
-  continuationToken?: string;
-  language?: string;
-}
-
-export interface VoiceChatResponse {
-  transcript: string;
-  response: string;
-  audio: string;
-  content_type: string;
-  continuation_token?: string;
-}
-
-/** Token for establishing a voice WebSocket connection. */
+/** Token for establishing a voice live WebSocket connection. */
 export interface VoiceStreamToken {
   wsUrl: string;
   authToken: string;
 }
 
-/** Options for requesting a voice WebSocket token. */
+/** Options for requesting a voice live WebSocket token. */
 export interface VoiceTokenOptions {
   voiceName?: string;
   language?: string;
-  entityContext?: { name?: string; personality?: string };
+  userId?: string;
+  compiledSystemPrompt?: string;
+}
+
+/** Usage statistics from the voice session. */
+export interface VoiceUsage {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
 }
 
 /**
- * Server event from the voice WebSocket stream.
+ * Server event from the voice live WebSocket stream.
  *
- * Event types: "ready", "vad", "transcript", "response_delta",
- * "turn_complete", "error", or "audio" (binary audio data).
+ * Event types:
+ * - "ready" — Go proxy authenticated the token
+ * - "session_ready" — Gemini Live session established
+ * - "input_transcript" — user speech transcript (streaming)
+ * - "output_transcript" — agent speech transcript (streaming)
+ * - "agent_state" — agent speaking/silent
+ * - "turn_complete" — turn finished
+ * - "tool_activity" — tool call status
+ * - "side_effects" — extracted facts/emotions
+ * - "usage" — token usage update
+ * - "session_ended" — session closed
+ * - "error" — error occurred
+ * - "audio" — binary PCM audio data (24kHz, 16-bit, mono)
  */
 export interface VoiceStreamEvent {
   type: string;
   sessionId?: string;
-  speaking?: boolean;
+  /** Set on "input_transcript" and "output_transcript" events. */
   text?: string;
-  continuationToken?: string;
-  contentType?: string;
+  /** Whether the transcript is final or interim. */
+  isFinal?: boolean;
+  /** Set on "agent_state" events. */
+  speaking?: boolean;
+  /** Set on "turn_complete" events. */
+  turnIndex?: number;
+  /** Set on "tool_activity" events — tool name. */
+  name?: string;
+  /** Set on "tool_activity" events — "called" or "resolved". */
+  status?: string;
+  /** Set on "side_effects" events. */
+  facts?: unknown[];
+  emotions?: unknown;
+  relationshipDelta?: unknown;
+  /** Set on "usage" events. */
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number;
+  /** Set on "session_ended" events. */
+  reason?: string;
+  totalUsage?: VoiceUsage;
+  turnCount?: number;
+  /** Set on "session_ready" events. */
+  voiceName?: string;
+  /** Set on "error" events. */
   error?: string;
   errorCode?: string;
-  /** Raw binary audio data (set when type is "audio"). */
+  /** Raw binary PCM audio data (set when type is "audio"). */
   audio?: Uint8Array;
 }
 

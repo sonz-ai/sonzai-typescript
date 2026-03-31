@@ -17,77 +17,19 @@ declare class WebSocket {
 
 import type { HTTPClient } from "../http.js";
 import type {
-  TTSOptions,
-  TTSResponse,
-  VoiceChatOptions,
-  VoiceChatResponse,
   VoiceListOptions,
   VoiceListResponse,
-  VoiceMatchOptions,
-  VoiceMatchResponse,
   VoiceStreamEvent,
   VoiceStreamToken,
   VoiceTokenOptions,
 } from "../types.js";
 
-/** Agent-scoped voice operations (TTS, match, chat, streaming). */
+/** Agent-scoped voice live operations (duplex WebSocket streaming via Gemini Live). */
 export class Voice {
   constructor(private readonly http: HTTPClient) {}
 
-  /** Convert text to speech using the agent's voice. */
-  async textToSpeech(
-    agentId: string,
-    options: TTSOptions,
-  ): Promise<TTSResponse> {
-    const body: Record<string, unknown> = { text: options.text };
-    if (options.voiceName) body.voice_name = options.voiceName;
-    if (options.language) body.language = options.language;
-    if (options.emotionalContext)
-      body.emotional_context = options.emotionalContext;
-
-    return this.http.post<TTSResponse>(
-      `/api/v1/agents/${agentId}/voice/tts`,
-      body,
-    );
-  }
-
-  /** Find the best matching voice for an agent based on personality. */
-  async voiceMatch(
-    agentId: string,
-    options: VoiceMatchOptions = {},
-  ): Promise<VoiceMatchResponse> {
-    const body: Record<string, unknown> = {};
-    if (options.big5) body.big5 = options.big5;
-    if (options.preferredGender)
-      body.preferred_gender = options.preferredGender;
-
-    return this.http.post<VoiceMatchResponse>(
-      `/api/v1/agents/${agentId}/voice/match`,
-      body,
-    );
-  }
-
-  /** Perform a single-turn voice chat: send audio, receive text + audio response. */
-  async voiceChat(
-    agentId: string,
-    options: VoiceChatOptions,
-  ): Promise<VoiceChatResponse> {
-    const body: Record<string, unknown> = { audio: options.audio };
-    if (options.userId) body.user_id = options.userId;
-    if (options.audioFormat) body.audio_format = options.audioFormat;
-    if (options.voiceName) body.voice_name = options.voiceName;
-    if (options.continuationToken)
-      body.continuation_token = options.continuationToken;
-    if (options.language) body.language = options.language;
-
-    return this.http.post<VoiceChatResponse>(
-      `/api/v1/agents/${agentId}/voice/chat`,
-      body,
-    );
-  }
-
   /**
-   * Get a short-lived token for WebSocket voice streaming.
+   * Get a short-lived token for voice live WebSocket streaming.
    * The token expires in 60 seconds and is single-use.
    */
   async getToken(
@@ -97,29 +39,36 @@ export class Voice {
     const body: Record<string, unknown> = {};
     if (options.voiceName) body.voiceName = options.voiceName;
     if (options.language) body.language = options.language;
-    if (options.entityContext) body.entityContext = options.entityContext;
+    if (options.userId) body.userId = options.userId;
+    if (options.compiledSystemPrompt)
+      body.compiledSystemPrompt = options.compiledSystemPrompt;
 
     return this.http.post<VoiceStreamToken>(
-      `/api/v1/agents/${agentId}/voice/ws-token`,
+      `/api/v1/agents/${agentId}/voice/live-ws-token`,
       body,
     );
   }
 
   /**
-   * Open a bidirectional WebSocket for real-time voice chat.
+   * Open a bidirectional WebSocket for real-time voice chat via Gemini Live.
    *
    * @example
    * ```ts
    * const token = await client.agents.voice.getToken(agentId);
    * const stream = await client.agents.voice.stream(token);
    *
+   * // Send PCM audio chunks (16kHz, 16-bit, mono)
    * stream.sendAudio(audioChunk);
-   * stream.endOfSpeech();
+   *
+   * // Or send text input instead of audio
+   * stream.sendText("Hello!");
    *
    * for await (const event of stream) {
-   *   if (event.type === "transcript") console.log("User:", event.text);
-   *   if (event.type === "audio") playAudio(event.audio);
-   *   if (event.type === "turn_complete") break;
+   *   if (event.type === "input_transcript") console.log("User:", event.text);
+   *   if (event.type === "output_transcript") console.log("Agent:", event.text);
+   *   if (event.type === "audio") playPCMAudio(event.audio); // 24kHz PCM
+   *   if (event.type === "turn_complete") console.log("Turn done");
+   *   if (event.type === "session_ended") break;
    * }
    *
    * stream.close();
@@ -155,13 +104,25 @@ export class VoiceStreamInstance {
         const parsed = JSON.parse(evt.data as string);
         event = {
           type: parsed.type ?? "",
-          sessionId: parsed.session_id,
-          speaking: parsed.speaking,
+          sessionId: parsed.sessionId ?? parsed.session_id,
           text: parsed.text,
-          continuationToken: parsed.continuation_token,
-          contentType: parsed.content_type,
+          isFinal: parsed.isFinal,
+          speaking: parsed.speaking,
+          turnIndex: parsed.turnIndex,
+          name: parsed.name,
+          status: parsed.status,
+          facts: parsed.facts,
+          emotions: parsed.emotions,
+          relationshipDelta: parsed.relationshipDelta,
+          promptTokens: parsed.promptTokens,
+          completionTokens: parsed.completionTokens,
+          totalTokens: parsed.totalTokens,
+          reason: parsed.reason,
+          totalUsage: parsed.totalUsage,
+          turnCount: parsed.turnCount,
+          voiceName: parsed.voiceName,
           error: parsed.error,
-          errorCode: parsed.error_code,
+          errorCode: parsed.errorCode ?? parsed.error_code ?? parsed.code,
         };
       }
 
@@ -226,21 +187,24 @@ export class VoiceStreamInstance {
     this.ws.send(audio);
   }
 
-  /** Signal the server that the user has finished speaking. */
-  endOfSpeech(): void {
-    this.ws.send(JSON.stringify({ type: "end_of_speech" }));
+  /** Send a text message to the agent instead of audio. */
+  sendText(text: string): void {
+    this.ws.send(JSON.stringify({ type: "text_input", text }));
   }
 
-  /** Change audio format, voice, or language mid-session. */
+  /** Gracefully end the voice session. */
+  endSession(): void {
+    this.ws.send(JSON.stringify({ type: "end_session" }));
+  }
+
+  /** Change audio format or sample rate mid-session. */
   configure(options: {
     audioFormat?: string;
-    voiceName?: string;
-    language?: string;
+    sampleRate?: number;
   }): void {
-    const msg: Record<string, string> = { type: "config" };
-    if (options.audioFormat) msg.audio_format = options.audioFormat;
-    if (options.voiceName) msg.voice_name = options.voiceName;
-    if (options.language) msg.language = options.language;
+    const msg: Record<string, unknown> = { type: "config" };
+    if (options.audioFormat) msg.audioFormat = options.audioFormat;
+    if (options.sampleRate) msg.sampleRate = options.sampleRate;
     this.ws.send(JSON.stringify(msg));
   }
 
