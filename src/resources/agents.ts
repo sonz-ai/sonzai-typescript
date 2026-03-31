@@ -203,7 +203,7 @@ export class Agents {
   async *chatStream(
     options: ChatOptions,
   ): AsyncGenerator<ChatStreamEvent> {
-    requireNonEmpty(agentId, "agentId");
+    requireNonEmpty(options.agent, "agentId");
     const body = this.buildChatBody(options);
     for await (const event of this.http.streamSSE(
       "POST",

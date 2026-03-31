@@ -1,9 +1,9 @@
 {
   "name": "@sonzai-labs/agents",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TypeScript SDK for the Sonzai Mind Layer API",
   "license": "MIT",
-  "author": "Sonzai Labs <eng@sonz.ai>",
+  "author": "Sonzai Labs <engineering@sonz.ai>",
   "repository": {
     "type": "git",
     "url": "https://github.com/sonz-ai/sonzai-typescript.git"
