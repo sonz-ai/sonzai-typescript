@@ -1,9 +1,9 @@
 # Sonzai TypeScript SDK
 
-[![npm version](https://img.shields.io/npm/v/@sonzai/sdk.svg)](https://www.npmjs.com/package/@sonzai/sdk)
+[![npm version](https://img.shields.io/npm/v/@sonzai-labs/agents.svg)](https://www.npmjs.com/package/@sonzai-labs/agents)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-The official TypeScript SDK for the [Sonzai Character Engine API](https://sonz.ai). Build AI characters with persistent memory, evolving personality, and proactive behaviors.
+The official TypeScript SDK for the [Sonzai Mind Layer API](https://sonz.ai). Build AI agents with persistent memory, evolving personality, and proactive behaviors.
 
 **Zero runtime dependencies.** Uses the native `fetch` API. Works with Node.js (>=18), Bun, and Deno.
 
@@ -11,19 +11,19 @@ The official TypeScript SDK for the [Sonzai Character Engine API](https://sonz.a
 
 ```bash
 # npm
-npm install @sonzai/sdk
+npm install @sonzai-labs/agents
 
 # bun
-bun add @sonzai/sdk
+bun add @sonzai-labs/agents
 
 # deno
-import { Sonzai } from "npm:@sonzai/sdk";
+import { Sonzai } from "npm:@sonzai-labs/agents";
 ```
 
 ## Quick Start
 
 ```ts
-import { Sonzai } from "@sonzai/sdk";
+import { Sonzai } from "@sonzai-labs/agents";
 
 const client = new Sonzai({ apiKey: "your-api-key" });
 
@@ -371,7 +371,7 @@ import {
   BadRequestError,
   RateLimitError,
   SonzaiError,
-} from "@sonzai/sdk";
+} from "@sonzai-labs/agents";
 
 try {
   const res = await client.agents.chat("agent-id", { messages: [...] });

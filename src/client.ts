@@ -65,7 +65,7 @@ declare const Deno: {
 } | undefined;
 
 /**
- * Sonzai Character Engine API client.
+ * Sonzai Mind Layer API client.
  *
  * Works with Node.js (>=18), Bun, and Deno. Uses the native `fetch` API
  * with zero runtime dependencies.

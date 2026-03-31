@@ -1,7 +1,7 @@
 {
-  "name": "@sonzai/sdk",
+  "name": "@sonzai-labs/agents",
   "version": "1.0.0",
-  "description": "TypeScript SDK for the Sonzai Character Engine API",
+  "description": "TypeScript SDK for the Sonzai Mind Layer API",
   "license": "MIT",
   "author": "Sonzai Labs <eng@sonz.ai>",
   "repository": {
@@ -12,7 +12,7 @@
   "bugs": {
     "url": "https://github.com/sonz-ai/sonzai-typescript/issues"
   },
-  "keywords": ["sonzai", "ai", "character-engine", "agents", "llm", "sdk"],
+  "keywords": ["sonzai", "ai", "mind-layer", "agents", "llm", "sdk"],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
