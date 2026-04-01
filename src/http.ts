@@ -89,8 +89,10 @@ export class HTTPClient {
   }
 
   private async backoff(attempt: number): Promise<void> {
-    const delay = Math.min(1000 * 2 ** attempt, 10000) + Math.random() * 500;
-    await new Promise((resolve) => setTimeout(resolve, delay));
+    // Exponential backoff: 100ms * 2^attempt, capped at 5s, plus jitter
+    const base = Math.min(100 * 2 ** attempt, 5000);
+    const jitter = Math.random() * base;
+    await new Promise((resolve) => setTimeout(resolve, base + jitter));
   }
 
   private isNetworkError(error: unknown): boolean {
