@@ -121,6 +121,11 @@ export type {
   VoiceEntry,
   VoiceListResponse,
   VoiceListOptions,
+  // Voice TTS/STT
+  TTSOptions,
+  TTSResponse,
+  STTOptions,
+  STTResponse,
   // Generation
   GenerateBioOptions,
   GenerateBioResponse,

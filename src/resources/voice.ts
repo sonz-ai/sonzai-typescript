@@ -22,6 +22,10 @@ import type {
   VoiceStreamEvent,
   VoiceStreamToken,
   VoiceTokenOptions,
+  TTSOptions,
+  TTSResponse,
+  STTOptions,
+  STTResponse,
 } from "../types.js";
 
 /** Agent-scoped voice live operations (duplex WebSocket streaming via Gemini Live). */
@@ -76,6 +80,57 @@ export class Voice {
    */
   async stream(token: VoiceStreamToken): Promise<VoiceStreamInstance> {
     return VoiceStreamInstance.connect(token);
+  }
+
+  /**
+   * Convert text to speech audio.
+   *
+   * @example
+   * ```ts
+   * const result = await client.agents.voice.tts(agentId, {
+   *   text: "Hello, how are you?",
+   *   voiceName: "Kore",
+   *   outputFormat: "wav",
+   * });
+   * // result.audio is base64-encoded WAV
+   * ```
+   */
+  async tts(agentId: string, options: TTSOptions): Promise<TTSResponse> {
+    const body: Record<string, unknown> = { text: options.text };
+    if (options.voiceName) body.voiceName = options.voiceName;
+    if (options.language) body.language = options.language;
+    if (options.outputFormat) body.outputFormat = options.outputFormat;
+
+    return this.http.post<TTSResponse>(
+      `/api/v1/agents/${agentId}/voice/tts`,
+      body,
+    );
+  }
+
+  /**
+   * Transcribe audio to text.
+   *
+   * @example
+   * ```ts
+   * const result = await client.agents.voice.stt(agentId, {
+   *   audio: base64Audio,
+   *   audioFormat: "audio/wav",
+   *   language: "en-US",
+   * });
+   * console.log(result.transcript);
+   * ```
+   */
+  async stt(agentId: string, options: STTOptions): Promise<STTResponse> {
+    const body: Record<string, unknown> = {
+      audio: options.audio,
+      audioFormat: options.audioFormat,
+    };
+    if (options.language) body.language = options.language;
+
+    return this.http.post<STTResponse>(
+      `/api/v1/agents/${agentId}/voice/stt`,
+      body,
+    );
   }
 }
 

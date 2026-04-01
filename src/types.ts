@@ -1002,6 +1002,59 @@ export interface VoiceListOptions {
 }
 
 // ---------------------------------------------------------------------------
+// Voice TTS/STT
+// ---------------------------------------------------------------------------
+
+/** Options for text-to-speech synthesis. */
+export interface TTSOptions {
+  /** Text to synthesize (1–5000 characters). */
+  text: string;
+  /** Gemini voice name (e.g., "Kore", "Puck"). Defaults to "Kore". */
+  voiceName?: string;
+  /** Language code (e.g., "en-US"). Defaults to "en-US". */
+  language?: string;
+  /** Output audio format. Defaults to "wav". */
+  outputFormat?: "wav" | "opus";
+}
+
+/** Response from text-to-speech synthesis. */
+export interface TTSResponse {
+  /** Base64-encoded audio data. */
+  audio: string;
+  /** MIME type of the audio ("audio/wav" or "audio/ogg"). */
+  contentType: string;
+  /** Estimated audio duration in milliseconds. */
+  durationMs?: number;
+  /** Token usage for billing. */
+  usage?: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+    model: string;
+  };
+}
+
+/** Options for speech-to-text transcription. */
+export interface STTOptions {
+  /** Base64-encoded audio data. */
+  audio: string;
+  /** MIME type of the audio (e.g., "audio/wav", "audio/webm;codecs=opus"). */
+  audioFormat: string;
+  /** Language hint (e.g., "en-US"). */
+  language?: string;
+}
+
+/** Response from speech-to-text transcription. */
+export interface STTResponse {
+  /** Transcribed text. */
+  transcript: string;
+  /** Confidence score (0.0–1.0). */
+  confidence: number;
+  /** Detected or confirmed language code. */
+  languageCode?: string;
+}
+
+// ---------------------------------------------------------------------------
 // Generation
 // ---------------------------------------------------------------------------
 
