@@ -37,8 +37,13 @@ import type {
   GoalsResponse,
   HabitsResponse,
   InterestsResponse,
+  EnrichedContextResponse,
+  GetContextOptions,
   MoodAggregateResponse,
+  ModelsResponse,
   MoodResponse,
+  ProcessOptions,
+  ProcessResponse,
   RelationshipResponse,
   RunEvalOptions,
   ScheduleWakeupOptions,
@@ -637,6 +642,58 @@ export class Agents {
   /** Delete a custom tool from an agent. */
   async deleteCustomTool(agentId: string, toolName: string): Promise<void> {
     return this.http.delete<void>(`/api/v1/agents/${agentId}/tools/${toolName}`);
+  }
+
+  // -- Process (full pipeline) --
+
+  /**
+   * Run the full Context Engine pipeline on conversation messages without
+   * generating a chat response. Extracts side effects via LLM, processes
+   * behavioral updates (mood, personality, habits, interests, relationships),
+   * stores memories, and runs session-end analysis.
+   */
+  async process(agentId: string, options: ProcessOptions): Promise<ProcessResponse> {
+    requireNonEmpty(agentId, "agentId");
+    requireNonEmpty(options.userId, "options.userId");
+    const body: Record<string, unknown> = {
+      userId: options.userId,
+      messages: options.messages,
+    };
+    if (options.sessionId) body.sessionId = options.sessionId;
+    if (options.instanceId) body.instanceId = options.instanceId;
+    if (options.provider) body.provider = options.provider;
+    if (options.model) body.model = options.model;
+    return this.http.post<ProcessResponse>(`/api/v1/agents/${agentId}/process`, body);
+  }
+
+  /** Get available LLM providers and models for the /process endpoint. */
+  async getModels(agentId: string): Promise<ModelsResponse> {
+    return this.http.get<ModelsResponse>(`/api/v1/agents/${agentId}/models`);
+  }
+
+  // -- Context (single-call enriched context) --
+
+  /**
+   * Get the full enriched agent context in a single call.
+   * Returns all 7 layers (personality, mood, memory, relationships, goals, etc.)
+   * This replaces multiple individual API calls with one round-trip.
+   */
+  async getContext(
+    agentId: string,
+    options: GetContextOptions,
+  ): Promise<EnrichedContextResponse> {
+    requireNonEmpty(agentId, "agentId");
+    requireNonEmpty(options.userId, "options.userId");
+    const params: Record<string, string> = { userId: options.userId };
+    if (options.sessionId) params.sessionId = options.sessionId;
+    if (options.instanceId) params.instanceId = options.instanceId;
+    if (options.query) params.query = options.query;
+    if (options.language) params.language = options.language;
+    if (options.timezone) params.timezone = options.timezone;
+    return this.http.get<EnrichedContextResponse>(
+      `/api/v1/agents/${agentId}/context`,
+      params,
+    );
   }
 
   // -- Consolidation --

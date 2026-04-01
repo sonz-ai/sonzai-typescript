@@ -102,6 +102,15 @@ export type {
   ConstellationResponse,
   BreakthroughsResponse,
   WakeupsResponse,
+  // Context (single-call enriched context)
+  GetContextOptions,
+  EnrichedContextResponse,
+  // Process (full pipeline)
+  ProcessOptions,
+  ProcessResponse,
+  ProcessSideEffectsSummary,
+  ModelsResponse,
+  ModelsProviderEntry,
   // Tool definitions
   ToolDefinition,
   // Voice
@@ -290,4 +299,17 @@ export type {
   KBBulkUpdateEntry,
   KBBulkUpdateOptions,
   KBBulkUpdateResponse,
+  // Project Config
+  ProjectConfigEntry,
+  ProjectConfigListResponse,
+  SetConfigOptions,
+  // Custom LLM
+  CustomLLMConfigResponse,
+  SetCustomLLMOptions,
+  // Project Notifications
+  ProjectNotificationListOptions,
+  ProjectNotificationListResponse,
+  AcknowledgeNotificationsOptions,
+  AcknowledgeResponse,
+  AcknowledgeAllOptions,
 } from "./types.js";

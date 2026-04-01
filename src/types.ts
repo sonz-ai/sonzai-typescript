@@ -394,6 +394,120 @@ export interface BreakthroughsResponse extends Record<string, unknown> {}
 export interface WakeupsResponse extends Record<string, unknown> {}
 
 // ---------------------------------------------------------------------------
+// Process (full pipeline — extraction + side effects + memory + session end)
+// ---------------------------------------------------------------------------
+
+export interface ProcessOptions {
+  userId: string;
+  sessionId?: string;
+  instanceId?: string;
+  messages: ChatMessage[];
+  /** LLM provider for extraction (e.g. "gemini", "openai", "openrouter"). Falls back to platform default. */
+  provider?: string;
+  /** LLM model for extraction (e.g. "gemini-2.5-flash", "gpt-4o-mini"). Falls back to platform default. */
+  model?: string;
+}
+
+export interface ProcessSideEffectsSummary {
+  mood_updated: boolean;
+  personality_updated: boolean;
+  habits_observed: number;
+  interests_detected: number;
+}
+
+// ---------------------------------------------------------------------------
+// Context (single-call enriched context)
+// ---------------------------------------------------------------------------
+
+export interface GetContextOptions {
+  userId: string;
+  sessionId?: string;
+  instanceId?: string;
+  /** Current user message — used for supplementary memory search. */
+  query?: string;
+  language?: string;
+  /** IANA timezone (e.g. "Asia/Singapore"). */
+  timezone?: string;
+}
+
+/**
+ * Full enriched agent context returned by the 7-layer context builder.
+ * Fields use snake_case matching the Go JSON serialization.
+ * Forward-compatible via index signature.
+ */
+export interface EnrichedContextResponse {
+  // Layer 1: Core Identity
+  bio?: string;
+  personality_prompt?: string;
+  speech_patterns?: string[];
+  true_interests?: string[];
+  true_dislikes?: string[];
+  primary_traits?: string[];
+
+  // Layer 2: Personality
+  big5?: Record<string, unknown>;
+  dimensions?: Record<string, unknown>;
+  preferences?: Record<string, unknown>;
+  behaviors?: Record<string, unknown>;
+
+  // Layer 3: Evolution
+  recent_personality_shifts?: unknown[];
+  significant_moments?: unknown[];
+  active_goals?: unknown[];
+  habits?: unknown[];
+  breakthrough_count?: number;
+
+  // Layer 4: Relationship
+  relationship_narrative?: string;
+  shared_memory_summary?: string;
+  chemistry_score?: number;
+  love_from_agent?: number;
+  love_from_user?: number;
+  relationship_status?: string;
+  days_since_last_chat?: number;
+
+  // Layer 5: Current State
+  current_mood?: Record<string, unknown>;
+  emotional_state?: string;
+  capabilities?: Record<string, unknown>;
+
+  // Layer 6: Memory
+  loaded_facts?: Array<Record<string, unknown>>;
+  long_term_summaries?: unknown[];
+
+  // Layer 6b: Proactive
+  proactive_memories?: unknown[];
+
+  // Layer 6c: Constellation
+  constellation_patterns?: unknown[];
+
+  // Layer 7: Game Context
+  game_context?: Record<string, unknown>;
+
+  // Forward-compatible
+  [key: string]: unknown;
+}
+
+export interface ModelsProviderEntry {
+  provider: string;
+  provider_name: string;
+  default_model: string;
+}
+
+export interface ModelsResponse {
+  default_provider: string;
+  default_model: string;
+  providers: ModelsProviderEntry[];
+}
+
+export interface ProcessResponse {
+  success: boolean;
+  memories_created: number;
+  facts_extracted: number;
+  side_effects: ProcessSideEffectsSummary;
+}
+
+// ---------------------------------------------------------------------------
 // Evaluation
 // ---------------------------------------------------------------------------
 
@@ -1992,4 +2106,71 @@ export interface KBBulkUpdateResponse {
   created?: number;
   status?: string;
   count?: number;
+}
+
+// ---------------------------------------------------------------------------
+// Project Config
+// ---------------------------------------------------------------------------
+
+export interface ProjectConfigEntry {
+  key: string;
+  value: unknown;
+  updated_at?: string;
+}
+
+export interface ProjectConfigListResponse {
+  configs: ProjectConfigEntry[];
+}
+
+export interface SetConfigOptions {
+  value: unknown;
+}
+
+// ---------------------------------------------------------------------------
+// Custom LLM
+// ---------------------------------------------------------------------------
+
+export interface CustomLLMConfigResponse {
+  endpoint: string;
+  api_key_prefix: string;
+  model: string;
+  display_name: string;
+  is_active: boolean;
+  configured: boolean;
+}
+
+export interface SetCustomLLMOptions {
+  endpoint: string;
+  api_key: string;
+  model?: string;
+  display_name?: string;
+  is_active?: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Project Notifications
+// ---------------------------------------------------------------------------
+
+export interface ProjectNotificationListOptions {
+  agentId?: string;
+  eventType?: string;
+  limit?: number;
+}
+
+export interface ProjectNotificationListResponse {
+  notifications: Notification[];
+  count: number;
+}
+
+export interface AcknowledgeNotificationsOptions {
+  notificationIds: string[];
+}
+
+export interface AcknowledgeResponse {
+  acknowledged: number;
+}
+
+export interface AcknowledgeAllOptions {
+  agentId?: string;
+  eventType?: string;
 }

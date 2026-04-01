@@ -1,8 +1,11 @@
 import { HTTPClient } from "./http.js";
 import { Agents } from "./resources/agents.js";
+import { CustomLLM } from "./resources/custom-llm.js";
 import { EvalRuns } from "./resources/eval-runs.js";
 import { EvalTemplates } from "./resources/eval-templates.js";
 import { Knowledge } from "./resources/knowledge.js";
+import { ProjectConfig } from "./resources/project-config.js";
+import { ProjectNotifications } from "./resources/project-notifications.js";
 import { Voices } from "./resources/voice.js";
 import { Webhooks } from "./resources/webhooks.js";
 import type { SonzaiConfig } from "./types.js";
@@ -100,6 +103,12 @@ export class Sonzai {
   readonly evalRuns: EvalRuns;
   readonly voices: Voices;
   readonly webhooks: Webhooks;
+  /** Project-scoped configuration (key-value store). */
+  readonly projectConfig: ProjectConfig;
+  /** Project-scoped custom LLM provider configuration. */
+  readonly customLLM: CustomLLM;
+  /** Project-scoped notification polling for game backends. */
+  readonly projectNotifications: ProjectNotifications;
 
   private readonly http: HTTPClient;
 
@@ -120,5 +129,8 @@ export class Sonzai {
     this.evalRuns = new EvalRuns(this.http);
     this.voices = new Voices(this.http);
     this.webhooks = new Webhooks(this.http);
+    this.projectConfig = new ProjectConfig(this.http);
+    this.customLLM = new CustomLLM(this.http);
+    this.projectNotifications = new ProjectNotifications(this.http);
   }
 }
