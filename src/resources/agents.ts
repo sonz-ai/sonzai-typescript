@@ -27,6 +27,8 @@ import type {
   CustomToolListResponse,
   DeleteGoalOptions,
   DialogueOptions,
+  GenerateAvatarOptions,
+  GenerateAvatarResponse,
   DialogueResponse,
   DiaryResponse,
   EvalOnlyOptions,
@@ -642,6 +644,16 @@ export class Agents {
   /** Delete a custom tool from an agent. */
   async deleteCustomTool(agentId: string, toolName: string): Promise<void> {
     return this.http.delete<void>(`/api/v1/agents/${agentId}/tools/${toolName}`);
+  }
+
+  // -- Avatar Generation --
+
+  /** Trigger avatar generation for an agent. */
+  async generateAvatar(agentId: string, options?: GenerateAvatarOptions): Promise<GenerateAvatarResponse> {
+    return this.http.post<GenerateAvatarResponse>(
+      `/api/v1/agents/${agentId}/avatar/generate`,
+      (options ?? {}) as Record<string, unknown>,
+    );
   }
 
   // -- Process (full pipeline) --

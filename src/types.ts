@@ -1549,6 +1549,21 @@ export interface UpdateCustomToolOptions {
 }
 
 // ---------------------------------------------------------------------------
+// Avatar Generation
+// ---------------------------------------------------------------------------
+
+export interface GenerateAvatarOptions {
+  style?: string;
+}
+
+export interface GenerateAvatarResponse {
+  success: boolean;
+  avatar_url: string;
+  prompt: string;
+  generation_time_ms: number;
+}
+
+// ---------------------------------------------------------------------------
 // Consolidation
 // ---------------------------------------------------------------------------
 

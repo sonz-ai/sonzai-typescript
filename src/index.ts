@@ -212,6 +212,9 @@ export type {
   // Capabilities
   AgentCapabilities,
   UpdateCapabilitiesOptions,
+  // Avatar Generation
+  GenerateAvatarOptions,
+  GenerateAvatarResponse,
   // Custom tools
   CustomToolDefinition,
   CustomToolListResponse,
