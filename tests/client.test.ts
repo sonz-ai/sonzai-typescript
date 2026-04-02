@@ -45,14 +45,22 @@ describe("Chat", () => {
   it("aggregates non-streaming chat", async () => {
     server.use(
       http.post(`${BASE_URL}/api/v1/agents/agent-1/chat`, () => {
-        const body = [
-          'data: {"choices":[{"delta":{"content":"Hello"},"finish_reason":null,"index":0}]}',
-          "",
-          'data: {"choices":[{"delta":{"content":" world"},"finish_reason":"stop","index":0}],"usage":{"promptTokens":10,"completionTokens":5,"totalTokens":15}}',
-          "",
-          "data: [DONE]",
-          "",
-        ].join("\n");
+        const encoder = new TextEncoder();
+        const body = new ReadableStream({
+          start(controller) {
+            controller.enqueue(encoder.encode(
+              [
+                'data: {"choices":[{"delta":{"content":"Hello"},"finish_reason":null,"index":0}]}',
+                "",
+                'data: {"choices":[{"delta":{"content":" world"},"finish_reason":"stop","index":0}],"usage":{"promptTokens":10,"completionTokens":5,"totalTokens":15}}',
+                "",
+                "data: [DONE]",
+                "",
+              ].join("\n"),
+            ));
+            controller.close();
+          },
+        });
         return new HttpResponse(body, {
           headers: { "Content-Type": "text/event-stream" },
         });
@@ -71,14 +79,22 @@ describe("Chat", () => {
   it("streams chat events", async () => {
     server.use(
       http.post(`${BASE_URL}/api/v1/agents/agent-1/chat`, () => {
-        const body = [
-          'data: {"choices":[{"delta":{"content":"Hi"},"finish_reason":null,"index":0}]}',
-          "",
-          'data: {"choices":[{"delta":{"content":"!"},"finish_reason":"stop","index":0}]}',
-          "",
-          "data: [DONE]",
-          "",
-        ].join("\n");
+        const encoder = new TextEncoder();
+        const body = new ReadableStream({
+          start(controller) {
+            controller.enqueue(encoder.encode(
+              [
+                'data: {"choices":[{"delta":{"content":"Hi"},"finish_reason":null,"index":0}]}',
+                "",
+                'data: {"choices":[{"delta":{"content":"!"},"finish_reason":"stop","index":0}]}',
+                "",
+                "data: [DONE]",
+                "",
+              ].join("\n"),
+            ));
+            controller.close();
+          },
+        });
         return new HttpResponse(body, {
           headers: { "Content-Type": "text/event-stream" },
         });

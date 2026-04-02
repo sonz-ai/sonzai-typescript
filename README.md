@@ -145,6 +145,21 @@ await client.agents.sessions.end("agent-id", {
   totalMessages: 10,
   durationSeconds: 300,
 });
+
+// Configure tools for an active session (OpenAI-compatible tool definitions)
+await client.agents.sessions.setTools("agent-id", "session-456", [
+  {
+    type: "function",
+    function: {
+      name: "get_weather",
+      description: "Get current weather for a city",
+      parameters: {
+        type: "object",
+        properties: { city: { type: "string" } },
+      },
+    },
+  },
+]);
 ```
 
 ### Agent Instances
@@ -188,12 +203,59 @@ const history = await client.agents.notifications.history("agent-id");
 
 ```ts
 const mood = await client.agents.getMood("agent-id", { userId: "user-123" });
+const moodHistory = await client.agents.getMoodHistory("agent-id", { userId: "user-123" });
+const moodAggregate = await client.agents.getMoodAggregate("agent-id");
 const relationships = await client.agents.getRelationships("agent-id");
 const habits = await client.agents.getHabits("agent-id");
-const goals = await client.agents.getGoals("agent-id");
 const interests = await client.agents.getInterests("agent-id");
 const diary = await client.agents.getDiary("agent-id");
 const users = await client.agents.getUsers("agent-id");
+```
+
+### Goals
+
+```ts
+// List goals
+const goals = await client.agents.getGoals("agent-id");
+
+// Create a goal (omit userId for agent-global, include for per-user)
+const goal = await client.agents.createGoal("agent-id", {
+  title: "Learn guitar",
+  description: "Practice 30 minutes daily",
+  type: "skill_mastery",
+  priority: 1,
+  userId: "user-123", // optional
+});
+
+// Update a goal
+await client.agents.updateGoal("agent-id", goal.id, { status: "completed" });
+
+// Delete (soft-abandon) a goal
+await client.agents.deleteGoal("agent-id", goal.id, { userId: "user-123" });
+```
+
+### Wakeups
+
+```ts
+// Schedule a proactive check-in
+const wakeup = await client.agents.scheduleWakeup("agent-id", {
+  userId: "user-123",
+  scheduledAt: "2026-06-01T09:00:00Z",
+  checkType: "birthday",
+  occasion: "User's birthday",
+});
+```
+
+### Image Generation
+
+```ts
+// Generate an image using the agent's personality and context
+const image = await client.agents.generation.generateImage("agent-id", {
+  prompt: "A serene mountain lake at sunset",
+  style: "photorealistic", // optional
+  userId: "user-123",      // optional — personalises the image
+});
+console.log(image.url);
 ```
 
 ### Evaluation
@@ -381,7 +443,8 @@ try {
   } else if (err instanceof NotFoundError) {
     console.log("Agent not found");
   } else if (err instanceof RateLimitError) {
-    console.log("Rate limit exceeded");
+    const wait = err.retryAfter ?? 60;
+    console.log(`Rate limited. Retry in ${wait}s`);
   } else if (err instanceof SonzaiError) {
     console.log(`API error: ${err.message}`);
   }
