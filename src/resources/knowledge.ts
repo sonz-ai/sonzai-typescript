@@ -55,6 +55,20 @@ export class Knowledge {
     );
   }
 
+  /** Upload a document file to the knowledge base. */
+  async uploadDocument(
+    projectId: string,
+    fileName: string,
+    fileData: Uint8Array | Buffer,
+  ): Promise<KBDocument> {
+    return this.http.uploadFile<KBDocument>(
+      `/api/v1/projects/${projectId}/knowledge/documents`,
+      "file",
+      fileName,
+      fileData,
+    );
+  }
+
   /** Delete a document. */
   async deleteDocument(
     projectId: string,

@@ -137,6 +137,42 @@ export class HTTPClient {
     return this.request<T>("DELETE", path, { params });
   }
 
+  async uploadFile<T = unknown>(
+    path: string,
+    fieldName: string,
+    fileName: string,
+    fileData: Uint8Array | Buffer,
+  ): Promise<T> {
+    const url = this.buildUrl(path);
+    const formData = new FormData();
+    const blob = new Blob([new Uint8Array(fileData) as unknown as ArrayBuffer]);
+    formData.append(fieldName, blob, fileName);
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.timeout);
+
+    try {
+      // Omit Content-Type so fetch sets multipart boundary automatically
+      const { "Content-Type": _, ...headers } = this.headers;
+      const response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: formData,
+        signal: controller.signal,
+      });
+
+      await this.throwOnError(response);
+
+      const contentType = response.headers.get("content-type") ?? "";
+      if (contentType.includes("application/json")) {
+        return (await response.json()) as T;
+      }
+      return (await response.text()) as T;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   async *streamSSE(
     method: string,
     path: string,

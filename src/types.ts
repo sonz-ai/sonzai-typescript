@@ -1993,3 +1993,18 @@ export interface KBBulkUpdateResponse {
   status?: string;
   count?: number;
 }
+
+// ---------------------------------------------------------------------------
+// Avatar Generation
+// ---------------------------------------------------------------------------
+
+export interface RegenerateAvatarOptions {
+  style?: string;
+}
+
+export interface RegenerateAvatarResponse {
+  success: boolean;
+  avatar_url: string;
+  prompt: string;
+  generation_time_ms: number;
+}

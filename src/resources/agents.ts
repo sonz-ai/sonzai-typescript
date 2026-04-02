@@ -39,6 +39,8 @@ import type {
   InterestsResponse,
   MoodAggregateResponse,
   MoodResponse,
+  RegenerateAvatarOptions,
+  RegenerateAvatarResponse,
   RelationshipResponse,
   RunEvalOptions,
   ScheduleWakeupOptions,
@@ -662,6 +664,22 @@ export class Agents {
     if (options.userId) params.user_id = options.userId;
     if (options.instanceId) params.instance_id = options.instanceId;
     return this.http.get<TimeMachineResponse>(`/api/v1/agents/${agentId}/timemachine`, params);
+  }
+
+  // -- Avatar Generation --
+
+  /** Regenerate the agent's avatar image. */
+  async regenerateAvatar(
+    agentId: string,
+    options?: RegenerateAvatarOptions,
+  ): Promise<RegenerateAvatarResponse> {
+    requireNonEmpty(agentId, "agentId");
+    const body: Record<string, unknown> = {};
+    if (options?.style) body.style = options.style;
+    return this.http.post<RegenerateAvatarResponse>(
+      `/api/v1/agents/${agentId}/avatar/generate`,
+      body,
+    );
   }
 
   private buildChatBody(options: ChatOptions): Record<string, unknown> {

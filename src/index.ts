@@ -290,4 +290,7 @@ export type {
   KBBulkUpdateEntry,
   KBBulkUpdateOptions,
   KBBulkUpdateResponse,
+  // Avatar Generation
+  RegenerateAvatarOptions,
+  RegenerateAvatarResponse,
 } from "./types.js";
