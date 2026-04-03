@@ -274,10 +274,10 @@ export class Agents {
   ): Promise<ScheduledWakeup> {
     const body: Record<string, unknown> = {
       user_id: options.userId,
-      scheduled_at: options.scheduledAt,
       check_type: options.checkType,
+      intent: options.intent,
     };
-    if (options.intent) body.intent = options.intent;
+    if (options.delayHours !== undefined) body.delay_hours = options.delayHours;
     if (options.occasion) body.occasion = options.occasion;
     if (options.interestTopic) body.interest_topic = options.interestTopic;
     if (options.eventDescription)

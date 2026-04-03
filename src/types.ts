@@ -1270,9 +1270,10 @@ export interface CustomStateDeleteByKeyOptions {
 
 export interface ScheduleWakeupOptions {
   userId: string;
-  scheduledAt: string;
+  /** Number of hours from now to schedule the wakeup. Defaults to 0 (immediate). */
+  delayHours?: number;
   checkType: string;
-  intent?: string;
+  intent: string;
   occasion?: string;
   interestTopic?: string;
   eventDescription?: string;
