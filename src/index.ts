@@ -99,6 +99,9 @@ export type {
   InterestsResponse,
   DiaryResponse,
   UsersResponse,
+  ConstellationResponse,
+  BreakthroughsResponse,
+  WakeupsResponse,
   // Context (single-call enriched context)
   GetContextOptions,
   EnrichedContextResponse,
@@ -199,6 +202,36 @@ export type {
   UserOverlayOptions,
   // Fact history
   FactHistoryResponse,
+  // Time machine
+  TimeMachineOptions,
+  TimeMachineMoodSnapshot,
+  TimeMachineResponse,
+  // Agent status
+  SetStatusOptions,
+  SetStatusResponse,
+  // Capabilities
+  AgentCapabilities,
+  UpdateCapabilitiesOptions,
+  // Avatar Generation
+  GenerateAvatarOptions,
+  GenerateAvatarResponse,
+  // Custom tools
+  CustomToolDefinition,
+  CustomToolListResponse,
+  CreateCustomToolOptions,
+  UpdateCustomToolOptions,
+  // Consolidation
+  ConsolidateOptions,
+  ConsolidateResponse,
+  // Summaries
+  SummariesOptions,
+  MemorySummary,
+  SummariesResponse,
+  // Project association
+  UpdateProjectOptions,
+  UpdateProjectResponse,
+  // Instance update
+  UpdateInstanceOptions,
   // Knowledge Base
   KBDocument,
   KBDocumentListResponse,
