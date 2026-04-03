@@ -294,10 +294,7 @@ export class Agents {
     agentId: string,
     options: ContextDataOptions = {},
   ): Promise<WakeupsResponse> {
-    return this.http.get(`/api/v1/agents/${agentId}/wakeups`, {
-      user_id: options.userId,
-      instance_id: options.instanceId,
-    });
+    return this.http.get(`/api/v1/agents/${agentId}/wakeups`, this.contextParams(options));
   }
 
   // -- Evaluation --
@@ -428,20 +425,14 @@ export class Agents {
     agentId: string,
     options: ContextDataOptions = {},
   ): Promise<MoodResponse> {
-    return this.http.get(`/api/v1/agents/${agentId}/mood`, {
-      user_id: options.userId,
-      instance_id: options.instanceId,
-    });
+    return this.http.get(`/api/v1/agents/${agentId}/mood`, this.contextParams(options));
   }
 
   async getMoodHistory(
     agentId: string,
     options: ContextDataOptions = {},
   ): Promise<MoodResponse> {
-    return this.http.get(`/api/v1/agents/${agentId}/mood-history`, {
-      user_id: options.userId,
-      instance_id: options.instanceId,
-    });
+    return this.http.get(`/api/v1/agents/${agentId}/mood-history`, this.contextParams(options));
   }
 
   /** Get aggregated mood statistics for an agent. */
@@ -449,40 +440,28 @@ export class Agents {
     agentId: string,
     options: ContextDataOptions = {},
   ): Promise<MoodAggregateResponse> {
-    return this.http.get(`/api/v1/agents/${agentId}/mood/aggregate`, {
-      user_id: options.userId,
-      instance_id: options.instanceId,
-    });
+    return this.http.get(`/api/v1/agents/${agentId}/mood/aggregate`, this.contextParams(options));
   }
 
   async getRelationships(
     agentId: string,
     options: ContextDataOptions = {},
   ): Promise<RelationshipResponse> {
-    return this.http.get(`/api/v1/agents/${agentId}/relationships`, {
-      user_id: options.userId,
-      instance_id: options.instanceId,
-    });
+    return this.http.get(`/api/v1/agents/${agentId}/relationships`, this.contextParams(options));
   }
 
   async getHabits(
     agentId: string,
     options: ContextDataOptions = {},
   ): Promise<HabitsResponse> {
-    return this.http.get(`/api/v1/agents/${agentId}/habits`, {
-      user_id: options.userId,
-      instance_id: options.instanceId,
-    });
+    return this.http.get(`/api/v1/agents/${agentId}/habits`, this.contextParams(options));
   }
 
   async getGoals(
     agentId: string,
     options: ContextDataOptions = {},
   ): Promise<GoalsResponse> {
-    return this.http.get(`/api/v1/agents/${agentId}/goals`, {
-      user_id: options.userId,
-      instance_id: options.instanceId,
-    });
+    return this.http.get(`/api/v1/agents/${agentId}/goals`, this.contextParams(options));
   }
 
   /** Create a goal for an agent. Set userId to create a per-user goal. */
@@ -544,20 +523,14 @@ export class Agents {
     agentId: string,
     options: ContextDataOptions = {},
   ): Promise<InterestsResponse> {
-    return this.http.get(`/api/v1/agents/${agentId}/interests`, {
-      user_id: options.userId,
-      instance_id: options.instanceId,
-    });
+    return this.http.get(`/api/v1/agents/${agentId}/interests`, this.contextParams(options));
   }
 
   async getDiary(
     agentId: string,
     options: ContextDataOptions = {},
   ): Promise<DiaryResponse> {
-    return this.http.get(`/api/v1/agents/${agentId}/diary`, {
-      user_id: options.userId,
-      instance_id: options.instanceId,
-    });
+    return this.http.get(`/api/v1/agents/${agentId}/diary`, this.contextParams(options));
   }
 
   async getUsers(agentId: string): Promise<UsersResponse> {
@@ -569,10 +542,7 @@ export class Agents {
     agentId: string,
     options: ContextDataOptions = {},
   ): Promise<ConstellationResponse> {
-    return this.http.get(`/api/v1/agents/${agentId}/constellation`, {
-      user_id: options.userId,
-      instance_id: options.instanceId,
-    });
+    return this.http.get(`/api/v1/agents/${agentId}/constellation`, this.contextParams(options));
   }
 
   /** Get breakthroughs for an agent. */
@@ -580,10 +550,7 @@ export class Agents {
     agentId: string,
     options: ContextDataOptions = {},
   ): Promise<BreakthroughsResponse> {
-    return this.http.get(`/api/v1/agents/${agentId}/breakthroughs`, {
-      user_id: options.userId,
-      instance_id: options.instanceId,
-    });
+    return this.http.get(`/api/v1/agents/${agentId}/breakthroughs`, this.contextParams(options));
   }
 
   // -- Agent List --
@@ -731,6 +698,10 @@ export class Agents {
     if (options.userId) params.user_id = options.userId;
     if (options.instanceId) params.instance_id = options.instanceId;
     return this.http.get<TimeMachineResponse>(`/api/v1/agents/${agentId}/timemachine`, params);
+  }
+
+  private contextParams(options: ContextDataOptions): Record<string, string | undefined> {
+    return this.contextParams(options);
   }
 
   private buildChatBody(options: ChatOptions): Record<string, unknown> {
