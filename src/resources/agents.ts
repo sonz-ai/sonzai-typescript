@@ -748,7 +748,7 @@ export class Agents {
     const body: Record<string, unknown> = { query: options.query };
     if (options.limit != null) body.limit = options.limit;
     return this.http.post<AgentKBSearchResponse>(
-      `/api/v1/agents/${agentId}/tools/knowledge-search`,
+      `/api/v1/agents/${agentId}/tools/kb-search`,
       body,
     );
   }

@@ -1,6 +1,6 @@
 {
   "name": "@sonzai-labs/agents",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "TypeScript SDK for the Sonzai Mind Layer API",
   "license": "MIT",
   "author": "Sonzai Labs <engineering@sonz.ai>",
