@@ -675,6 +675,7 @@ export class Agents {
     if (options.instanceId) body.instanceId = options.instanceId;
     if (options.provider) body.provider = options.provider;
     if (options.model) body.model = options.model;
+    if (options.includeExtractions) body.include_extractions = options.includeExtractions;
     return this.http.post<ProcessResponse>(`/api/v1/agents/${agentId}/process`, body);
   }
 

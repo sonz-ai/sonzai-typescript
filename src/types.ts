@@ -406,6 +406,8 @@ export interface ProcessOptions {
   provider?: string;
   /** LLM model for extraction (e.g. "gemini-2.5-flash", "gpt-4o-mini"). Falls back to platform default. */
   model?: string;
+  /** When true, the response includes the full extraction payload in `extractions`. */
+  includeExtractions?: boolean;
 }
 
 export interface ProcessSideEffectsSummary {
@@ -505,6 +507,92 @@ export interface ProcessResponse {
   memories_created: number;
   facts_extracted: number;
   side_effects: ProcessSideEffectsSummary;
+  /** Present only when `includeExtractions` was set to true in the request. */
+  extractions?: SideEffectExtraction;
+}
+
+// ---------------------------------------------------------------------------
+// Side-Effect Extraction (detailed extraction payload)
+// ---------------------------------------------------------------------------
+
+export interface ExtractionFact {
+  text: string;
+  fact_type: string;
+  importance: number;
+  entities: string[];
+  sentiment: string;
+  topic_tags: string[];
+}
+
+export interface ExtractionPersonalityDelta {
+  trait: string;
+  delta: number;
+  reason: string;
+}
+
+export interface ExtractionDimensionDelta {
+  dimension: string;
+  delta: number;
+  reason: string;
+}
+
+export interface ExtractionMoodDelta {
+  happiness: number;
+  energy: number;
+  calmness: number;
+  affection: number;
+  reason: string;
+}
+
+export interface ExtractionHabit {
+  name: string;
+  category: string;
+  description: string;
+  is_reinforcement: boolean;
+}
+
+export interface ExtractionInterest {
+  topic: string;
+  category: string;
+  confidence: number;
+  engagement_level: number;
+}
+
+export interface ExtractionRelationshipDelta {
+  score_change: number;
+  reason: string;
+}
+
+export interface ExtractionProactive {
+  type: string;
+  description: string;
+  delay_hours: number;
+  intent: string;
+}
+
+export interface ExtractionRecurring {
+  description: string;
+  pattern: string;
+  confidence: number;
+}
+
+export interface ExtractionInnerThoughts {
+  diary: string;
+  reflection: string;
+}
+
+export interface SideEffectExtraction {
+  memory_facts: ExtractionFact[];
+  personality_deltas: ExtractionPersonalityDelta[];
+  dimension_deltas: ExtractionDimensionDelta[];
+  mood_delta?: ExtractionMoodDelta;
+  habit_observations: ExtractionHabit[];
+  interests_detected: ExtractionInterest[];
+  relationship_delta?: ExtractionRelationshipDelta;
+  proactive_suggestions: ExtractionProactive[];
+  recurring_events: ExtractionRecurring[];
+  inner_thoughts?: ExtractionInnerThoughts;
+  emotional_themes: string[];
 }
 
 // ---------------------------------------------------------------------------

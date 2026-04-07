@@ -109,6 +109,18 @@ export type {
   ProcessOptions,
   ProcessResponse,
   ProcessSideEffectsSummary,
+  // Side-Effect Extraction
+  SideEffectExtraction,
+  ExtractionFact,
+  ExtractionPersonalityDelta,
+  ExtractionDimensionDelta,
+  ExtractionMoodDelta,
+  ExtractionHabit,
+  ExtractionInterest,
+  ExtractionRelationshipDelta,
+  ExtractionProactive,
+  ExtractionRecurring,
+  ExtractionInnerThoughts,
   ModelsResponse,
   ModelsProviderEntry,
   // Tool definitions
