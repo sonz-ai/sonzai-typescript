@@ -2330,3 +2330,25 @@ export interface AcknowledgeAllOptions {
   agentId?: string;
   eventType?: string;
 }
+
+// ---------------------------------------------------------------------------
+// Agent Knowledge Search (tool endpoint)
+// ---------------------------------------------------------------------------
+
+export interface AgentKBSearchOptions {
+  query: string;
+  limit?: number;
+}
+
+export interface AgentKBSearchResult {
+  content: string;
+  label: string;
+  type: string;
+  source: string;
+  score: number;
+}
+
+export interface AgentKBSearchResponse {
+  query: string;
+  results: AgentKBSearchResult[];
+}

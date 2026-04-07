@@ -244,6 +244,10 @@ export type {
   UpdateProjectResponse,
   // Instance update
   UpdateInstanceOptions,
+  // Agent Knowledge Search (tool endpoint)
+  AgentKBSearchOptions,
+  AgentKBSearchResult,
+  AgentKBSearchResponse,
   // Knowledge Base
   KBDocument,
   KBDocumentListResponse,

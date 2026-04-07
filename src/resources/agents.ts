@@ -9,6 +9,8 @@ function requireNonEmpty(value: string, name: string): void {
 import type {
   Agent,
   AgentCapabilities,
+  AgentKBSearchOptions,
+  AgentKBSearchResponse,
   AgentListOptions,
   AgentListResponse,
   BreakthroughsResponse,
@@ -732,6 +734,22 @@ export class Agents {
     if (options.userId) params.user_id = options.userId;
     if (options.instanceId) params.instance_id = options.instanceId;
     return this.http.get<TimeMachineResponse>(`/api/v1/agents/${agentId}/timemachine`, params);
+  }
+
+  // -- Knowledge Search (tool endpoint) --
+
+  /** Search the knowledge base for an agent. */
+  async knowledgeSearch(
+    agentId: string,
+    options: AgentKBSearchOptions,
+  ): Promise<AgentKBSearchResponse> {
+    requireNonEmpty(agentId, "agentId");
+    const body: Record<string, unknown> = { query: options.query };
+    if (options.limit != null) body.limit = options.limit;
+    return this.http.post<AgentKBSearchResponse>(
+      `/api/v1/agents/${agentId}/tools/knowledge-search`,
+      body,
+    );
   }
 
   private buildChatBody(options: ChatOptions): Record<string, unknown> {
