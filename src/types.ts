@@ -2352,3 +2352,20 @@ export interface AgentKBSearchResponse {
   query: string;
   results: AgentKBSearchResult[];
 }
+
+// ---------------------------------------------------------------------------
+// Tool Schemas (BYO-LLM)
+// ---------------------------------------------------------------------------
+
+/** Describes a single tool available for an agent (BYO-LLM integrations). */
+export interface ToolSchema {
+  name: string;
+  description: string;
+  endpoint: string;
+  parameters?: Record<string, unknown>;
+}
+
+/** Response from the getTools endpoint. */
+export interface ToolSchemasResponse {
+  tools: ToolSchema[];
+}

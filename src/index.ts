@@ -248,6 +248,9 @@ export type {
   AgentKBSearchOptions,
   AgentKBSearchResult,
   AgentKBSearchResponse,
+  // Tool Schemas (BYO-LLM)
+  ToolSchema,
+  ToolSchemasResponse,
   // Knowledge Base
   KBDocument,
   KBDocumentListResponse,

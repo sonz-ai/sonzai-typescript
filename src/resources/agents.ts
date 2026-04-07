@@ -60,6 +60,7 @@ import type {
   SummariesResponse,
   TimeMachineOptions,
   TimeMachineResponse,
+  ToolSchemasResponse,
   TriggerEventOptions,
   TriggerEventResponse,
   UpdateAgentOptions,
@@ -749,6 +750,16 @@ export class Agents {
     return this.http.post<AgentKBSearchResponse>(
       `/api/v1/agents/${agentId}/tools/knowledge-search`,
       body,
+    );
+  }
+
+  // -- Tool Schemas (BYO-LLM) --
+
+  /** Get tool schemas available for an agent (for BYO-LLM integrations). */
+  async getTools(agentId: string): Promise<ToolSchemasResponse> {
+    requireNonEmpty(agentId, "agentId");
+    return this.http.get<ToolSchemasResponse>(
+      `/api/v1/agents/${agentId}/tools`,
     );
   }
 
