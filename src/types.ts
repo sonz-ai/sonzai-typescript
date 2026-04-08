@@ -2102,6 +2102,8 @@ export interface PrimeUserMetadata {
   title?: string;
   email?: string;
   phone?: string;
+  /** IANA timezone (e.g. "Asia/Singapore"). */
+  timezone?: string;
   custom?: Record<string, string>;
 }
 
@@ -2158,6 +2160,8 @@ export interface UserPrimingMetadata {
   title?: string;
   email?: string;
   phone?: string;
+  /** IANA timezone (e.g. "Asia/Singapore"). */
+  timezone?: string;
   source_type?: string;
   custom_fields?: Record<string, string>;
   primed_at?: string;
@@ -2169,6 +2173,8 @@ export interface UpdateMetadataOptions {
   title?: string;
   email?: string;
   phone?: string;
+  /** IANA timezone (e.g. "Asia/Singapore"). */
+  timezone?: string;
   custom?: Record<string, string>;
 }
 
