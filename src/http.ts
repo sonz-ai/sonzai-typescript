@@ -27,7 +27,7 @@ export class HTTPClient {
     this.headers = {
       Authorization: `Bearer ${options.apiKey}`,
       "Content-Type": "application/json",
-      "User-Agent": "sonzai-typescript/1.0.9",
+      "User-Agent": "sonzai-typescript/1.0.10",
     };
     this.timeout = options.timeout;
     this.maxRetries = options.maxRetries;
