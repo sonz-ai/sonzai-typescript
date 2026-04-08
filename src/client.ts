@@ -8,7 +8,7 @@ import { ProjectConfig } from "./resources/project-config.js";
 import { ProjectNotifications } from "./resources/project-notifications.js";
 import { Voices } from "./resources/voice.js";
 import { Webhooks } from "./resources/webhooks.js";
-import type { SonzaiConfig } from "./types.js";
+import type { PlatformModelsResponse, SonzaiConfig } from "./types.js";
 
 const DEFAULT_BASE_URL = "https://api.sonz.ai";
 const DEFAULT_TIMEOUT = 30_000;
@@ -132,5 +132,23 @@ export class Sonzai {
     this.projectConfig = new ProjectConfig(this.http);
     this.customLLM = new CustomLLM(this.http);
     this.projectNotifications = new ProjectNotifications(this.http);
+  }
+
+  /**
+   * List all LLM providers and model variants enabled on this deployment.
+   *
+   * This is a platform-level call — it does not require an agent ID. Use it
+   * to populate model picker UIs or validate model IDs before a chat request.
+   *
+   * @example
+   * ```ts
+   * const { providers, default_model } = await client.listModels();
+   * for (const p of providers) {
+   *   console.log(p.provider_name, p.models.map(m => m.id));
+   * }
+   * ```
+   */
+  listModels(): Promise<PlatformModelsResponse> {
+    return this.http.get<PlatformModelsResponse>("/api/v1/models");
   }
 }

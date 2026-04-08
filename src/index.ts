@@ -1,4 +1,5 @@
 export { Sonzai } from "./client.js";
+export * as providers from "./providers.js";
 export { VoiceStreamInstance } from "./resources/voice.js";
 
 // Errors
@@ -130,8 +131,10 @@ export type {
   ExtractionProactive,
   ExtractionRecurring,
   ExtractionInnerThoughts,
+  ModelVariant,
   ModelsResponse,
   ModelsProviderEntry,
+  PlatformModelsResponse,
   // Tool definitions
   ToolDefinition,
   // Voice

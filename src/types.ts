@@ -569,10 +569,20 @@ export interface EnrichedContextResponse {
   [key: string]: unknown;
 }
 
+/** A single model variant offered by a provider. */
+export interface ModelVariant {
+  /** Model ID to pass as the `model` field in chat requests. */
+  id: string;
+  /** Human-readable model name suitable for display in a UI. */
+  display_name: string;
+}
+
 export interface ModelsProviderEntry {
   provider: string;
   provider_name: string;
   default_model: string;
+  /** All model variants available from this provider. */
+  models: ModelVariant[];
 }
 
 export interface ModelsResponse {
@@ -2473,4 +2483,16 @@ export interface ToolSchema {
 /** Response from the getTools endpoint. */
 export interface ToolSchemasResponse {
   tools: ToolSchema[];
+}
+
+// ---------------------------------------------------------------------------
+// Platform models
+// ---------------------------------------------------------------------------
+
+/** Response from `GET /api/v1/models`. */
+export interface PlatformModelsResponse {
+  /** The platform's overall default model ID. */
+  default_model: string;
+  /** Enabled LLM providers and their available model variants. */
+  providers: ModelsProviderEntry[];
 }
