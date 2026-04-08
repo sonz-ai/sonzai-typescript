@@ -1,5 +1,7 @@
 import type { HTTPClient } from "../http.js";
 import type {
+  AtomicFact,
+  CreateFactOptions,
   FactHistoryResponse,
   FactListOptions,
   FactListResponse,
@@ -13,6 +15,7 @@ import type {
   MemoryTimelineResponse,
   SeedMemoriesOptions,
   SeedMemoriesResponse,
+  UpdateFactOptions,
 } from "../types.js";
 
 export class Memory {
@@ -111,6 +114,53 @@ export class Memory {
         instance_id: options.instanceId,
       },
     );
+  }
+
+  /** Create a new fact for an agent. Facts are tagged source_type='manual'. */
+  async createFact(
+    agentId: string,
+    options: CreateFactOptions,
+  ): Promise<AtomicFact> {
+    const body: Record<string, unknown> = {
+      content: options.content,
+    };
+    if (options.userId) body.user_id = options.userId;
+    if (options.factType) body.fact_type = options.factType;
+    if (options.importance != null) body.importance = options.importance;
+    if (options.confidence != null) body.confidence = options.confidence;
+    if (options.entities) body.entities = options.entities;
+    if (options.nodeId) body.node_id = options.nodeId;
+    if (options.metadata) body.metadata = options.metadata;
+
+    return this.http.post<AtomicFact>(
+      `/api/v1/agents/${agentId}/memory/facts`,
+      body,
+    );
+  }
+
+  /** Update an existing fact by ID. */
+  async updateFact(
+    agentId: string,
+    factId: string,
+    options: UpdateFactOptions,
+  ): Promise<AtomicFact> {
+    const body: Record<string, unknown> = {};
+    if (options.content) body.content = options.content;
+    if (options.factType) body.fact_type = options.factType;
+    if (options.importance != null) body.importance = options.importance;
+    if (options.confidence != null) body.confidence = options.confidence;
+    if (options.entities) body.entities = options.entities;
+    if (options.metadata) body.metadata = options.metadata;
+
+    return this.http.put<AtomicFact>(
+      `/api/v1/agents/${agentId}/memory/facts/${factId}`,
+      body,
+    );
+  }
+
+  /** Delete a fact by ID. */
+  async deleteFact(agentId: string, factId: string): Promise<void> {
+    await this.http.delete(`/api/v1/agents/${agentId}/memory/facts/${factId}`);
   }
 
   /** Get the version history of a specific fact. */

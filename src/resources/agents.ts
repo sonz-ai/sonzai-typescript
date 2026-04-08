@@ -20,14 +20,18 @@ import type {
   ChatUsage,
   ConsolidateOptions,
   ConsolidateResponse,
+  ConstellationNode,
   ConstellationResponse,
   ContextDataOptions,
   CreateAgentOptions,
+  CreateConstellationNodeOptions,
   CreateCustomToolOptions,
   CreateGoalOptions,
+  CreateHabitOptions,
   CustomToolDefinition,
   CustomToolListResponse,
   DeleteGoalOptions,
+  DeleteHabitOptions,
   DialogueOptions,
   GenerateAvatarOptions,
   GenerateAvatarResponse,
@@ -39,6 +43,7 @@ import type {
   RunRef,
   Goal,
   GoalsResponse,
+  Habit,
   HabitsResponse,
   InterestsResponse,
   EnrichedContextResponse,
@@ -66,7 +71,9 @@ import type {
   UpdateAgentOptions,
   UpdateCapabilitiesOptions,
   UpdateCustomToolOptions,
+  UpdateConstellationNodeOptions,
   UpdateGoalOptions,
+  UpdateHabitOptions,
   UpdateProjectOptions,
   UpdateProjectResponse,
   UsersResponse,
@@ -478,6 +485,60 @@ export class Agents {
     });
   }
 
+  /** Create a habit for an agent. Set userId for a per-user habit. */
+  async createHabit(
+    agentId: string,
+    options: CreateHabitOptions,
+  ): Promise<Habit> {
+    const body: Record<string, unknown> = {
+      name: options.name,
+    };
+    if (options.userId) body.user_id = options.userId;
+    if (options.category) body.category = options.category;
+    if (options.description) body.description = options.description;
+    if (options.displayName) body.display_name = options.displayName;
+    if (options.strength != null) body.strength = options.strength;
+
+    return this.http.post<Habit>(
+      `/api/v1/agents/${agentId}/habits`,
+      body,
+    );
+  }
+
+  /** Update an existing habit by name. */
+  async updateHabit(
+    agentId: string,
+    habitName: string,
+    options: UpdateHabitOptions,
+  ): Promise<Habit> {
+    const body: Record<string, unknown> = {};
+    if (options.userId) body.user_id = options.userId;
+    if (options.category) body.category = options.category;
+    if (options.description) body.description = options.description;
+    if (options.displayName) body.display_name = options.displayName;
+    if (options.strength != null) body.strength = options.strength;
+
+    return this.http.put<Habit>(
+      `/api/v1/agents/${agentId}/habits/${encodeURIComponent(habitName)}`,
+      body,
+    );
+  }
+
+  /** Delete a habit. Set userId for per-user habits. */
+  async deleteHabit(
+    agentId: string,
+    habitName: string,
+    options: DeleteHabitOptions = {},
+  ): Promise<void> {
+    const params: Record<string, string> = {};
+    if (options.userId) params.user_id = options.userId;
+
+    await this.http.delete(
+      `/api/v1/agents/${agentId}/habits/${encodeURIComponent(habitName)}`,
+      params,
+    );
+  }
+
   async getGoals(
     agentId: string,
     options: ContextDataOptions = {},
@@ -576,6 +637,53 @@ export class Agents {
       user_id: options.userId,
       instance_id: options.instanceId,
     });
+  }
+
+  /** Create a constellation node (lore) for an agent. */
+  async createConstellationNode(
+    agentId: string,
+    options: CreateConstellationNodeOptions,
+  ): Promise<ConstellationNode> {
+    const body: Record<string, unknown> = {
+      label: options.label,
+    };
+    if (options.userId) body.user_id = options.userId;
+    if (options.nodeType) body.node_type = options.nodeType;
+    if (options.description) body.description = options.description;
+    if (options.significance != null) body.significance = options.significance;
+
+    return this.http.post<ConstellationNode>(
+      `/api/v1/agents/${agentId}/constellation/nodes`,
+      body,
+    );
+  }
+
+  /** Update an existing constellation node. */
+  async updateConstellationNode(
+    agentId: string,
+    nodeId: string,
+    options: UpdateConstellationNodeOptions,
+  ): Promise<ConstellationNode> {
+    const body: Record<string, unknown> = {};
+    if (options.label) body.label = options.label;
+    if (options.description) body.description = options.description;
+    if (options.significance != null) body.significance = options.significance;
+    if (options.nodeType) body.node_type = options.nodeType;
+
+    return this.http.put<ConstellationNode>(
+      `/api/v1/agents/${agentId}/constellation/nodes/${nodeId}`,
+      body,
+    );
+  }
+
+  /** Delete a constellation node. */
+  async deleteConstellationNode(
+    agentId: string,
+    nodeId: string,
+  ): Promise<void> {
+    await this.http.delete(
+      `/api/v1/agents/${agentId}/constellation/nodes/${nodeId}`,
+    );
   }
 
   /** Get breakthroughs for an agent. */

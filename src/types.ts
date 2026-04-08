@@ -318,6 +318,49 @@ export interface MoodResponse extends Record<string, unknown> {}
 export interface MoodAggregateResponse extends Record<string, unknown> {}
 export interface RelationshipResponse extends Record<string, unknown> {}
 export interface HabitsResponse extends Record<string, unknown> {}
+
+// ---------------------------------------------------------------------------
+// Habits (CRUD)
+// ---------------------------------------------------------------------------
+
+export interface Habit {
+  id?: string;
+  agent_id: string;
+  user_id?: string;
+  name: string;
+  category: string;
+  description: string;
+  display_name?: string;
+  strength: number;
+  formed: boolean;
+  observation_count: number;
+  last_reinforced_at?: string;
+  formed_at?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateHabitOptions {
+  userId?: string;
+  name: string;
+  category?: string;
+  description?: string;
+  displayName?: string;
+  strength?: number;
+}
+
+export interface UpdateHabitOptions {
+  userId?: string;
+  category?: string;
+  description?: string;
+  displayName?: string;
+  strength?: number;
+}
+
+export interface DeleteHabitOptions {
+  userId?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Goals
 // ---------------------------------------------------------------------------
@@ -390,6 +433,42 @@ export interface InterestsResponse extends Record<string, unknown> {}
 export interface DiaryResponse extends Record<string, unknown> {}
 export interface UsersResponse extends Record<string, unknown> {}
 export interface ConstellationResponse extends Record<string, unknown> {}
+
+// ---------------------------------------------------------------------------
+// Constellation (CRUD)
+// ---------------------------------------------------------------------------
+
+export interface ConstellationNode {
+  node_id: string;
+  agent_id: string;
+  user_id?: string;
+  node_type: string;
+  label: string;
+  description?: string;
+  significance: number;
+  mention_count: number;
+  brightness: number;
+  first_mentioned_at?: string;
+  last_mentioned_at?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateConstellationNodeOptions {
+  userId?: string;
+  nodeType?: string;
+  label: string;
+  description?: string;
+  significance?: number;
+}
+
+export interface UpdateConstellationNodeOptions {
+  label?: string;
+  description?: string;
+  significance?: number;
+  nodeType?: string;
+}
+
 export interface BreakthroughsResponse extends Record<string, unknown> {}
 export interface WakeupsResponse extends Record<string, unknown> {}
 
@@ -943,6 +1022,26 @@ export interface FactListOptions {
   category?: string;
   limit?: number;
   offset?: number;
+}
+
+export interface CreateFactOptions {
+  content: string;
+  userId?: string;
+  factType?: string;
+  importance?: number;
+  confidence?: number;
+  entities?: string[];
+  nodeId?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateFactOptions {
+  content?: string;
+  factType?: string;
+  importance?: number;
+  confidence?: number;
+  entities?: string[];
+  metadata?: Record<string, unknown>;
 }
 
 export interface MemoryResetOptions {

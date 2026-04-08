@@ -169,6 +169,11 @@ export class HTTPClient {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      // The string buffer grows unbounded until a "\n" delimiter is found.
+      // Unlike Go's bufio.Scanner (64 KB hard limit), JavaScript strings have no
+      // fixed token size cap, so large SSE events such as context_ready (which
+      // embeds the full enriched context JSON in a single data: line and can
+      // exceed 64 KB) are handled correctly without any explicit buffer configuration.
       let buffer = "";
 
       try {
