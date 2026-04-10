@@ -2136,6 +2136,11 @@ export interface RecordFeedbackOptions {
 // User Priming
 // ---------------------------------------------------------------------------
 
+export interface PrimeContentBlock {
+  type: string;
+  body: string;
+}
+
 export interface PrimeUserMetadata {
   company?: string;
   title?: string;
