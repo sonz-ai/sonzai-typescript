@@ -35,6 +35,7 @@ export interface ChatStreamEvent {
   continuation_token?: string;
   message_count?: number;
   side_effects?: Record<string, unknown>;
+  external_tool_calls?: ExternalToolCall[];
   error_message?: string;
   error_code?: string;
   is_token_error?: boolean;
@@ -44,6 +45,19 @@ export interface ChatResponse {
   content: string;
   sessionId: string;
   usage?: ChatUsage;
+}
+
+export interface ExternalToolCall {
+  id: string;
+  name: string;
+  parameters?: Record<string, unknown>;
+}
+
+export interface ToolCallResponseOptions {
+  session_id: string;
+  user_id?: string;
+  tool_call_id: string;
+  result: unknown;
 }
 
 export interface ToolDefinition {
@@ -1862,6 +1876,7 @@ export interface KBNode {
 export interface KBNodeListResponse {
   nodes: KBNode[];
   total: number;
+  next_cursor?: string;
 }
 
 export interface KBEdge {
@@ -1929,6 +1944,7 @@ export interface KBSearchOptions {
   includeHistory?: boolean;
   entityTypes?: string;
   filters?: string;
+  hops?: number;
 }
 
 export interface KBSchemaField {
@@ -1959,7 +1975,12 @@ export interface KBSchemaListResponse {
 }
 
 export interface KBStats {
-  documents: { total: number; indexed: number; pending: number; failed: number };
+  documents: {
+    total: number;
+    indexed: number;
+    pending: number;
+    failed: number;
+  };
   nodes: { total: number; active: number };
   edges: number;
   extraction_tokens: number;
@@ -1991,11 +2012,19 @@ export interface InsertFactDetail {
   version: number;
 }
 
+export interface InsertFactEdgeDetail {
+  edge_id: string;
+  from_node: string;
+  to_node: string;
+  relation: string;
+}
+
 export interface InsertFactsResponse {
   processed: number;
   created: number;
   updated: number;
   details: InsertFactDetail[];
+  edges?: InsertFactEdgeDetail[];
 }
 
 export interface CreateSchemaOptions {
@@ -2117,9 +2146,20 @@ export interface PrimeUserMetadata {
   custom?: Record<string, string>;
 }
 
-export interface PrimeContentBlock {
-  type: string;
-  body: string;
+export interface UpdateMetadataOptions {
+  display_name?: string;
+  company?: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  /** IANA timezone (e.g. "Asia/Singapore"). */
+  timezone?: string;
+  /**
+   * Custom fields to merge into existing custom metadata.
+   * Keys are merged, not replaced — existing keys not mentioned are preserved.
+   * Omit to leave custom metadata unchanged.
+   */
+  custom?: Record<string, string>;
 }
 
 export interface StructuredColumnMapping {

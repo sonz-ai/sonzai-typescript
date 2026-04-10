@@ -76,6 +76,7 @@ import type {
   UpdateHabitOptions,
   UpdateProjectOptions,
   UpdateProjectResponse,
+  ToolCallResponseOptions,
   UsersResponse,
   WakeupsResponse,
 } from "../types.js";
@@ -142,8 +143,7 @@ export class Agents {
       body.tool_capabilities = options.toolCapabilities;
     if (options.language) body.language = options.language;
     if (options.seedMemories) body.seed_memories = options.seedMemories;
-    if (options.loreContext)
-      body.lore_generation_context = options.loreContext;
+    if (options.loreContext) body.lore_generation_context = options.loreContext;
     if (options.generateOriginStory != null)
       body.generate_origin_story = options.generateOriginStory;
     if (options.generatePersonalizedMemories != null)
@@ -217,9 +217,7 @@ export class Agents {
   }
 
   /** Send a chat message and stream events as an async iterator. */
-  async *chatStream(
-    options: ChatOptions,
-  ): AsyncGenerator<ChatStreamEvent> {
+  async *chatStream(options: ChatOptions): AsyncGenerator<ChatStreamEvent> {
     requireNonEmpty(options.agent, "agentId");
     const body = this.buildChatBody(options);
     for await (const event of this.http.streamSSE(
@@ -355,10 +353,7 @@ export class Agents {
     if (options.model) body.model = options.model;
     if (options.configOverride) body.config_override = options.configOverride;
 
-    return this.http.post<RunRef>(
-      `/api/v1/agents/${agentId}/simulate`,
-      body,
-    );
+    return this.http.post<RunRef>(`/api/v1/agents/${agentId}/simulate`, body);
   }
 
   /** Run simulation + evaluation combined (two-step: POST to start, then stream SSE). */
@@ -393,10 +388,7 @@ export class Agents {
       body.adaptation_template_id = options.adaptationTemplateId;
     if (options.qualityOnly != null) body.quality_only = options.qualityOnly;
 
-    return this.http.post<RunRef>(
-      `/api/v1/agents/${agentId}/run-eval`,
-      body,
-    );
+    return this.http.post<RunRef>(`/api/v1/agents/${agentId}/run-eval`, body);
   }
 
   /** Re-evaluate an existing run (two-step: POST to start, then stream SSE). */
@@ -426,10 +418,7 @@ export class Agents {
       body.adaptation_template_id = options.adaptationTemplateId;
     if (options.qualityOnly != null) body.quality_only = options.qualityOnly;
 
-    return this.http.post<RunRef>(
-      `/api/v1/agents/${agentId}/eval-only`,
-      body,
-    );
+    return this.http.post<RunRef>(`/api/v1/agents/${agentId}/eval-only`, body);
   }
 
   // -- Context Engine convenience accessors --
@@ -499,10 +488,7 @@ export class Agents {
     if (options.displayName) body.display_name = options.displayName;
     if (options.strength != null) body.strength = options.strength;
 
-    return this.http.post<Habit>(
-      `/api/v1/agents/${agentId}/habits`,
-      body,
-    );
+    return this.http.post<Habit>(`/api/v1/agents/${agentId}/habits`, body);
   }
 
   /** Update an existing habit by name. */
@@ -550,10 +536,7 @@ export class Agents {
   }
 
   /** Create a goal for an agent. Set userId to create a per-user goal. */
-  async createGoal(
-    agentId: string,
-    options: CreateGoalOptions,
-  ): Promise<Goal> {
+  async createGoal(agentId: string, options: CreateGoalOptions): Promise<Goal> {
     const body: Record<string, unknown> = {
       title: options.title,
       description: options.description,
@@ -563,10 +546,7 @@ export class Agents {
     if (options.priority != null) body.priority = options.priority;
     if (options.relatedTraits) body.related_traits = options.relatedTraits;
 
-    return this.http.post<Goal>(
-      `/api/v1/agents/${agentId}/goals`,
-      body,
-    );
+    return this.http.post<Goal>(`/api/v1/agents/${agentId}/goals`, body);
   }
 
   /** Update an existing goal. Set userId for per-user goals. */
@@ -598,10 +578,7 @@ export class Agents {
     const params: Record<string, string> = {};
     if (options.userId) params.user_id = options.userId;
 
-    await this.http.delete(
-      `/api/v1/agents/${agentId}/goals/${goalId}`,
-      params,
-    );
+    await this.http.delete(`/api/v1/agents/${agentId}/goals/${goalId}`, params);
   }
 
   async getInterests(
@@ -626,6 +603,16 @@ export class Agents {
 
   async getUsers(agentId: string): Promise<UsersResponse> {
     return this.http.get(`/api/v1/agents/${agentId}/users`);
+  }
+
+  async respondToToolCall(
+    agentId: string,
+    options: ToolCallResponseOptions,
+  ): Promise<ChatResponse> {
+    return this.http.post<ChatResponse>(
+      `/api/v1/agents/${agentId}/tools/respond`,
+      options as unknown as Record<string, unknown>,
+    );
   }
 
   /** Get constellation data for an agent. */
@@ -712,55 +699,95 @@ export class Agents {
   // -- Agent Status --
 
   /** Set the active status of an agent. */
-  async setStatus(agentId: string, options: SetStatusOptions): Promise<SetStatusResponse> {
-    return this.http.patch<SetStatusResponse>(`/api/v1/agents/${agentId}/status`, options as unknown as Record<string, unknown>);
+  async setStatus(
+    agentId: string,
+    options: SetStatusOptions,
+  ): Promise<SetStatusResponse> {
+    return this.http.patch<SetStatusResponse>(
+      `/api/v1/agents/${agentId}/status`,
+      options as unknown as Record<string, unknown>,
+    );
   }
 
   // -- Project Association --
 
   /** Update an agent's project association. */
-  async updateProject(agentId: string, options: UpdateProjectOptions): Promise<UpdateProjectResponse> {
-    return this.http.patch<UpdateProjectResponse>(`/api/v1/agents/${agentId}/project`, options as unknown as Record<string, unknown>);
+  async updateProject(
+    agentId: string,
+    options: UpdateProjectOptions,
+  ): Promise<UpdateProjectResponse> {
+    return this.http.patch<UpdateProjectResponse>(
+      `/api/v1/agents/${agentId}/project`,
+      options as unknown as Record<string, unknown>,
+    );
   }
 
   // -- Capabilities --
 
   /** Get an agent's capabilities. */
   async getCapabilities(agentId: string): Promise<AgentCapabilities> {
-    return this.http.get<AgentCapabilities>(`/api/v1/agents/${agentId}/capabilities`);
+    return this.http.get<AgentCapabilities>(
+      `/api/v1/agents/${agentId}/capabilities`,
+    );
   }
 
   /** Update an agent's capabilities. */
-  async updateCapabilities(agentId: string, options: UpdateCapabilitiesOptions): Promise<AgentCapabilities> {
-    return this.http.patch<AgentCapabilities>(`/api/v1/agents/${agentId}/capabilities`, options as unknown as Record<string, unknown>);
+  async updateCapabilities(
+    agentId: string,
+    options: UpdateCapabilitiesOptions,
+  ): Promise<AgentCapabilities> {
+    return this.http.patch<AgentCapabilities>(
+      `/api/v1/agents/${agentId}/capabilities`,
+      options as unknown as Record<string, unknown>,
+    );
   }
 
   // -- Custom Tools --
 
   /** List custom tools for an agent. */
   async listCustomTools(agentId: string): Promise<CustomToolListResponse> {
-    return this.http.get<CustomToolListResponse>(`/api/v1/agents/${agentId}/tools`);
+    return this.http.get<CustomToolListResponse>(
+      `/api/v1/agents/${agentId}/tools`,
+    );
   }
 
   /** Create a custom tool for an agent. */
-  async createCustomTool(agentId: string, options: CreateCustomToolOptions): Promise<CustomToolDefinition> {
-    return this.http.post<CustomToolDefinition>(`/api/v1/agents/${agentId}/tools`, options as unknown as Record<string, unknown>);
+  async createCustomTool(
+    agentId: string,
+    options: CreateCustomToolOptions,
+  ): Promise<CustomToolDefinition> {
+    return this.http.post<CustomToolDefinition>(
+      `/api/v1/agents/${agentId}/tools`,
+      options as unknown as Record<string, unknown>,
+    );
   }
 
   /** Update a custom tool for an agent. */
-  async updateCustomTool(agentId: string, toolName: string, options: UpdateCustomToolOptions): Promise<{ success: boolean }> {
-    return this.http.put<{ success: boolean }>(`/api/v1/agents/${agentId}/tools/${toolName}`, options as unknown as Record<string, unknown>);
+  async updateCustomTool(
+    agentId: string,
+    toolName: string,
+    options: UpdateCustomToolOptions,
+  ): Promise<{ success: boolean }> {
+    return this.http.put<{ success: boolean }>(
+      `/api/v1/agents/${agentId}/tools/${toolName}`,
+      options as unknown as Record<string, unknown>,
+    );
   }
 
   /** Delete a custom tool from an agent. */
   async deleteCustomTool(agentId: string, toolName: string): Promise<void> {
-    return this.http.delete<void>(`/api/v1/agents/${agentId}/tools/${toolName}`);
+    return this.http.delete<void>(
+      `/api/v1/agents/${agentId}/tools/${toolName}`,
+    );
   }
 
   // -- Avatar Generation --
 
   /** Trigger avatar generation for an agent. */
-  async generateAvatar(agentId: string, options?: GenerateAvatarOptions): Promise<GenerateAvatarResponse> {
+  async generateAvatar(
+    agentId: string,
+    options?: GenerateAvatarOptions,
+  ): Promise<GenerateAvatarResponse> {
     return this.http.post<GenerateAvatarResponse>(
       `/api/v1/agents/${agentId}/avatar/generate`,
       (options ?? {}) as Record<string, unknown>,
@@ -775,7 +802,10 @@ export class Agents {
    * behavioral updates (mood, personality, habits, interests, relationships),
    * stores memories, and runs session-end analysis.
    */
-  async process(agentId: string, options: ProcessOptions): Promise<ProcessResponse> {
+  async process(
+    agentId: string,
+    options: ProcessOptions,
+  ): Promise<ProcessResponse> {
     requireNonEmpty(agentId, "agentId");
     requireNonEmpty(options.userId, "options.userId");
     const body: Record<string, unknown> = {
@@ -786,8 +816,12 @@ export class Agents {
     if (options.instanceId) body.instanceId = options.instanceId;
     if (options.provider) body.provider = options.provider;
     if (options.model) body.model = options.model;
-    if (options.includeExtractions) body.include_extractions = options.includeExtractions;
-    return this.http.post<ProcessResponse>(`/api/v1/agents/${agentId}/process`, body);
+    if (options.includeExtractions)
+      body.include_extractions = options.includeExtractions;
+    return this.http.post<ProcessResponse>(
+      `/api/v1/agents/${agentId}/process`,
+      body,
+    );
   }
 
   /** Get available LLM providers and models for the /process endpoint. */
@@ -823,26 +857,44 @@ export class Agents {
   // -- Consolidation --
 
   /** Trigger memory consolidation for an agent. */
-  async consolidate(agentId: string, options?: ConsolidateOptions): Promise<ConsolidateResponse> {
-    return this.http.post<ConsolidateResponse>(`/api/v1/agents/${agentId}/consolidate`, (options ?? {}) as Record<string, unknown>);
+  async consolidate(
+    agentId: string,
+    options?: ConsolidateOptions,
+  ): Promise<ConsolidateResponse> {
+    return this.http.post<ConsolidateResponse>(
+      `/api/v1/agents/${agentId}/consolidate`,
+      (options ?? {}) as Record<string, unknown>,
+    );
   }
 
   /** Get memory summaries for an agent. */
-  async getSummaries(agentId: string, options?: SummariesOptions): Promise<SummariesResponse> {
+  async getSummaries(
+    agentId: string,
+    options?: SummariesOptions,
+  ): Promise<SummariesResponse> {
     const params: Record<string, string> = {};
     if (options?.period) params.period = options.period;
     if (options?.limit) params.limit = String(options.limit);
-    return this.http.get<SummariesResponse>(`/api/v1/agents/${agentId}/summaries`, params);
+    return this.http.get<SummariesResponse>(
+      `/api/v1/agents/${agentId}/summaries`,
+      params,
+    );
   }
 
   // -- Time Machine --
 
   /** Get a point-in-time snapshot of an agent's personality and mood. */
-  async getTimeMachine(agentId: string, options: TimeMachineOptions): Promise<TimeMachineResponse> {
+  async getTimeMachine(
+    agentId: string,
+    options: TimeMachineOptions,
+  ): Promise<TimeMachineResponse> {
     const params: Record<string, string> = { at: options.at };
     if (options.userId) params.user_id = options.userId;
     if (options.instanceId) params.instance_id = options.instanceId;
-    return this.http.get<TimeMachineResponse>(`/api/v1/agents/${agentId}/timemachine`, params);
+    return this.http.get<TimeMachineResponse>(
+      `/api/v1/agents/${agentId}/timemachine`,
+      params,
+    );
   }
 
   // -- Knowledge Search (tool endpoint) --

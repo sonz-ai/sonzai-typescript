@@ -46,22 +46,30 @@ export class Knowledge {
   }
 
   /** Get a single document. */
-  async getDocument(
-    projectId: string,
-    docId: string,
-  ): Promise<KBDocument> {
+  async getDocument(projectId: string, docId: string): Promise<KBDocument> {
     return this.http.get<KBDocument>(
       `/api/v1/projects/${projectId}/knowledge/documents/${docId}`,
     );
   }
 
   /** Delete a document. */
-  async deleteDocument(
-    projectId: string,
-    docId: string,
-  ): Promise<void> {
+  async deleteDocument(projectId: string, docId: string): Promise<void> {
     await this.http.delete(
       `/api/v1/projects/${projectId}/knowledge/documents/${docId}`,
+    );
+  }
+
+  async uploadDocument(
+    projectId: string,
+    fileName: string,
+    fileData: Blob | Buffer | ArrayBuffer,
+    contentType = "application/octet-stream",
+  ): Promise<KBDocument> {
+    return this.http.uploadFile<KBDocument>(
+      `/api/v1/projects/${projectId}/knowledge/documents`,
+      fileName,
+      fileData,
+      contentType,
     );
   }
 
@@ -81,11 +89,26 @@ export class Knowledge {
   /** List knowledge graph nodes. */
   async listNodes(
     projectId: string,
-    options: { type?: string; limit?: number } = {},
+    options: {
+      type?: string;
+      limit?: number;
+      offset?: number;
+      sort_by?: string;
+      sort_order?: string;
+      properties?: Record<string, string>;
+    } = {},
   ): Promise<KBNodeListResponse> {
     const params: Record<string, string> = {};
     if (options.type) params.type = options.type;
     if (options.limit) params.limit = String(options.limit);
+    if (options.offset) params.offset = String(options.offset);
+    if (options.sort_by) params.sort_by = options.sort_by;
+    if (options.sort_order) params.sort_order = options.sort_order;
+    if (options.properties) {
+      for (const [k, v] of Object.entries(options.properties)) {
+        params[`properties.${k}`] = v;
+      }
+    }
     return this.http.get<KBNodeListResponse>(
       `/api/v1/projects/${projectId}/knowledge/nodes`,
       params,
@@ -107,10 +130,7 @@ export class Knowledge {
   }
 
   /** Soft-delete a node. */
-  async deleteNode(
-    projectId: string,
-    nodeId: string,
-  ): Promise<void> {
+  async deleteNode(projectId: string, nodeId: string): Promise<void> {
     await this.http.delete(
       `/api/v1/projects/${projectId}/knowledge/nodes/${nodeId}`,
     );
@@ -142,6 +162,7 @@ export class Knowledge {
     if (options.includeHistory) params.history = "true";
     if (options.entityTypes) params.type = options.entityTypes;
     if (options.filters) params.filters = options.filters;
+    if (options.hops) params.hops = String(options.hops);
     return this.http.get<KBSearchResponse>(
       `/api/v1/projects/${projectId}/knowledge/search`,
       params,
@@ -181,10 +202,7 @@ export class Knowledge {
   }
 
   /** Delete an entity schema. */
-  async deleteSchema(
-    projectId: string,
-    schemaId: string,
-  ): Promise<void> {
+  async deleteSchema(projectId: string, schemaId: string): Promise<void> {
     await this.http.delete(
       `/api/v1/projects/${projectId}/knowledge/schemas/${schemaId}`,
     );
@@ -244,20 +262,14 @@ export class Knowledge {
   }
 
   /** Delete an analytics rule. */
-  async deleteAnalyticsRule(
-    projectId: string,
-    ruleId: string,
-  ): Promise<void> {
+  async deleteAnalyticsRule(projectId: string, ruleId: string): Promise<void> {
     await this.http.delete(
       `/api/v1/projects/${projectId}/knowledge/analytics/rules/${ruleId}`,
     );
   }
 
   /** Trigger a manual run of an analytics rule. */
-  async runAnalyticsRule(
-    projectId: string,
-    ruleId: string,
-  ): Promise<void> {
+  async runAnalyticsRule(projectId: string, ruleId: string): Promise<void> {
     await this.http.post(
       `/api/v1/projects/${projectId}/knowledge/analytics/rules/${ruleId}/run`,
       {},

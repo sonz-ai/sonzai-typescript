@@ -27,7 +27,7 @@ export class HTTPClient {
     this.headers = {
       Authorization: `Bearer ${options.apiKey}`,
       "Content-Type": "application/json",
-      "User-Agent": "sonzai-typescript/1.0.11",
+      "User-Agent": "sonzai-typescript/1.0.12",
     };
     this.timeout = options.timeout;
     this.maxRetries = options.maxRetries;
@@ -58,7 +58,11 @@ export class HTTPClient {
         });
 
         // Retry on 5xx for idempotent methods
-        if (response.status >= 500 && isIdempotent && attempt < maxAttempts - 1) {
+        if (
+          response.status >= 500 &&
+          isIdempotent &&
+          attempt < maxAttempts - 1
+        ) {
           clearTimeout(timer);
           await this.backoff(attempt);
           continue;
@@ -74,7 +78,11 @@ export class HTTPClient {
       } catch (error) {
         clearTimeout(timer);
         // Retry on network errors for idempotent methods
-        if (isIdempotent && attempt < maxAttempts - 1 && this.isNetworkError(error)) {
+        if (
+          isIdempotent &&
+          attempt < maxAttempts - 1 &&
+          this.isNetworkError(error)
+        ) {
           await this.backoff(attempt);
           continue;
         }
@@ -137,6 +145,44 @@ export class HTTPClient {
     params?: Record<string, string | number | boolean | undefined>,
   ): Promise<T> {
     return this.request<T>("DELETE", path, { params });
+  }
+
+  async uploadFile<T = unknown>(
+    path: string,
+    fileName: string,
+    fileData: Blob | Buffer | ArrayBuffer,
+    contentType: string,
+  ): Promise<T> {
+    const url = this.buildUrl(path);
+    const formData = new FormData();
+    let blob: Blob;
+    if (fileData instanceof Blob) {
+      blob = fileData;
+    } else {
+      const data =
+        fileData instanceof ArrayBuffer
+          ? fileData
+          : new Uint8Array(fileData).buffer;
+      blob = new Blob([data], { type: contentType });
+    }
+    formData.append("file", blob, fileName);
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: this.headers["Authorization"],
+        "User-Agent": this.headers["User-Agent"],
+      },
+      body: formData,
+    });
+
+    await this.throwOnError(response);
+
+    const contentTypeResp = response.headers.get("content-type") ?? "";
+    if (contentTypeResp.includes("application/json")) {
+      return (await response.json()) as T;
+    }
+    return (await response.text()) as T;
   }
 
   async *streamSSE(
