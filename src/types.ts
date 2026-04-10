@@ -2222,17 +2222,6 @@ export interface UserPrimingMetadata {
   primed_at?: string;
 }
 
-export interface UpdateMetadataOptions {
-  display_name?: string;
-  company?: string;
-  title?: string;
-  email?: string;
-  phone?: string;
-  /** IANA timezone (e.g. "Asia/Singapore"). */
-  timezone?: string;
-  custom?: Record<string, string>;
-}
-
 export interface UpdateMetadataResponse {
   metadata: UserPrimingMetadata;
   facts_created: number;
