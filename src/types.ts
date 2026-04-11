@@ -2306,9 +2306,17 @@ export interface InventoryQueryOptions {
   item_type?: string;
   query?: string;
   project_id?: string;
+  /** Structured metadata filtering, e.g. "grade:eq:mint,market_price:gte:100".
+   *  Operators: eq, neq, gt, gte, lt, lte, in (pipe-separated values), contains. */
+  filters?: string;
+  sort_by?: string;
+  sort_order?: "asc" | "desc";
   aggregations?: string;
   group_by?: string;
   limit?: number;
+  offset?: number;
+  /** Base64-encoded pagination cursor (takes precedence over offset). */
+  cursor?: string;
   instanceId?: string;
 }
 
@@ -2329,6 +2337,7 @@ export interface InventoryGroupResult {
 export interface InventoryQueryResponse {
   items: InventoryItem[];
   total_items: number;
+  next_cursor?: string;
   totals?: Record<string, unknown>;
   groups?: InventoryGroupResult[];
 }

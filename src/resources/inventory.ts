@@ -49,9 +49,14 @@ export class Inventory {
     if (options.item_type) params.item_type = options.item_type;
     if (options.query) params.query = options.query;
     if (options.project_id) params.project_id = options.project_id;
+    if (options.filters) params.filters = options.filters;
+    if (options.sort_by) params.sort_by = options.sort_by;
+    if (options.sort_order) params.sort_order = options.sort_order;
     if (options.aggregations) params.aggregations = options.aggregations;
     if (options.group_by) params.group_by = options.group_by;
     if (options.limit) params.limit = String(options.limit);
+    if (options.offset) params.offset = String(options.offset);
+    if (options.cursor) params.cursor = options.cursor;
     if (options.instanceId) params.instance_id = options.instanceId;
 
     return this.http.get<InventoryQueryResponse>(
