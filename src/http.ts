@@ -14,6 +14,8 @@ export interface HTTPClientOptions {
   apiKey: string;
   timeout: number;
   maxRetries: number;
+  defaultHeaders?: Record<string, string>;
+  customFetch?: typeof fetch;
 }
 
 export class HTTPClient {
@@ -21,16 +23,19 @@ export class HTTPClient {
   private readonly headers: Record<string, string>;
   private readonly timeout: number;
   private readonly maxRetries: number;
+  private readonly fetchFn: typeof fetch;
 
   constructor(options: HTTPClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/$/, "");
     this.headers = {
       Authorization: `Bearer ${options.apiKey}`,
       "Content-Type": "application/json",
-      "User-Agent": "sonzai-typescript/1.0.13",
+      "User-Agent": "sonzai-typescript/1.1.0",
+      ...options.defaultHeaders,
     };
     this.timeout = options.timeout;
     this.maxRetries = options.maxRetries;
+    this.fetchFn = options.customFetch ?? fetch;
   }
 
   async request<T = unknown>(
@@ -50,7 +55,7 @@ export class HTTPClient {
       const timer = setTimeout(() => controller.abort(), this.timeout);
 
       try {
-        const response = await fetch(url, {
+        const response = await this.fetchFn(url, {
           method,
           headers: this.headers,
           body: options?.body ? JSON.stringify(options.body) : undefined,
@@ -167,7 +172,7 @@ export class HTTPClient {
     }
     formData.append("file", blob, fileName);
 
-    const response = await fetch(url, {
+    const response = await this.fetchFn(url, {
       method: "POST",
       headers: {
         Authorization: this.headers["Authorization"],
@@ -197,7 +202,7 @@ export class HTTPClient {
     const timer = setTimeout(() => controller.abort(), this.timeout * 10);
 
     try {
-      const response = await fetch(url, {
+      const response = await this.fetchFn(url, {
         method,
         headers: {
           ...this.headers,

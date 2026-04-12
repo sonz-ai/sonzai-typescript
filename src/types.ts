@@ -1555,6 +1555,8 @@ export interface SonzaiConfig {
   baseUrl?: string;
   timeout?: number;
   maxRetries?: number;
+  defaultHeaders?: Record<string, string>;
+  customFetch?: typeof fetch;
 }
 
 // ---------------------------------------------------------------------------

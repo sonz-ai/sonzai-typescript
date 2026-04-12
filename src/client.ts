@@ -63,9 +63,11 @@ function resolveBaseUrl(config?: SonzaiConfig): string {
 }
 
 // Deno type shim for TypeScript compilation
-declare const Deno: {
-  env: { get(key: string): string | undefined };
-} | undefined;
+declare const Deno:
+  | {
+      env: { get(key: string): string | undefined };
+    }
+  | undefined;
 
 /**
  * Sonzai Mind Layer API client.
@@ -121,6 +123,8 @@ export class Sonzai {
       apiKey,
       timeout: config?.timeout ?? DEFAULT_TIMEOUT,
       maxRetries: config?.maxRetries ?? DEFAULT_MAX_RETRIES,
+      defaultHeaders: config?.defaultHeaders,
+      customFetch: config?.customFetch,
     });
 
     this.agents = new Agents(this.http);
