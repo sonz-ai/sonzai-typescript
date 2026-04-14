@@ -252,8 +252,8 @@ export class Agents {
 
   // -- Events --
 
-  /** Trigger a game event / activity for an agent. */
-  async triggerGameEvent(
+  /** Trigger a backend event / activity for an agent. */
+  async triggerBackendEvent(
     agentId: string,
     options: TriggerEventOptions,
   ): Promise<TriggerEventResponse> {

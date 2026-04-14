@@ -109,7 +109,7 @@ export class Sonzai {
   readonly projectConfig: ProjectConfig;
   /** Project-scoped custom LLM provider configuration. */
   readonly customLLM: CustomLLM;
-  /** Project-scoped notification polling for game backends. */
+  /** Project-scoped notification polling for backends. */
   readonly projectNotifications: ProjectNotifications;
 
   private readonly http: HTTPClient;
