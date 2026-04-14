@@ -266,6 +266,7 @@ export class Agents {
     if (options.metadata) body.metadata = options.metadata;
     if (options.language) body.language = options.language;
     if (options.instanceId) body.instance_id = options.instanceId;
+    if (options.messages) body.messages = options.messages;
 
     return this.http.post<TriggerEventResponse>(
       `/api/v1/agents/${agentId}/events`,

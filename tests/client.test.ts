@@ -311,6 +311,59 @@ describe("Notifications", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Events
+// ---------------------------------------------------------------------------
+
+describe("Events", () => {
+  it("sends messages array when provided (TD-SDK-009)", async () => {
+    let capturedBody: Record<string, unknown> | null = null;
+    server.use(
+      http.post(`${BASE_URL}/api/v1/agents/agent-1/events`, async ({ request }) => {
+        capturedBody = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json({ accepted: true, event_id: "evt-1" });
+      }),
+    );
+
+    const res = await client().agents.triggerGameEvent("agent-1", {
+      userId: "user-1",
+      eventType: "daily_summary",
+      messages: [
+        { role: "user", content: "Hi there" },
+        { role: "assistant", content: "Hello!" },
+      ],
+    });
+
+    expect(res.accepted).toBe(true);
+    expect(capturedBody).not.toBeNull();
+    expect(capturedBody!.user_id).toBe("user-1");
+    expect(capturedBody!.event_type).toBe("daily_summary");
+    expect(capturedBody!.messages).toEqual([
+      { role: "user", content: "Hi there" },
+      { role: "assistant", content: "Hello!" },
+    ]);
+  });
+
+  it("omits messages when undefined (back-compat)", async () => {
+    let capturedBody: Record<string, unknown> | null = null;
+    server.use(
+      http.post(`${BASE_URL}/api/v1/agents/agent-1/events`, async ({ request }) => {
+        capturedBody = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json({ accepted: true, event_id: "evt-2" });
+      }),
+    );
+
+    const res = await client().agents.triggerGameEvent("agent-1", {
+      userId: "user-1",
+      eventType: "cron_daily",
+    });
+
+    expect(res.accepted).toBe(true);
+    expect(capturedBody).not.toBeNull();
+    expect("messages" in (capturedBody as object)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Eval Templates
 // ---------------------------------------------------------------------------
 
