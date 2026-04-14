@@ -993,6 +993,14 @@ export interface TriggerEventOptions {
   metadata?: Record<string, string>;
   language?: string;
   instanceId?: string;
+  /**
+   * Raw conversation messages that triggered this event.
+   * When present, Platform API uses these directly for context-sensitive
+   * generation (diary, summaries) instead of reconstructing from consolidation
+   * summaries. Typically set by the orchestrator after a chat session ends.
+   * Omit when triggering from cron jobs or other non-conversation sources.
+   */
+  messages?: ChatMessage[];
 }
 
 export interface TriggerEventResponse {
