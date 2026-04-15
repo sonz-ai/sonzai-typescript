@@ -324,7 +324,7 @@ describe("Events", () => {
       }),
     );
 
-    const res = await client().agents.triggerGameEvent("agent-1", {
+    const res = await client().agents.triggerBackendEvent("agent-1", {
       userId: "user-1",
       eventType: "daily_summary",
       messages: [
@@ -352,7 +352,7 @@ describe("Events", () => {
       }),
     );
 
-    const res = await client().agents.triggerGameEvent("agent-1", {
+    const res = await client().agents.triggerBackendEvent("agent-1", {
       userId: "user-1",
       eventType: "cron_daily",
     });

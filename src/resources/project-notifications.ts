@@ -7,7 +7,7 @@ import type {
   AcknowledgeAllOptions,
 } from "../types.js";
 
-/** Project-scoped notification polling for game backends. */
+/** Project-scoped notification polling for backends. */
 export class ProjectNotifications {
   constructor(private readonly http: HTTPClient) {}
 

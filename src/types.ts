@@ -576,7 +576,8 @@ export interface EnrichedContextResponse {
   // Layer 6c: Constellation
   constellation_patterns?: unknown[];
 
-  // Layer 7: Game Context
+  // Layer 7: Backend Context
+  // Note: JSON wire key remains `game_context` for server-side compatibility.
   game_context?: Record<string, unknown>;
 
   // Forward-compatible
