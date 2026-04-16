@@ -1581,6 +1581,7 @@ export interface AgentListOptions {
 
 export interface AgentIndex {
   id: string;
+  tenant_id?: string;
   name: string;
   bio?: string;
   gender?: string;
