@@ -328,10 +328,55 @@ export interface ContextDataOptions {
   instanceId?: string;
 }
 
-export interface MoodResponse extends Record<string, unknown> {}
-export interface MoodAggregateResponse extends Record<string, unknown> {}
-export interface RelationshipResponse extends Record<string, unknown> {}
-export interface HabitsResponse extends Record<string, unknown> {}
+export interface MoodState {
+  happiness: number;
+  energy: number;
+  calmness: number;
+  affection: number;
+}
+
+export interface MoodResponse {
+  mood: MoodState;
+  updated_at?: string;
+}
+
+export interface MoodHistoryEntry {
+  mood: MoodState;
+  timestamp: string;
+}
+
+export interface MoodHistoryResponse {
+  history: MoodHistoryEntry[];
+}
+
+export interface MoodAggregateResponse {
+  average: MoodState;
+  min: MoodState;
+  max: MoodState;
+  data_count: number;
+}
+
+export interface RelationshipData {
+  user_id: string;
+  love_score: number;
+  narrative?: string;
+  last_update?: string;
+}
+
+export interface RelationshipResponse {
+  relationships: RelationshipData[];
+}
+
+export interface HabitData {
+  name: string;
+  strength: number;
+  category?: string;
+  last_update?: string;
+}
+
+export interface HabitsResponse {
+  habits: HabitData[];
+}
 
 // ---------------------------------------------------------------------------
 // Habits (CRUD)
@@ -443,10 +488,58 @@ export interface InitialGoal {
   priority?: GoalPriority;
   relatedTraits?: string[];
 }
-export interface InterestsResponse extends Record<string, unknown> {}
-export interface DiaryResponse extends Record<string, unknown> {}
-export interface UsersResponse extends Record<string, unknown> {}
-export interface ConstellationResponse extends Record<string, unknown> {}
+export interface InterestData {
+  topic: string;
+  score: number;
+  category?: string;
+}
+
+export interface InterestsResponse {
+  interests: InterestData[];
+}
+
+export interface DiaryEntry {
+  entry_id: string;
+  title: string;
+  body: string;
+  tags?: string[];
+  created_at: string;
+}
+
+export interface DiaryResponse {
+  entries: DiaryEntry[];
+}
+
+export interface UsersResponse {
+  users: Record<string, unknown>[];
+}
+
+export interface ConstellationEdge {
+  edge_id: string;
+  agent_id: string;
+  source_id: string;
+  target_id: string;
+  relation: string;
+  weight: number;
+  metadata?: Record<string, unknown>;
+}
+
+export interface ConstellationInsight {
+  insight_id: string;
+  agent_id: string;
+  user_id?: string;
+  content: string;
+  type: string;
+  surfaced: boolean;
+  metadata?: Record<string, unknown>;
+  created_at?: string;
+}
+
+export interface ConstellationResponse {
+  nodes: ConstellationNode[];
+  edges: ConstellationEdge[];
+  insights: ConstellationInsight[];
+}
 
 // ---------------------------------------------------------------------------
 // Constellation (CRUD)
@@ -483,8 +576,29 @@ export interface UpdateConstellationNodeOptions {
   nodeType?: string;
 }
 
-export interface BreakthroughsResponse extends Record<string, unknown> {}
-export interface WakeupsResponse extends Record<string, unknown> {}
+export interface Breakthrough {
+  breakthrough_id: string;
+  agent_id: string;
+  user_id: string;
+  breakthrough_number: number;
+  level_at_breakthrough: number;
+  narrative: string;
+  personality_shifts: string[];
+  trait_evolved?: string;
+  new_goals: string[];
+  achieved_goals: string[];
+  skill_points_awarded: number;
+  acknowledged: boolean;
+  created_at: string;
+}
+
+export interface BreakthroughsResponse {
+  breakthroughs: Breakthrough[];
+}
+
+export interface WakeupsResponse {
+  wakeups: ScheduledWakeup[];
+}
 
 // ---------------------------------------------------------------------------
 // Process (full pipeline — extraction + side effects + memory + session end)

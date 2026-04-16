@@ -49,6 +49,7 @@ import type {
   EnrichedContextResponse,
   GetContextOptions,
   MoodAggregateResponse,
+  MoodHistoryResponse,
   ModelsResponse,
   MoodResponse,
   ProcessOptions,
@@ -437,7 +438,7 @@ export class Agents {
   async getMoodHistory(
     agentId: string,
     options: ContextDataOptions = {},
-  ): Promise<MoodResponse> {
+  ): Promise<MoodHistoryResponse> {
     return this.http.get(`/api/v1/agents/${agentId}/mood-history`, {
       user_id: options.userId,
       instance_id: options.instanceId,
