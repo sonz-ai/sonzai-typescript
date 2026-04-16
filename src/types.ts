@@ -1522,6 +1522,8 @@ export interface WebhookEndpoint {
   event_type: string;
   webhook_url: string;
   auth_header?: string;
+  is_active?: boolean;
+  created_at?: string;
 }
 
 export interface WebhookRegisterOptions {
