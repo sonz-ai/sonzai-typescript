@@ -66,6 +66,11 @@ export interface ToolDefinition {
   parameters?: Record<string, unknown>;
 }
 
+export interface GameContext {
+  custom_fields?: Record<string, string>;
+  game_state_json?: unknown;
+}
+
 export interface ChatOptions {
   /** Agent UUID or agent name. Names are resolved to deterministic UUIDs on the server. */
   agent: string;
@@ -84,6 +89,9 @@ export interface ChatOptions {
   timezone?: string;
   toolCapabilities?: AgentToolCapabilities;
   toolDefinitions?: ToolDefinition[];
+  maxTurns?: number;
+  skipContextBuild?: boolean;
+  gameContext?: GameContext;
 }
 
 // ---------------------------------------------------------------------------
@@ -254,8 +262,10 @@ export interface PersonalityGetOptions {
 
 export interface SessionStartOptions {
   userId: string;
+  userDisplayName?: string;
   sessionId: string;
   instanceId?: string;
+  toolDefinitions?: ToolDefinition[];
 }
 
 export interface SessionEndOptions {
@@ -374,6 +384,10 @@ export interface HabitData {
   name: string;
   strength: number;
   category?: string;
+  description?: string;
+  display_name?: string;
+  formed?: boolean;
+  daily_reinforced?: number;
   last_update?: string;
 }
 
@@ -1048,6 +1062,11 @@ export interface SeedMemory {
   entities?: string[];
 }
 
+export interface AgentFeatureCapabilities {
+  image_generation: boolean;
+  inventory: boolean;
+}
+
 export interface CreateAgentOptions {
   agentId?: string;
   userId?: string;
@@ -1066,7 +1085,9 @@ export interface CreateAgentOptions {
   dimensions?: SDKPersonalityDimensions;
   preferences?: Record<string, string>;
   behaviors?: Record<string, string>;
+  capabilities?: AgentFeatureCapabilities;
   toolCapabilities?: AgentToolCapabilities;
+  generateAvatar?: boolean;
   language?: string;
   seedMemories?: SeedMemory[];
   loreContext?: Record<string, unknown>;

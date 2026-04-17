@@ -145,8 +145,11 @@ export class Agents {
     if (options.dimensions) body.dimensions = options.dimensions;
     if (options.preferences) body.preferences = options.preferences;
     if (options.behaviors) body.behaviors = options.behaviors;
+    if (options.capabilities) body.capabilities = options.capabilities;
     if (options.toolCapabilities)
       body.tool_capabilities = options.toolCapabilities;
+    if (options.generateAvatar != null)
+      body.generate_avatar = options.generateAvatar;
     if (options.language) body.language = options.language;
     if (options.seedMemories) body.seed_memories = options.seedMemories;
     if (options.loreContext) body.lore_generation_context = options.loreContext;
@@ -1035,6 +1038,10 @@ export class Agents {
       body.tool_capabilities = options.toolCapabilities;
     if (options.toolDefinitions)
       body.tool_definitions = options.toolDefinitions;
+    if (options.maxTurns) body.max_turns = options.maxTurns;
+    if (options.skipContextBuild)
+      body.skip_context_build = options.skipContextBuild;
+    if (options.gameContext) body.game_context = options.gameContext;
     return body;
   }
 }

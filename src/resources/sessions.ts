@@ -19,6 +19,10 @@ export class Sessions {
       session_id: options.sessionId,
     };
     if (options.instanceId) body.instance_id = options.instanceId;
+    if (options.userDisplayName)
+      body.user_display_name = options.userDisplayName;
+    if (options.toolDefinitions)
+      body.tool_definitions = options.toolDefinitions;
 
     return this.http.post<SessionResponse>(
       `/api/v1/agents/${agentId}/sessions/start`,

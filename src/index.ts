@@ -26,6 +26,7 @@ export type {
   SDKPersonalityDimensions,
   Big5Scores,
   AgentToolCapabilities,
+  AgentFeatureCapabilities,
   SeedMemory,
   // Chat
   ChatMessage,
@@ -34,6 +35,7 @@ export type {
   ChatStreamEvent,
   ChatResponse,
   ChatOptions,
+  GameContext,
   // Dialogue
   DialogueOptions,
   DialogueResponse,
