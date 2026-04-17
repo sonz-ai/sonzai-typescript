@@ -123,10 +123,34 @@ export interface AtomicFact {
   atomic_text: string;
   fact_type: string;
   importance: number;
+  confidence?: number;
   supersedes_id: string;
   session_id: string;
+  source_id?: string;
+  source_type?: string;
+  sentiment?: string;
+  entities?: string[];
+  inferred_entities?: string[];
+  topic_tags?: string[];
+  agent_framing?: string;
+  character_salience?: number;
+  emotional_intensity?: number;
+  relationship_relevance?: number;
+  retention_strength?: number;
+  temporal_relevance?: string;
+  time_sensitive_at?: string;
+  episode_id?: string;
+  event_time?: string;
+  evidence_message_ids?: string[];
+  polarity_group_id?: string;
+  hit_count?: number;
+  miss_count?: number;
+  mention_count?: number;
+  last_confirmed?: string;
+  last_retrieved_at?: string;
   metadata?: Record<string, unknown>;
   created_at?: string;
+  updated_at?: string;
 }
 
 export interface MemoryResponse {
@@ -224,6 +248,12 @@ export interface PersonalityBehaviors {
   conflict_approach: string;
 }
 
+export interface TraitPrecision {
+  precision: number;
+  observation_count: number;
+  last_updated_at?: string;
+}
+
 export interface PersonalityProfile {
   agent_id: string;
   name: string;
@@ -241,6 +271,7 @@ export interface PersonalityProfile {
   preferences: PersonalityPreferences;
   behaviors: PersonalityBehaviors;
   emotional_tendencies: Record<string, number>;
+  trait_precisions?: Record<string, TraitPrecision>;
   created_at?: string;
 }
 
@@ -347,38 +378,61 @@ export interface ContextDataOptions {
 }
 
 export interface MoodState {
-  happiness: number;
-  energy: number;
-  calmness: number;
-  affection: number;
+  valence: number;
+  arousal: number;
+  tension: number;
+  affiliation: number;
+  label?: string;
+  /** @deprecated Use valence instead. */
+  happiness?: number;
+  /** @deprecated Use arousal instead. */
+  energy?: number;
+  /** @deprecated Use tension instead. */
+  calmness?: number;
+  /** @deprecated Use affiliation instead. */
+  affection?: number;
 }
 
 export interface MoodResponse {
   mood: MoodState;
-  updated_at?: string;
 }
 
 export interface MoodHistoryEntry {
-  mood: MoodState;
+  valence: number;
+  arousal: number;
+  tension: number;
+  affiliation: number;
+  label?: string;
+  trigger_type?: string;
+  trigger_reason?: string;
+  delta_valence?: number;
+  delta_arousal?: number;
+  delta_tension?: number;
+  delta_affiliation?: number;
   timestamp: string;
 }
 
 export interface MoodHistoryResponse {
-  history: MoodHistoryEntry[];
+  entries: MoodHistoryEntry[];
 }
 
 export interface MoodAggregateResponse {
-  average: MoodState;
-  min: MoodState;
-  max: MoodState;
-  data_count: number;
+  valence: number;
+  arousal: number;
+  tension: number;
+  affiliation: number;
+  label: string;
+  user_count: number;
+  days_window: number;
 }
 
 export interface RelationshipData {
   user_id: string;
   love_score: number;
+  chemistry_score?: number;
   narrative?: string;
   last_update?: string;
+  updated_at?: string;
 }
 
 export interface RelationshipResponse {
@@ -512,8 +566,19 @@ export interface InitialGoal {
 }
 export interface InterestData {
   topic: string;
-  score: number;
+  /** @deprecated Use confidence instead. */
+  score?: number;
   category?: string;
+  agent_id?: string;
+  user_id?: string;
+  confidence?: number;
+  engagement_level?: number;
+  mention_count?: number;
+  research_status?: string;
+  research_findings?: string;
+  last_mentioned_at?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface InterestsResponse {
@@ -522,9 +587,18 @@ export interface InterestsResponse {
 
 export interface DiaryEntry {
   entry_id: string;
-  title: string;
-  body: string;
+  agent_id: string;
+  user_id?: string;
+  date: string;
+  content: string;
+  title?: string;
+  body_lines?: string[];
+  /** @deprecated Use content instead. */
+  body?: string;
+  mood?: string;
+  topics?: string[];
   tags?: string[];
+  trigger_type?: string;
   created_at: string;
 }
 
@@ -1042,8 +1116,11 @@ export interface EvalTemplateUpdateOptions {
 // ---------------------------------------------------------------------------
 
 export interface EvalRun {
+  /** SDK alias. The spec wire name is `run_id`. */
   id: string;
+  run_id?: string;
   tenant_id: string;
+  project_id?: string;
   agent_id: string;
   agent_name: string;
   status: string;
@@ -1066,6 +1143,7 @@ export interface EvalRun {
   evaluation_cost_usd?: number;
   adaptation_template_id?: string;
   adaptation_template_snapshot?: Record<string, unknown>;
+  started_at?: string;
   created_at?: string;
   completed_at?: string;
 }
@@ -1711,6 +1789,7 @@ export interface ScheduledWakeup {
   event_description?: string;
   occasion?: string;
   interest_topic?: string;
+  research_summary?: string;
   executed_at?: string;
   created_at?: string;
 }
@@ -1783,14 +1862,22 @@ export interface AgentListOptions {
 }
 
 export interface AgentIndex {
+  /** Agent UUID. Alias for agent_id. */
   id: string;
+  agent_id?: string;
   tenant_id?: string;
   name: string;
   bio?: string;
   gender?: string;
   avatar_url?: string;
   status?: string;
+  is_active?: boolean;
   project_id?: string;
+  instance_count?: number;
+  last_seen_at?: string;
+  owner_user_id?: string;
+  owner_display_name?: string;
+  owner_email?: string;
   created_at?: string;
 }
 
@@ -1798,6 +1885,7 @@ export interface AgentListResponse {
   items: AgentIndex[];
   next_cursor?: string;
   has_more: boolean;
+  total_count?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -1934,11 +2022,28 @@ export interface SetStatusResponse {
 // Capabilities
 // ---------------------------------------------------------------------------
 
+export interface PendingCapability {
+  capability: string;
+  context?: string;
+}
+
 export interface AgentCapabilities {
   webSearch: boolean;
   rememberName: boolean;
   imageGeneration: boolean;
   inventory: boolean;
+  knowledgeBase?: boolean;
+  knowledgeBaseProjectId?: string;
+  voiceGeneration: boolean;
+  voiceId?: string;
+  voiceTier?: number;
+  voiceUnlockedAt?: string;
+  imageUnlockedAt?: string;
+  musicGeneration: boolean;
+  musicUnlockedAt?: string;
+  videoGeneration: boolean;
+  videoUnlockedAt?: string;
+  pendingCapabilities?: PendingCapability[];
   customTools?: CustomToolDefinition[];
 }
 
@@ -1947,6 +2052,7 @@ export interface UpdateCapabilitiesOptions {
   rememberName?: boolean;
   imageGeneration?: boolean;
   inventory?: boolean;
+  knowledgeBase?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -2257,6 +2363,9 @@ export interface KBAnalyticsRule {
   config: unknown;
   enabled: boolean;
   schedule?: string;
+  last_run_at?: string;
+  last_run_status?: string;
+  last_run_duration_ms?: number;
   created_at?: string;
   updated_at?: string;
 }
