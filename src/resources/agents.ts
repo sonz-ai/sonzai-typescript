@@ -744,6 +744,65 @@ export class Agents {
     );
   }
 
+  // ------------------------------------------------------------------
+  // Agent-scope post-processing override (layer 1 of the cascade)
+  // ------------------------------------------------------------------
+
+  /**
+   * Set the agent-level post-processing model override. Both
+   * `provider` and `model` must be non-empty for the cascade to honour
+   * the override — mixed-empty pairs act as "no override" (use
+   * `clearPostProcessingModel` for that).
+   *
+   * Short-circuits the cascade: when set, project / account /
+   * system-default layers are not consulted for this agent.
+   */
+  async updatePostProcessingModel(
+    agentId: string,
+    override: { provider: string; model: string },
+  ): Promise<{ success: boolean; post_processing_provider: string; post_processing_model: string }> {
+    return this.http.patch(`/api/v1/agents/${agentId}/post-processing-model`, {
+      post_processing_provider: override.provider,
+      post_processing_model: override.model,
+    });
+  }
+
+  /**
+   * Remove the agent-level override so the cascade falls through to
+   * project / account / system-default layers. Equivalent to
+   * `updatePostProcessingModel(agentId, { provider: "", model: "" })`.
+   */
+  async clearPostProcessingModel(agentId: string): Promise<{ success: boolean }> {
+    return this.http.patch(`/api/v1/agents/${agentId}/post-processing-model`, {
+      post_processing_provider: "",
+      post_processing_model: "",
+    });
+  }
+
+  /**
+   * Run the cascade server-side for a given chat model, without firing
+   * inference. Useful for "which model would run my diary tonight?"
+   * UIs.
+   *
+   * When the server has `ENABLE_POST_PROCESSING_MODEL_MAP=false`, the
+   * response echoes the chat model itself — matches runtime behaviour
+   * on disabled deployments.
+   */
+  async effectivePostProcessingModel(
+    agentId: string,
+    chatModel: string,
+  ): Promise<{
+    provider: string;
+    model: string;
+    temperature?: number;
+    max_tokens?: number;
+  }> {
+    const params = new URLSearchParams({ chat_model: chatModel });
+    return this.http.get(
+      `/api/v1/agents/${agentId}/effective-post-processing-model?${params.toString()}`,
+    );
+  }
+
   // -- Custom Tools --
 
   /** List custom tools for an agent. */
