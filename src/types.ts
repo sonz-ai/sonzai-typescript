@@ -33,9 +33,13 @@ export interface ChatStreamEvent {
   full_content?: string;
   finish_reason?: string;
   continuation_token?: string;
+  response_cookie?: string;
   message_count?: number;
   side_effects?: Record<string, unknown>;
   external_tool_calls?: ExternalToolCall[];
+  enriched_context?: Record<string, unknown>;
+  build_duration_ms?: number;
+  used_fast_path?: boolean;
   error_message?: string;
   error_code?: string;
   is_token_error?: boolean;
@@ -82,6 +86,7 @@ export interface ChatOptions {
   provider?: string;
   model?: string;
   continuationToken?: string;
+  aiServiceCookie?: string;
   requestType?: string;
   language?: string;
   compiledSystemPrompt?: string;
@@ -566,12 +571,17 @@ export interface ConstellationNode {
   node_id: string;
   agent_id: string;
   user_id?: string;
+  /** Canonical node type (e.g. "concept", "person", "place"). */
   node_type: string;
+  /** Legacy alias for node_type returned by some endpoints. */
+  type?: string;
   label: string;
   description?: string;
   significance: number;
+  weight?: number;
   mention_count: number;
   brightness: number;
+  metadata?: Record<string, unknown>;
   first_mentioned_at?: string;
   last_mentioned_at?: string;
   created_at?: string;
@@ -671,16 +681,16 @@ export interface EnrichedContextResponse {
   primary_traits?: string[];
 
   // Layer 2: Personality
-  big5?: Record<string, unknown>;
-  dimensions?: Record<string, unknown>;
-  preferences?: Record<string, unknown>;
-  behaviors?: Record<string, unknown>;
+  big5?: Big5;
+  dimensions?: PersonalityDimensions;
+  preferences?: PersonalityPreferences;
+  behaviors?: PersonalityBehaviors;
 
   // Layer 3: Evolution
-  recent_personality_shifts?: unknown[];
-  significant_moments?: unknown[];
-  active_goals?: unknown[];
-  habits?: unknown[];
+  recent_personality_shifts?: PersonalityShift[];
+  significant_moments?: SignificantMoment[];
+  active_goals?: Goal[];
+  habits?: HabitData[];
   breakthrough_count?: number;
 
   // Layer 4: Relationship
@@ -693,25 +703,74 @@ export interface EnrichedContextResponse {
   days_since_last_chat?: number;
 
   // Layer 5: Current State
-  current_mood?: Record<string, unknown>;
+  current_mood?: MoodState;
   emotional_state?: string;
-  capabilities?: Record<string, unknown>;
+  capabilities?: AgentToolCapabilities;
 
   // Layer 6: Memory
-  loaded_facts?: Array<Record<string, unknown>>;
-  long_term_summaries?: unknown[];
+  loaded_facts?: ContextLoadedFact[];
+  long_term_summaries?: ContextLongTermSummary[];
 
   // Layer 6b: Proactive
-  proactive_memories?: unknown[];
+  proactive_memories?: ContextProactiveMemory[];
 
   // Layer 6c: Constellation
-  constellation_patterns?: unknown[];
+  constellation_patterns?: ContextConstellationPattern[];
 
   // Layer 7: Backend Context
   // (The SDK remaps the legacy wire key for this field when parsing responses.)
   backend_context?: Record<string, unknown>;
 
   // Forward-compatible
+  [key: string]: unknown;
+}
+
+/**
+ * A loaded fact in the enriched context (Layer 6).
+ * Mirrors the AtomicFact shape serialized by the context builder.
+ */
+export interface ContextLoadedFact {
+  fact_id?: string;
+  atomic_text?: string;
+  fact_type?: string;
+  importance?: number;
+  session_id?: string;
+  created_at?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * A long-term summary in the enriched context (Layer 6).
+ * Mirrors the LongTermSummary entity from the context engine.
+ */
+export interface ContextLongTermSummary {
+  summary_type?: string;
+  period_start?: string;
+  summary?: string;
+  topics?: string[];
+  [key: string]: unknown;
+}
+
+/**
+ * A proactive memory in the enriched context (Layer 6b).
+ * Mirrors the ProactiveMemory entity from the context engine.
+ */
+export interface ContextProactiveMemory {
+  fact?: ContextLoadedFact;
+  urgency?: number;
+  template?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * A constellation pattern in the enriched context (Layer 6c).
+ * Mirrors the ConstellationPattern entity from the context engine.
+ */
+export interface ContextConstellationPattern {
+  type?: string;
+  description?: string;
+  significance?: number;
+  mention_count?: number;
   [key: string]: unknown;
 }
 

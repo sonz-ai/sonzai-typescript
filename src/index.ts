@@ -117,6 +117,10 @@ export type {
   // Context (single-call enriched context)
   GetContextOptions,
   EnrichedContextResponse,
+  ContextLoadedFact,
+  ContextLongTermSummary,
+  ContextProactiveMemory,
+  ContextConstellationPattern,
   // Process (full pipeline)
   ProcessOptions,
   ProcessResponse,
@@ -137,8 +141,10 @@ export type {
   ModelsResponse,
   ModelsProviderEntry,
   PlatformModelsResponse,
-  // Tool definitions
+  // Tool definitions & tool calls
   ToolDefinition,
+  ExternalToolCall,
+  ToolCallResponseOptions,
   // Voice
   VoiceStreamToken,
   VoiceTokenOptions,
