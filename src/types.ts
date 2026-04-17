@@ -185,27 +185,30 @@ export interface Big5 {
 }
 
 export interface PersonalityDimensions {
-  warmth: number;
-  energy: number;
-  openness: number;
-  emotional_depth: number;
-  playfulness: number;
-  supportiveness: number;
-  curiosity: number;
-  wisdom: number;
+  intellect: number;
+  aesthetic: number;
+  industriousness: number;
+  orderliness: number;
+  enthusiasm: number;
+  assertiveness: number;
+  compassion: number;
+  politeness: number;
+  withdrawal: number;
+  volatility: number;
 }
 
 export interface PersonalityPreferences {
-  pace: string;
+  conversation_pace: string;
   formality: string;
   humor_style: string;
   emotional_expression: string;
 }
 
 export interface PersonalityBehaviors {
-  proactivity: string;
-  reliability: string;
-  humor: string;
+  response_length: string;
+  question_frequency: string;
+  empathy_style: string;
+  conflict_approach: string;
 }
 
 export interface PersonalityProfile {
@@ -1010,14 +1013,16 @@ export interface EvalRunListOptions {
 // ---------------------------------------------------------------------------
 
 export interface SDKPersonalityDimensions {
-  warmth: number;
-  energy: number;
-  openness: number;
-  emotional_depth: number;
-  playfulness: number;
-  supportiveness: number;
-  curiosity: number;
-  wisdom: number;
+  intellect: number;
+  aesthetic: number;
+  industriousness: number;
+  orderliness: number;
+  enthusiasm: number;
+  assertiveness: number;
+  compassion: number;
+  politeness: number;
+  withdrawal: number;
+  volatility: number;
 }
 
 export interface Big5Scores {
@@ -1419,16 +1424,17 @@ export interface GenerateCharacterOptions {
 }
 
 export interface SDKInteractionPreferences {
-  pace: string;
+  conversation_pace: string;
   formality: string;
   humor_style: string;
   emotional_expression: string;
 }
 
 export interface SDKBehavioralTraits {
-  proactivity: string;
-  reliability: string;
-  humor: string;
+  response_length: string;
+  question_frequency: string;
+  empathy_style: string;
+  conflict_approach: string;
 }
 
 export interface GeneratedGoal {
