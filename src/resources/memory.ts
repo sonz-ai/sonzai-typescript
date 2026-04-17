@@ -2,6 +2,7 @@ import type { HTTPClient } from "../http.js";
 import type {
   AtomicFact,
   CreateFactOptions,
+  DeleteWisdomResponse,
   FactHistoryResponse,
   FactListOptions,
   FactListResponse,
@@ -16,6 +17,7 @@ import type {
   SeedMemoriesOptions,
   SeedMemoriesResponse,
   UpdateFactOptions,
+  WisdomAuditResponse,
 } from "../types.js";
 
 export class Memory {
@@ -166,5 +168,25 @@ export class Memory {
   /** Get the version history of a specific fact. */
   async getFactHistory(agentId: string, factId: string): Promise<FactHistoryResponse> {
     return this.http.get<FactHistoryResponse>(`/api/v1/agents/${agentId}/memory/fact/${factId}/history`);
+  }
+
+  /** Delete a wisdom fact by ID. */
+  async deleteWisdomFact(
+    agentId: string,
+    factId: string,
+  ): Promise<DeleteWisdomResponse> {
+    return this.http.delete<DeleteWisdomResponse>(
+      `/api/v1/agents/${agentId}/memory/wisdom/${factId}`,
+    );
+  }
+
+  /** Get the audit trail for a wisdom fact. */
+  async getWisdomAudit(
+    agentId: string,
+    factId: string,
+  ): Promise<WisdomAuditResponse> {
+    return this.http.get<WisdomAuditResponse>(
+      `/api/v1/agents/${agentId}/memory/wisdom/audit/${factId}`,
+    );
   }
 }

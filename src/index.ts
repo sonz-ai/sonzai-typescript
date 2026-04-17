@@ -263,6 +263,13 @@ export type {
   // Tool Schemas (BYO-LLM)
   ToolSchema,
   ToolSchemasResponse,
+  // Fork
+  ForkAgentOptions,
+  ForkResponse,
+  ForkStatusResponse,
+  // Wisdom
+  DeleteWisdomResponse,
+  WisdomAuditResponse,
   // Knowledge Base
   KBDocument,
   KBDocumentListResponse,

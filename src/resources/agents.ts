@@ -35,6 +35,7 @@ import type {
   DialogueOptions,
   GenerateAvatarOptions,
   GenerateAvatarResponse,
+  DeleteWisdomResponse,
   DialogueResponse,
   DiaryResponse,
   EvalOnlyOptions,
@@ -47,6 +48,9 @@ import type {
   HabitsResponse,
   InterestsResponse,
   EnrichedContextResponse,
+  ForkAgentOptions,
+  ForkResponse,
+  ForkStatusResponse,
   GetContextOptions,
   MoodAggregateResponse,
   MoodHistoryResponse,
@@ -80,6 +84,7 @@ import type {
   ToolCallResponseOptions,
   UsersResponse,
   WakeupsResponse,
+  WisdomAuditResponse,
 } from "../types.js";
 import { CustomStates } from "./custom-states.js";
 import { Generation } from "./generation.js";
@@ -928,6 +933,83 @@ export class Agents {
     requireNonEmpty(agentId, "agentId");
     return this.http.get<ToolSchemasResponse>(
       `/api/v1/agents/${agentId}/tools`,
+    );
+  }
+
+  // -- Fork --
+
+  /** Fork an agent (create a copy with a new ID). */
+  async fork(
+    agentId: string,
+    options?: ForkAgentOptions,
+  ): Promise<ForkResponse> {
+    requireNonEmpty(agentId, "agentId");
+    const body: Record<string, unknown> = {};
+    if (options?.name) body.name = options.name;
+    return this.http.post<ForkResponse>(
+      `/api/v1/agents/${agentId}/fork`,
+      body,
+    );
+  }
+
+  /** Check the status of a fork operation. */
+  async getForkStatus(agentId: string): Promise<ForkStatusResponse> {
+    requireNonEmpty(agentId, "agentId");
+    return this.http.get<ForkStatusResponse>(
+      `/api/v1/agents/${agentId}/fork/status`,
+    );
+  }
+
+  // -- Playground Chat --
+
+  /** Send a playground chat message (non-streaming). Same as chat but via the playground endpoint. */
+  async playgroundChat(options: ChatOptions): Promise<ChatResponse> {
+    const body = this.buildChatBody(options);
+    const parts: string[] = [];
+    let usage: ChatUsage | undefined;
+
+    for await (const event of this.http.streamSSE(
+      "POST",
+      `/api/v1/agents/${options.agent}/playground/chat`,
+      body,
+    )) {
+      const parsed = event as ChatStreamEvent;
+      const content = parsed.choices?.[0]?.delta?.content;
+      if (content) parts.push(content);
+      if (parsed.usage) usage = parsed.usage;
+    }
+
+    return { content: parts.join(""), sessionId: "", usage };
+  }
+
+  /** Send a playground chat message and stream events as an async iterator. */
+  async *playgroundChatStream(
+    options: ChatOptions,
+  ): AsyncGenerator<ChatStreamEvent> {
+    requireNonEmpty(options.agent, "agentId");
+    const body = this.buildChatBody(options);
+    for await (const event of this.http.streamSSE(
+      "POST",
+      `/api/v1/agents/${options.agent}/playground/chat`,
+      body,
+    )) {
+      yield event as ChatStreamEvent;
+    }
+  }
+
+  // -- Knowledge Search GET --
+
+  /** Search the knowledge base using a GET request with query parameters. */
+  async knowledgeSearchGet(
+    agentId: string,
+    options: { query: string; limit?: number },
+  ): Promise<AgentKBSearchResponse> {
+    requireNonEmpty(agentId, "agentId");
+    const params: Record<string, string | number> = { q: options.query };
+    if (options.limit != null) params.limit = options.limit;
+    return this.http.get<AgentKBSearchResponse>(
+      `/api/v1/agents/${agentId}/tools/kb-search`,
+      params,
     );
   }
 

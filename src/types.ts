@@ -2663,6 +2663,55 @@ export interface ToolSchemasResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Fork
+// ---------------------------------------------------------------------------
+
+export interface ForkAgentOptions {
+  /** Display name for the forked agent. */
+  name?: string;
+}
+
+/** Response from forking an agent. */
+export interface ForkResponse {
+  agent_id: string;
+  source_agent_id: string;
+  status: string;
+  name: string;
+}
+
+/** Response from checking fork status. */
+export interface ForkStatusResponse {
+  status: string;
+  source_agent_id: string;
+  started_at?: string;
+  completed_at?: string;
+  tables_copied: number;
+  tables_total: number;
+  error_message?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Wisdom
+// ---------------------------------------------------------------------------
+
+/** Response from deleting a wisdom fact. */
+export interface DeleteWisdomResponse {
+  success: boolean;
+  fact_id: string;
+}
+
+/** Response from the wisdom audit endpoint. */
+export interface WisdomAuditResponse {
+  fact_id: string;
+  content: string;
+  target_path?: string;
+  derived_from_hashes?: string[];
+  source_user_count: number;
+  promotion_confidence: number;
+  promoted_at?: string;
+}
+
+// ---------------------------------------------------------------------------
 // Platform models
 // ---------------------------------------------------------------------------
 
