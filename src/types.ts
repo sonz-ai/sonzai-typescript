@@ -2013,6 +2013,39 @@ export interface KBNodeListResponse {
   next_cursor?: string;
 }
 
+// ----------------------------------------------------------------------------
+// Organization-global KB (see docs/ORGANIZATION_GLOBAL_KB.md)
+// ----------------------------------------------------------------------------
+
+/**
+ * KBScopeMode controls how an agent's knowledge_search reads across the
+ * project and organization-global scopes.
+ */
+export type KBScopeMode = "project_only" | "org_only" | "cascade" | "union";
+
+/** Wire-value constants for KBScopeMode — lock-in for cross-SDK compat. */
+export const KBScope = {
+  ProjectOnly: "project_only" as const,
+  OrgOnly: "org_only" as const,
+  Cascade: "cascade" as const,
+  Union: "union" as const,
+} satisfies Record<string, KBScopeMode>;
+
+/** Request body for Knowledge.createOrgNode. */
+export interface CreateOrgNodeOptions {
+  node_type: string;
+  label: string;
+  properties?: Record<string, unknown>;
+  /** 0.0–1.0. Defaults to 1.0 server-side for hand-authored org knowledge. */
+  confidence?: number;
+}
+
+/** KBNode with scope provenance, returned by cascade reads + promote. */
+export interface KBNodeWithScope extends KBNode {
+  scope_type: "project" | "organization";
+  relevance: number;
+}
+
 export interface KBEdge {
   project_id: string;
   edge_id: string;

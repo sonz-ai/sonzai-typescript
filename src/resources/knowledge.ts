@@ -2,6 +2,8 @@ import type { HTTPClient } from "../http.js";
 import type {
   KBDocument,
   KBDocumentListResponse,
+  KBNode,
+  KBNodeWithScope,
   KBNodeListResponse,
   KBNodeDetailResponse,
   KBNodeHistoryResponse,
@@ -12,6 +14,7 @@ import type {
   KBStats,
   InsertFactsOptions,
   InsertFactsResponse,
+  CreateOrgNodeOptions,
   CreateSchemaOptions,
   KBAnalyticsRule,
   KBAnalyticsRuleListResponse,
@@ -366,6 +369,42 @@ export class Knowledge {
     return this.http.patch<KBBulkUpdateResponse>(
       `/api/v1/projects/${projectId}/knowledge/bulk-update`,
       options as unknown as Record<string, unknown>,
+    );
+  }
+
+  // -- Organization-global scope (docs/ORGANIZATION_GLOBAL_KB.md) --
+
+  /**
+   * Create a knowledge-base node directly in the organization-global scope.
+   * Readable by every project under the tenant when its agents opt into
+   * cascade / union / org_only scope modes. Idempotency is the caller's
+   * responsibility — look up by label before calling this if duplicates
+   * are a concern.
+   */
+  async createOrgNode(
+    tenantId: string,
+    options: CreateOrgNodeOptions,
+  ): Promise<KBNode> {
+    return this.http.post<KBNode>(
+      `/api/v1/tenants/${tenantId}/knowledge/org-nodes`,
+      options as unknown as Record<string, unknown>,
+    );
+  }
+
+  /**
+   * Promote a project-scoped node into the organization-global scope. The
+   * project copy is preserved — promotion is additive. If an org node with
+   * the same (node_type, norm_label) already exists, the server returns
+   * that one instead of writing a duplicate.
+   */
+  async promoteNodeToOrg(
+    projectId: string,
+    nodeId: string,
+    tenantId: string,
+  ): Promise<KBNodeWithScope> {
+    return this.http.post<KBNodeWithScope>(
+      `/api/v1/projects/${projectId}/knowledge/nodes/${nodeId}/promote-to-org`,
+      { tenant_id: tenantId },
     );
   }
 }
