@@ -474,7 +474,8 @@ export class Agents {
     });
   }
 
-  async getHabits(
+  /** List habits for an agent. */
+  async listHabits(
     agentId: string,
     options: ContextDataOptions = {},
   ): Promise<HabitsResponse> {
@@ -482,6 +483,14 @@ export class Agents {
       user_id: options.userId,
       instance_id: options.instanceId,
     });
+  }
+
+  /** @deprecated Use listHabits() instead. */
+  async getHabits(
+    agentId: string,
+    options: ContextDataOptions = {},
+  ): Promise<HabitsResponse> {
+    return this.listHabits(agentId, options);
   }
 
   /** Create a habit for an agent. Set userId for a per-user habit. */
@@ -535,7 +544,8 @@ export class Agents {
     );
   }
 
-  async getGoals(
+  /** List goals for an agent. */
+  async listGoals(
     agentId: string,
     options: ContextDataOptions = {},
   ): Promise<GoalsResponse> {
@@ -543,6 +553,14 @@ export class Agents {
       user_id: options.userId,
       instance_id: options.instanceId,
     });
+  }
+
+  /** @deprecated Use listGoals() instead. */
+  async getGoals(
+    agentId: string,
+    options: ContextDataOptions = {},
+  ): Promise<GoalsResponse> {
+    return this.listGoals(agentId, options);
   }
 
   /** Create a goal for an agent. Set userId to create a per-user goal. */
@@ -683,8 +701,8 @@ export class Agents {
     );
   }
 
-  /** Get breakthroughs for an agent. */
-  async getBreakthroughs(
+  /** List breakthroughs for an agent. */
+  async listBreakthroughs(
     agentId: string,
     options: ContextDataOptions = {},
   ): Promise<BreakthroughsResponse> {
@@ -692,6 +710,14 @@ export class Agents {
       user_id: options.userId,
       instance_id: options.instanceId,
     });
+  }
+
+  /** @deprecated Use listBreakthroughs() instead. */
+  async getBreakthroughs(
+    agentId: string,
+    options: ContextDataOptions = {},
+  ): Promise<BreakthroughsResponse> {
+    return this.listBreakthroughs(agentId, options);
   }
 
   // -- Agent List --

@@ -97,7 +97,7 @@ export class Memory {
       `/api/v1/agents/${agentId}/memory/facts`,
       {
         user_id: options.userId,
-        category: options.category,
+        fact_type: options.factType,
         limit: options.limit,
         offset: options.offset,
       },

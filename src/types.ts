@@ -1251,7 +1251,8 @@ export interface FactListResponse {
 
 export interface FactListOptions {
   userId?: string;
-  category?: string;
+  /** Filter by fact type (e.g. "relationship", "preference", "event", "interest"). */
+  factType?: string;
   limit?: number;
   offset?: number;
 }
