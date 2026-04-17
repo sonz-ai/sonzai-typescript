@@ -850,10 +850,16 @@ export class Agents {
     if (options.query) params.query = options.query;
     if (options.language) params.language = options.language;
     if (options.timezone) params.timezone = options.timezone;
-    return this.http.get<EnrichedContextResponse>(
+    const raw = await this.http.get<Record<string, unknown>>(
       `/api/v1/agents/${agentId}/context`,
       params,
     );
+    // Remap legacy wire key → SDK field name (server still emits the old key).
+    if ("game_context" in raw && !("backend_context" in raw)) {
+      raw.backend_context = raw.game_context;
+      delete raw.game_context;
+    }
+    return raw as EnrichedContextResponse;
   }
 
   // -- Consolidation --
