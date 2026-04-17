@@ -272,10 +272,15 @@ export class HTTPClient {
           }
         }
       } finally {
-        await reader.cancel();
+        // releaseLock() detaches the reader without awaiting stream cleanup.
+        // reader.cancel() can hang indefinitely when we exit early (e.g. after
+        // "data: [DONE]") before the underlying stream signals done=true —
+        // network-level teardown is handled by the AbortController below.
+        reader.releaseLock();
       }
     } finally {
       clearTimeout(timer);
+      controller.abort();
     }
   }
 
