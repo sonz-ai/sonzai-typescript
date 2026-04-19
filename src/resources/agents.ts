@@ -904,7 +904,7 @@ export class Agents {
     options?: ConsolidateOptions,
   ): Promise<ConsolidateResponse> {
     return this.http.post<ConsolidateResponse>(
-      `/api/v1/agents/${agentId}/consolidate`,
+      `/api/v1/agents/${agentId}/memory/consolidate`,
       (options ?? {}) as Record<string, unknown>,
     );
   }
@@ -918,7 +918,7 @@ export class Agents {
     if (options?.period) params.period = options.period;
     if (options?.limit) params.limit = String(options.limit);
     return this.http.get<SummariesResponse>(
-      `/api/v1/agents/${agentId}/summaries`,
+      `/api/v1/agents/${agentId}/memory/summaries`,
       params,
     );
   }
@@ -1068,6 +1068,7 @@ export class Agents {
     if (options.skipContextBuild)
       body.skip_context_build = options.skipContextBuild;
     if (options.gameContext) body.game_context = options.gameContext;
+    if (options.skillLevels) body.skill_levels = options.skillLevels;
     return body;
   }
 }

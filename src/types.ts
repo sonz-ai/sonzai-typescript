@@ -97,6 +97,7 @@ export interface ChatOptions {
   maxTurns?: number;
   skipContextBuild?: boolean;
   gameContext?: GameContext;
+  skillLevels?: Record<string, number>;
 }
 
 // ---------------------------------------------------------------------------
