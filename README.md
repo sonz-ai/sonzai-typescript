@@ -398,6 +398,13 @@ try {
 
 The SDK uses only the standard Web API (`fetch`, `ReadableStream`, `TextDecoder`, `URL`, `AbortController`) with no runtime-specific dependencies.
 
+## Staying in sync with the production API
+
+This SDK tracks `https://api.sonz.ai/docs/openapi.json`. A git pre-push hook
+checks for drift; `npm install` / `bun install` auto-enables it via the
+`prepare` script. To refresh the committed spec snapshot, run
+`bun run sync-spec` (or `just sync-spec`) and commit the diff.
+
 ## Development
 
 ```bash

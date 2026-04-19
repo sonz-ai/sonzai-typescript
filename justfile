@@ -4,6 +4,17 @@ set shell := ["bash", "-cu"]
 default:
     @just --list
 
+# Pull the latest OpenAPI spec from production and show what changed.
+sync-spec:
+    @curl -sfL https://api.sonz.ai/docs/openapi.json -o openapi.json
+    @echo "✓ Spec updated. Review diff:"
+    @git diff --stat openapi.json || true
+
+# Wire git to use .githooks/ (run once per clone; npm install does this automatically).
+install-hooks:
+    git config core.hooksPath .githooks
+    @echo "✓ Hooks enabled."
+
 # Bump patch (x.y.Z+1) from package.json and deploy.
 patch:
     just deploy $(just _next patch)

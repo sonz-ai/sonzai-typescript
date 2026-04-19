@@ -47,7 +47,9 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "biome check src/",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
+    "sync-spec": "curl -sfL https://api.sonz.ai/docs/openapi.json -o openapi.json && git diff --stat openapi.json"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.0",
