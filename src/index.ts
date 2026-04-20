@@ -287,6 +287,10 @@ export type {
   KBNodeHistory,
   KBNodeDetailResponse,
   KBNodeHistoryResponse,
+  // Knowledge Base — organization-global scope
+  KBScopeMode,
+  KBNodeWithScope,
+  CreateOrgNodeOptions,
   KBRelatedNode,
   KBSearchResult,
   KBSearchResponse,
@@ -367,3 +371,6 @@ export type {
   AcknowledgeResponse,
   AcknowledgeAllOptions,
 } from "./types.js";
+
+// Runtime value exports (non-type)
+export { KBScope } from "./types.js";
