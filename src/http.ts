@@ -157,6 +157,7 @@ export class HTTPClient {
     fileName: string,
     fileData: Blob | Buffer | ArrayBuffer,
     contentType: string,
+    options?: { signal?: AbortSignal; timeoutMs?: number },
   ): Promise<T> {
     const url = this.buildUrl(path);
     const formData = new FormData();
@@ -172,22 +173,40 @@ export class HTTPClient {
     }
     formData.append("file", blob, fileName);
 
-    const response = await this.fetchFn(url, {
-      method: "POST",
-      headers: {
-        Authorization: this.headers["Authorization"],
-        "User-Agent": this.headers["User-Agent"],
-      },
-      body: formData,
-    });
-
-    await this.throwOnError(response);
-
-    const contentTypeResp = response.headers.get("content-type") ?? "";
-    if (contentTypeResp.includes("application/json")) {
-      return (await response.json()) as T;
+    // Uploads can legitimately take longer than a JSON round-trip, so default
+    // to 10× the base timeout. A hung connection with no timeout was previously
+    // able to block the caller indefinitely.
+    const controller = new AbortController();
+    const timeoutMs = options?.timeoutMs ?? this.timeout * 10;
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const onExternalAbort = () => controller.abort();
+    if (options?.signal) {
+      if (options.signal.aborted) controller.abort();
+      else options.signal.addEventListener("abort", onExternalAbort, { once: true });
     }
-    return (await response.text()) as T;
+
+    try {
+      const response = await this.fetchFn(url, {
+        method: "POST",
+        headers: {
+          Authorization: this.headers["Authorization"],
+          "User-Agent": this.headers["User-Agent"],
+        },
+        body: formData,
+        signal: controller.signal,
+      });
+
+      await this.throwOnError(response);
+
+      const contentTypeResp = response.headers.get("content-type") ?? "";
+      if (contentTypeResp.includes("application/json")) {
+        return (await response.json()) as T;
+      }
+      return (await response.text()) as T;
+    } finally {
+      clearTimeout(timer);
+      options?.signal?.removeEventListener("abort", onExternalAbort);
+    }
   }
 
   async *streamSSE(
