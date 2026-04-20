@@ -181,8 +181,12 @@ export class HTTPClient {
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     const onExternalAbort = () => controller.abort();
     if (options?.signal) {
+      // Attach the listener first, then check .aborted — reversing the
+      // order opens a race window where the signal can fire between the
+      // check and the addEventListener call, and a listener added after
+      // the event already fired does not receive it.
+      options.signal.addEventListener("abort", onExternalAbort, { once: true });
       if (options.signal.aborted) controller.abort();
-      else options.signal.addEventListener("abort", onExternalAbort, { once: true });
     }
 
     try {
