@@ -156,7 +156,24 @@ export class VoiceStreamInstance {
       if (evt.data instanceof ArrayBuffer) {
         event = { type: "audio", audio: new Uint8Array(evt.data) };
       } else {
-        const parsed = JSON.parse(evt.data as string);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let parsed: any;
+        try {
+          parsed = JSON.parse(evt.data as string);
+        } catch (err) {
+          event = {
+            type: "error",
+            error: `malformed JSON from voice server: ${(err as Error).message}`,
+          };
+          if (this.waitResolve) {
+            const resolve = this.waitResolve;
+            this.waitResolve = null;
+            resolve({ value: event, done: false });
+          } else {
+            this.eventQueue.push(event);
+          }
+          return;
+        }
         event = {
           type: parsed.type ?? "",
           sessionId: parsed.sessionId ?? parsed.session_id,
