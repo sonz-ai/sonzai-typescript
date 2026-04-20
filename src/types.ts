@@ -2761,6 +2761,37 @@ export interface ProjectConfigListResponse {
   configs: ProjectConfigEntry[];
 }
 
+/**
+ * Tenant-scoped config entry. Shape mirrors `ProjectConfigEntry` deliberately
+ * so callers that already handle project config can reuse their serialisation.
+ */
+export interface AccountConfigEntry {
+  key: string;
+  value: unknown;
+  updated_at?: string;
+}
+
+export interface AccountConfigListResponse {
+  configs: AccountConfigEntry[];
+}
+
+/**
+ * One entry in a post-processing model map — the cheaper model that
+ * latency-insensitive batch work routes to when the agent's chat turn uses a
+ * particular model. Sampling (temperature, maxTokens) is intentionally
+ * omitted; the server inherits it from the chat ModelConfig.
+ */
+export interface PostProcessingModelEntry {
+  provider: string;
+  model: string;
+}
+
+/**
+ * The full chat-model → post-processing-entry mapping stored under
+ * `POST_PROCESSING_MODEL_MAP_KEY`. The `"*"` key is a wildcard fallback.
+ */
+export type PostProcessingModelMap = Record<string, PostProcessingModelEntry>;
+
 export interface SetConfigOptions {
   value: unknown;
 }

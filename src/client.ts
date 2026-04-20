@@ -4,6 +4,7 @@ import { CustomLLM } from "./resources/custom-llm.js";
 import { EvalRuns } from "./resources/eval-runs.js";
 import { EvalTemplates } from "./resources/eval-templates.js";
 import { Knowledge } from "./resources/knowledge.js";
+import { AccountConfig } from "./resources/account-config.js";
 import { ProjectConfig } from "./resources/project-config.js";
 import { ProjectNotifications } from "./resources/project-notifications.js";
 import { Voices } from "./resources/voice.js";
@@ -107,6 +108,8 @@ export class Sonzai {
   readonly webhooks: Webhooks;
   /** Project-scoped configuration (key-value store). */
   readonly projectConfig: ProjectConfig;
+  /** Tenant-scoped ("account-level") configuration. Applies to every project in the tenant. */
+  readonly accountConfig: AccountConfig;
   /** Project-scoped custom LLM provider configuration. */
   readonly customLLM: CustomLLM;
   /** Project-scoped notification polling for backends. */
@@ -134,6 +137,7 @@ export class Sonzai {
     this.voices = new Voices(this.http);
     this.webhooks = new Webhooks(this.http);
     this.projectConfig = new ProjectConfig(this.http);
+    this.accountConfig = new AccountConfig(this.http);
     this.customLLM = new CustomLLM(this.http);
     this.projectNotifications = new ProjectNotifications(this.http);
   }
