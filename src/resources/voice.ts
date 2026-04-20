@@ -145,13 +145,19 @@ export class VoiceStreamInstance {
   private closed = false;
   private eventQueue: VoiceStreamEvent[] = [];
   private waitResolve: ((value: IteratorResult<VoiceStreamEvent>) => void) | null = null;
+  // Named references so close() can detach them — otherwise the listeners'
+  // closures keep the WebSocket reachable after close() and let late events
+  // keep pushing onto eventQueue.
+  private onMessage: (evt: { data: any }) => void;
+  private onClose: () => void;
+  private onError: (evt: any) => void;
 
   private constructor(ws: WebSocket) {
     this.ws = ws;
 
     ws.binaryType = "arraybuffer";
 
-    ws.addEventListener("message", (evt) => {
+    this.onMessage = (evt) => {
       let event: VoiceStreamEvent;
       if (evt.data instanceof ArrayBuffer) {
         event = { type: "audio", audio: new Uint8Array(evt.data) };
@@ -188,25 +194,29 @@ export class VoiceStreamInstance {
       } else {
         this.eventQueue.push(event);
       }
-    });
+    };
 
-    ws.addEventListener("close", () => {
+    this.onClose = () => {
       this.closed = true;
       if (this.waitResolve) {
         const resolve = this.waitResolve;
         this.waitResolve = null;
         resolve({ value: undefined as unknown as VoiceStreamEvent, done: true });
       }
-    });
+    };
 
-    ws.addEventListener("error", () => {
+    this.onError = () => {
       this.closed = true;
       if (this.waitResolve) {
         const resolve = this.waitResolve;
         this.waitResolve = null;
         resolve({ value: undefined as unknown as VoiceStreamEvent, done: true });
       }
-    });
+    };
+
+    ws.addEventListener("message", this.onMessage);
+    ws.addEventListener("close", this.onClose);
+    ws.addEventListener("error", this.onError);
   }
 
   /** Establish the WebSocket connection and authenticate. */
@@ -269,6 +279,11 @@ export class VoiceStreamInstance {
       this.closed = true;
       this.ws.close();
     }
+    // Detach listeners after close to release the WebSocket reference and
+    // stop any late events from growing eventQueue. Safe to call twice.
+    this.ws.removeEventListener("message", this.onMessage);
+    this.ws.removeEventListener("close", this.onClose);
+    this.ws.removeEventListener("error", this.onError);
   }
 
   /** Async iterator for incoming events. */
