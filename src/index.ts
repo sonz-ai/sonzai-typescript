@@ -370,6 +370,16 @@ export type {
   AcknowledgeNotificationsOptions,
   AcknowledgeResponse,
   AcknowledgeAllOptions,
+  // Support Tickets
+  SupportTicket,
+  SupportTicketComment,
+  SupportTicketHistory,
+  TicketSummary,
+  TicketListResponse,
+  TicketDetailResponse,
+  ListSupportTicketsOptions,
+  CreateTicketRequest,
+  AddCommentRequest,
 } from "./types.js";
 
 // Runtime value exports (non-type)

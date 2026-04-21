@@ -2972,3 +2972,108 @@ export interface PlatformModelsResponse {
   /** Enabled LLM providers and their available model variants. */
   providers: ModelsProviderEntry[];
 }
+
+// ---------------------------------------------------------------------------
+// Support Tickets
+// ---------------------------------------------------------------------------
+
+/** A single comment on a support ticket. */
+export interface SupportTicketComment {
+  comment_id: string;
+  ticket_id: string;
+  author_id: string;
+  author_email: string;
+  author_type: string;
+  content: string;
+  is_internal: boolean;
+  created_at: string;
+}
+
+/** A history/audit entry tracking a change to a support ticket. */
+export interface SupportTicketHistory {
+  history_id: string;
+  ticket_id: string;
+  changed_by: string;
+  changed_by_email: string;
+  field_changed: string;
+  old_value?: string;
+  new_value?: string;
+  created_at: string;
+}
+
+/** A full support ticket record, optionally hydrated with its comment thread. */
+export interface SupportTicket {
+  ticket_id: string;
+  tenant_id: string;
+  created_by: string;
+  created_by_email: string;
+  assigned_to?: string;
+  assigned_to_email?: string;
+  title: string;
+  description: string;
+  type: string;
+  status: string;
+  priority: string;
+  comment_count?: number;
+  comments?: SupportTicketComment[] | null;
+  created_at: string;
+  updated_at: string;
+  resolved_at?: string;
+}
+
+/** Condensed ticket fields returned in the list endpoint. */
+export interface TicketSummary {
+  ticket_id: string;
+  title: string;
+  type: string;
+  status: string;
+  priority: string;
+  created_by_email: string;
+  assigned_to_email?: string;
+  comment_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Response from `GET /api/v1/support/tickets`. */
+export interface TicketListResponse {
+  tickets: TicketSummary[] | null;
+  total: number;
+  has_more: boolean;
+}
+
+/** Response from `GET /api/v1/support/tickets/{ticketId}`. */
+export interface TicketDetailResponse {
+  ticket: SupportTicket;
+  history?: SupportTicketHistory[] | null;
+}
+
+/** Query options for listing the caller's support tickets. */
+export interface ListSupportTicketsOptions {
+  /** Items per page (server default 20, max 100). */
+  limit?: number;
+  /** Pagination offset (server default 0). */
+  offset?: number;
+  /** Filter by status (e.g. `open`, `in_progress`, `resolved`, `closed`). */
+  status?: string;
+  /** Filter by ticket type (e.g. `support`, `bug`, `feature_request`, `billing`). */
+  type?: string;
+}
+
+/** Body for `POST /api/v1/support/tickets`. */
+export interface CreateTicketRequest {
+  title: string;
+  description: string;
+  type: string;
+  priority?: string;
+}
+
+/** Body for `POST /api/v1/support/tickets/{ticketId}/comments`. */
+export interface AddCommentRequest {
+  content: string;
+  /**
+   * User comments are always external (`is_internal=false`). Staff-only
+   * internal comments are created via the admin portal, not this SDK.
+   */
+  is_internal?: boolean;
+}

@@ -7,6 +7,7 @@ import { Knowledge } from "./resources/knowledge.js";
 import { AccountConfig } from "./resources/account-config.js";
 import { ProjectConfig } from "./resources/project-config.js";
 import { ProjectNotifications } from "./resources/project-notifications.js";
+import { SupportTickets } from "./resources/support-tickets.js";
 import { Voices } from "./resources/voice.js";
 import { Webhooks } from "./resources/webhooks.js";
 import type { PlatformModelsResponse, SonzaiConfig } from "./types.js";
@@ -114,6 +115,8 @@ export class Sonzai {
   readonly customLLM: CustomLLM;
   /** Project-scoped notification polling for backends. */
   readonly projectNotifications: ProjectNotifications;
+  /** Support tickets for the authenticated user (list, create, comment, close). */
+  readonly supportTickets: SupportTickets;
 
   private readonly http: HTTPClient;
 
@@ -140,6 +143,7 @@ export class Sonzai {
     this.accountConfig = new AccountConfig(this.http);
     this.customLLM = new CustomLLM(this.http);
     this.projectNotifications = new ProjectNotifications(this.http);
+    this.supportTickets = new SupportTickets(this.http);
   }
 
   /**
