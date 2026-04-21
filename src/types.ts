@@ -2700,3 +2700,58 @@ export interface DeleteUserPersonaResponse {
 export interface GetToolSchemasResponse {
   tools?: ToolSchemaEntry[] | null;
 }
+
+// ---------------------------------------------------------------------------
+// Workbench
+// ---------------------------------------------------------------------------
+//
+// Mirrors the Go handler structs in
+// services/platform/api/internal/delivery/http/workbench_advance_time.go.
+// The AdvanceTime endpoint accepts async=true and returns a 202 body of
+// shape AdvanceTimeJob; poll GetAdvanceTimeJob until status is terminal.
+
+export interface AdvanceTimeOptions {
+  agentId: string;
+  userId: string;
+  simulatedHours: number;
+  simulatedBaseOffsetHours?: number;
+  instanceId?: string;
+  characterConfig?: Record<string, unknown>;
+  /** When true, server returns 202 + job_id. Poll getAdvanceTimeJob. */
+  runAsync?: boolean;
+}
+
+export interface WakeupExecution {
+  wakeup_id?: string;
+  check_type?: string;
+  intent?: string;
+  user_id?: string;
+  agent_id?: string;
+  /** Populated only when the proactive message generator is wired in. */
+  generated_message?: string;
+  [key: string]: unknown;
+}
+
+export interface AdvanceTimeResponse {
+  days_processed?: number;
+  consolidation_ran?: boolean;
+  weekly_consolidations?: number;
+  diary_entries_created?: number;
+  diary_entries?: DiaryEntry[] | null;
+  wakeups_executed?: WakeupExecution[] | null;
+  consolidation_processed?: number;
+  [key: string]: unknown;
+}
+
+/**
+ * 202 response body returned when AdvanceTime is invoked with async=true,
+ * and the body returned by getAdvanceTimeJob. State lives in Redis with a
+ * 30-minute TTL and terminal statuses carry either `result` or `error`.
+ */
+export interface AdvanceTimeJob {
+  job_id: string;
+  status: "running" | "succeeded" | "failed";
+  result?: AdvanceTimeResponse;
+  error?: string;
+  [key: string]: unknown;
+}

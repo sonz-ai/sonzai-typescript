@@ -12,6 +12,7 @@ import { Projects } from "./resources/projects.js";
 import { UserPersonas } from "./resources/user-personas.js";
 import { Voices } from "./resources/voice.js";
 import { Webhooks } from "./resources/webhooks.js";
+import { Workbench } from "./resources/workbench.js";
 import type { PlatformModelsResponse, SonzaiConfig } from "./types.js";
 
 const DEFAULT_BASE_URL = "https://api.sonz.ai";
@@ -123,6 +124,8 @@ export class Sonzai {
   readonly projects: Projects;
   /** User persona management (create, update, delete user personas). */
   readonly userPersonas: UserPersonas;
+  /** Workbench (time-machine / harness) operations for benchmarks and dev workflows. */
+  readonly workbench: Workbench;
 
   private readonly http: HTTPClient;
 
@@ -152,6 +155,7 @@ export class Sonzai {
     this.projectNotifications = new ProjectNotifications(this.http);
     this.projects = new Projects(this.http);
     this.userPersonas = new UserPersonas(this.http);
+    this.workbench = new Workbench(this.http);
   }
 
   /**

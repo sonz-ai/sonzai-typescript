@@ -912,8 +912,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Search agent memories via BM25
-         * @description Performs a BM25 text search across the agent's indexed memory facts. Returns scored results ordered by relevance.
+         * Search agent memories (semantic or BM25)
+         * @description Searches across the agent's indexed memory facts. When a user_id is provided and a vector index is wired (default in production), results are ranked by cosine similarity to the query embedding. Otherwise falls back to a BM25 token search. Pass `mode=bm25` to force the lexical path even when user_id is set.
          */
         get: operations["searchMemories"];
         put?: never;
@@ -3717,9 +3717,29 @@ export interface paths {
         put?: never;
         /**
          * Advance simulated time in the workbench
-         * @description Runs the same background CE workers (diary, consolidation, constellation) the production scheduler would run, for a chosen number of simulated days. Used by the workbench time-machine UI and long-horizon benchmarks.
+         * @description Runs the same background CE workers (diary, consolidation, constellation) the production scheduler would run, for a chosen number of simulated days. Used by the workbench time-machine UI and long-horizon benchmarks. Pass `async: true` to run in the background and poll `/workbench/advance-time/jobs/{jobId}` — useful when the full run exceeds your proxy's read timeout.
          */
         post: operations["workbenchAdvanceTime"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workbench/advance-time/jobs/{jobId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get async advance-time job status
+         * @description Returns the current state of an async advance-time job started via POST /workbench/advance-time with async=true. Status is one of 'running', 'succeeded', or 'failed'. Job state lives in Redis with a 30-minute TTL — poll within that window.
+         */
+        get: operations["workbenchGetAdvanceTimeJob"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3946,6 +3966,23 @@ export interface components {
              */
             acknowledged: number;
         };
+        ActiveCharacterSummary: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ActiveCharacterSummary.json
+             */
+            readonly $schema?: string;
+            /** Format: date-time */
+            billedAt?: string;
+            /** Format: double */
+            charChargeUsd: number;
+            /** Format: int64 */
+            highWaterMark: number;
+            month: string;
+            /** Format: double */
+            pricePerCharUsd: number;
+        };
         AddCommentRequest: {
             /**
              * Format: uri
@@ -3978,6 +4015,20 @@ export interface components {
             /** @description Job status (queued) */
             status: string;
         };
+        AdvanceTimeDiaryEntry: {
+            content: string;
+            date: string;
+            mood?: string;
+            topics?: string[] | null;
+        };
+        AdvanceTimeWakeup: {
+            agent_id: string;
+            check_type: string;
+            generated_message?: string;
+            intent: string;
+            user_id: string;
+            wakeup_id: string;
+        };
         AgentCapabilities: {
             /**
              * Format: uri
@@ -3993,6 +4044,7 @@ export interface components {
             knowledgeBase?: boolean;
             knowledgeBaseProjectId?: string;
             knowledgeBaseScopeMode?: string;
+            memoryMode?: string;
             musicGeneration: boolean;
             /** Format: date-time */
             musicUnlockedAt?: string;
@@ -4497,6 +4549,42 @@ export interface components {
             readonly $schema?: string;
             /** @description Whether the notification was consumed */
             success: boolean;
+        };
+        ContextEngineEventByType: {
+            /** Format: double */
+            chargeUsd: number;
+            /** Format: int64 */
+            count: number;
+            eventType: string;
+            /** Format: double */
+            unitPriceUsd: number;
+        };
+        ContextEngineEventSummary: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ContextEngineEventSummary.json
+             */
+            readonly $schema?: string;
+            byType: components["schemas"]["ContextEngineEventByType"][] | null;
+            month: string;
+            /** Format: double */
+            totalChargeUsd: number;
+            /** Format: int64 */
+            totalEvents: number;
+        };
+        ContractPayment: {
+            /** Format: double */
+            amountUsd: number;
+            /** Format: double */
+            creditUsd: number;
+            /** Format: date-time */
+            dueDate: string;
+            isOneTime?: boolean;
+            paid: boolean;
+            period: string;
+            /** Format: double */
+            serviceUsd: number;
         };
         CostBreakdownEntry: {
             /** Format: double */
@@ -5354,6 +5442,58 @@ export interface components {
             async: boolean;
             /** @description Whether the session end was accepted */
             success: boolean;
+        };
+        EnterpriseContract: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/EnterpriseContract.json
+             */
+            readonly $schema?: string;
+            autoRenew: boolean;
+            bonusCreditsPaid: boolean;
+            /** Format: double */
+            bonusCreditsUsd: number;
+            contractId: string;
+            /** Format: date-time */
+            createdAt: string;
+            createdBy?: string;
+            /** Format: int64 */
+            creditPeriodLimit?: number;
+            /** Format: double */
+            creditPortionUsd: number;
+            /** Format: date-time */
+            endDate: string;
+            notes?: string;
+            /** Format: double */
+            onetimeAmountUsd: number;
+            /** Format: double */
+            onetimeCreditUsd: number;
+            /** Format: double */
+            onetimeServiceUsd: number;
+            /** Format: double */
+            paymentAmountUsd: number;
+            /** Format: double */
+            paymentCreditUsd: number;
+            paymentFrequency: string;
+            paymentLinkUrl?: string;
+            paymentSchedule: components["schemas"]["ContractPayment"][] | null;
+            /** Format: double */
+            paymentServiceUsd: number;
+            /** Format: int64 */
+            servicePeriodLimit?: number;
+            /** Format: double */
+            servicePortionUsd: number;
+            /** Format: date-time */
+            startDate: string;
+            status: string;
+            stripePriceId?: string;
+            stripeSubscriptionId?: string;
+            tenantId: string;
+            /** Format: double */
+            totalValueUsd: number;
+            /** Format: date-time */
+            updatedAt: string;
         };
         ErrorDetail: {
             /** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
@@ -7271,6 +7411,15 @@ export interface components {
             /** @description Enterprise contract UUID to subscribe to */
             contractId: string;
         };
+        OrgBillingURLBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/OrgBillingURLBody.json
+             */
+            readonly $schema?: string;
+            url: string;
+        };
         OrgBillingVoucherInputBody: {
             /**
              * Format: uri
@@ -7281,6 +7430,13 @@ export interface components {
             /** @description Voucher code to redeem */
             code: string;
         };
+        OrgModelPriceItem: {
+            /** Format: double */
+            inputPricePer1K: number;
+            model: string;
+            /** Format: double */
+            outputPricePer1K: number;
+        };
         OrgResponse: {
             created_at: string;
             id: string;
@@ -7289,6 +7445,40 @@ export interface components {
             name: string;
             role: string;
             slug?: string;
+        };
+        OrgUsageSummaryBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/OrgUsageSummaryBody.json
+             */
+            readonly $schema?: string;
+            /** Format: double */
+            charPricePerMonthUsd: number;
+            /** Format: double */
+            creditBalanceUsd: number;
+            /** Format: double */
+            estimatedCostUsd: number;
+            /** Format: double */
+            inputTokenPricePer1KUsd: number;
+            /** Format: double */
+            outputTokenPricePer1KUsd: number;
+            /** Format: double */
+            tokenPricePer1KUsd: number;
+            /** Format: int64 */
+            totalCharacters: number;
+            /** Format: int64 */
+            totalInputTokens: number;
+            /** Format: int64 */
+            totalMessages: number;
+            /** Format: int64 */
+            totalOutputTokens: number;
+            /** Format: int64 */
+            totalProjects: number;
+            /** Format: int64 */
+            totalSessions: number;
+            /** Format: int64 */
+            totalTokens: number;
         };
         PaginatedAgentsResponse: {
             /**
@@ -7629,6 +7819,24 @@ export interface components {
             /** @description List of pending notifications */
             notifications: components["schemas"]["Notification"][] | null;
         };
+        ProjectServiceCharge: {
+            active: boolean;
+            /** Format: double */
+            amountUsd: number;
+            /** Format: date-time */
+            billedAt?: string;
+            chargeId: string;
+            chargeType: string;
+            /** Format: date-time */
+            createdAt: string;
+            createdBy?: string;
+            description: string;
+            projectId?: string;
+            projectName?: string;
+            tenantId: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         PropertySource: {
             doc_id: string;
             /** Format: date-time */
@@ -7642,6 +7850,20 @@ export interface components {
              */
             readonly $schema?: string;
             shifts: components["schemas"]["PersonalityShift"][] | null;
+        };
+        RedeemVoucherResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/RedeemVoucherResponse.json
+             */
+            readonly $schema?: string;
+            /** Format: double */
+            creditAmountUsd: number;
+            message: string;
+            /** Format: double */
+            newBalance: number;
+            voucherCode: string;
         };
         RegenerateAvatarInputBody: {
             /**
@@ -7903,6 +8125,29 @@ export interface components {
             factType: string;
             /** Format: double */
             importance: number;
+        };
+        ServiceUsageByOp: {
+            /** Format: double */
+            chargeUsd: number;
+            /** Format: int64 */
+            count: number;
+            operation: string;
+            /** Format: double */
+            unitPriceUsd: number;
+        };
+        ServiceUsageSummary: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ServiceUsageSummary.json
+             */
+            readonly $schema?: string;
+            byOperation: components["schemas"]["ServiceUsageByOp"][] | null;
+            month: string;
+            /** Format: double */
+            totalChargeUsd: number;
+            /** Format: int64 */
+            totalEvents: number;
         };
         SessionConfig: {
             name: string;
@@ -8339,6 +8584,57 @@ export interface components {
             slug?: string;
             tenant_id: string;
         };
+        TenantBillingLedgerEntry: {
+            /** Format: double */
+            amountCredits: number;
+            /** Format: double */
+            amountUsd: number;
+            /** Format: date-time */
+            createdAt: string;
+            createdBy?: string;
+            description: string;
+            entryId: string;
+            entryType: string;
+            tenantId: string;
+            /** Format: int64 */
+            tokens: number;
+            trafficSource?: string;
+        };
+        TenantBillingProfile: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/TenantBillingProfile.json
+             */
+            readonly $schema?: string;
+            billingMode: string;
+            /** Format: double */
+            charPricePerMonthUsd: number;
+            /** Format: double */
+            creditBalance: number;
+            currency: string;
+            eventPrices: {
+                [key: string]: number;
+            };
+            freeCreditGranted: boolean;
+            /** Format: double */
+            inputTokenPricePer1KUsd: number;
+            /** Format: double */
+            outputTokenPricePer1KUsd: number;
+            /** Format: double */
+            outstandingUsd: number;
+            /** Format: double */
+            postpaidLimitUsd: number;
+            servicePrices: {
+                [key: string]: number;
+            };
+            stripeCustomerId?: string;
+            tenantId: string;
+            /** Format: double */
+            tokenPricePer1KUsd: number;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         TextToSpeechInputBody: {
             /**
              * Format: uri
@@ -8612,6 +8908,11 @@ export interface components {
             inventory?: boolean;
             /** @description Enable/disable knowledge base search */
             knowledgeBase?: boolean;
+            /**
+             * @description Supplementary memory recall timing. 'sync' (default) blocks context build until recall returns so facts land in the current turn. 'async' lets the recall race a deadline — slow hits spill to the next turn for lower first-response latency.
+             * @enum {string}
+             */
+            memoryMode?: "sync" | "async";
             /** @description Enable/disable remember name tool */
             rememberName?: boolean;
             /** @description Enable/disable web search tool */
@@ -9193,6 +9494,278 @@ export interface components {
             /** Format: int64 */
             source_user_count: number;
             target_path?: string;
+        };
+        WorkbenchAdvanceTimeJobBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/WorkbenchAdvanceTimeJobBody.json
+             */
+            readonly $schema?: string;
+            agent_id?: string;
+            error?: string;
+            job_id: string;
+            result?: components["schemas"]["WorkbenchAdvanceTimeResponse"];
+            started_at?: string;
+            /** @description running | succeeded | failed */
+            status: string;
+            updated_at?: string;
+            user_id?: string;
+        };
+        WorkbenchAdvanceTimeResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/WorkbenchAdvanceTimeResponse.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            consolidation_processed: number;
+            consolidation_ran: boolean;
+            /** Format: int64 */
+            days_processed: number;
+            diary_entries?: components["schemas"]["AdvanceTimeDiaryEntry"][] | null;
+            /** Format: int64 */
+            diary_entries_created: number;
+            wakeups_executed: components["schemas"]["AdvanceTimeWakeup"][] | null;
+            /** Format: int64 */
+            weekly_consolidations: number;
+        };
+        WorkbenchGenerateBioBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/WorkbenchGenerateBioBody.json
+             */
+            readonly $schema?: string;
+            bio: string;
+            /** Format: double */
+            confidence?: number;
+            tone: string;
+        };
+        WorkbenchGenerateCharacterBehaviors: {
+            conflict_approach: string;
+            empathy_style: string;
+            question_frequency: string;
+            response_length: string;
+        };
+        WorkbenchGenerateCharacterBig5: {
+            /** Format: double */
+            agreeableness: number;
+            /** Format: double */
+            confidence?: number;
+            /** Format: double */
+            conscientiousness: number;
+            /** Format: double */
+            extraversion: number;
+            /** Format: double */
+            neuroticism: number;
+            /** Format: double */
+            openness: number;
+        };
+        WorkbenchGenerateCharacterBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/WorkbenchGenerateCharacterBody.json
+             */
+            readonly $schema?: string;
+            agent_id?: string;
+            existing?: boolean;
+            generated?: components["schemas"]["WorkbenchGenerateCharacterGenerated"];
+            usage?: components["schemas"]["WorkbenchGenerateCharacterUsage"];
+        };
+        WorkbenchGenerateCharacterGenerated: {
+            behaviors?: components["schemas"]["WorkbenchGenerateCharacterBehaviors"];
+            big5?: components["schemas"]["WorkbenchGenerateCharacterBig5"];
+            bio: string;
+            dimensions?: unknown;
+            initial_goals?: components["schemas"]["WorkbenchGenerateCharacterGoal"][] | null;
+            origin_prompt_instructions?: string;
+            personality_prompt: string;
+            preferences?: components["schemas"]["WorkbenchGenerateCharacterPreferences"];
+            primary_traits?: string[] | null;
+            speech_patterns?: string[] | null;
+            true_dislikes?: string[] | null;
+            true_interests?: string[] | null;
+            world_description?: string;
+        };
+        WorkbenchGenerateCharacterGoal: {
+            description: string;
+            /** Format: int64 */
+            priority?: number;
+            title: string;
+            type?: string;
+        };
+        WorkbenchGenerateCharacterPreferences: {
+            conversation_pace: string;
+            emotional_expression: string;
+            formality: string;
+            humor_style: string;
+        };
+        WorkbenchGenerateCharacterUsage: {
+            /** Format: int64 */
+            completionTokens: number;
+            model?: string;
+            /** Format: int64 */
+            promptTokens: number;
+            /** Format: int64 */
+            totalTokens: number;
+        };
+        WorkbenchGenerateSeedMemoriesBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/WorkbenchGenerateSeedMemoriesBody.json
+             */
+            readonly $schema?: string;
+            memories: components["schemas"]["WorkbenchSeedMemoryItem"][] | null;
+        };
+        WorkbenchPrepareBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/WorkbenchPrepareBody.json
+             */
+            readonly $schema?: string;
+            agent_id: string;
+            ready: boolean;
+            run_id?: string;
+            warm: boolean;
+        };
+        WorkbenchResetAgentBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/WorkbenchResetAgentBody.json
+             */
+            readonly $schema?: string;
+            agent_id: string;
+            message: string;
+            success: boolean;
+        };
+        WorkbenchSeedMemoryItem: {
+            content: string;
+            entities?: string[] | null;
+            factType: string;
+            /** Format: double */
+            importance: number;
+        };
+        WorkbenchSessionEndBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/WorkbenchSessionEndBody.json
+             */
+            readonly $schema?: string;
+            ok: boolean;
+        };
+        WorkbenchSimulateUserBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/WorkbenchSimulateUserBody.json
+             */
+            readonly $schema?: string;
+            end_session: boolean;
+            message: string;
+        };
+        WorkbenchStateBig5: {
+            /** Format: double */
+            agreeableness: number;
+            /** Format: double */
+            conscientiousness: number;
+            /** Format: double */
+            extraversion: number;
+            /** Format: double */
+            neuroticism: number;
+            /** Format: double */
+            openness: number;
+        };
+        WorkbenchStateDiaryEntry: {
+            content: string;
+            date: string;
+            mood?: string;
+            topics?: string[] | null;
+        };
+        WorkbenchStateDimensions: {
+            /** Format: double */
+            aesthetic: number;
+            /** Format: double */
+            assertiveness: number;
+            /** Format: double */
+            compassion: number;
+            /** Format: double */
+            enthusiasm: number;
+            /** Format: double */
+            industriousness: number;
+            /** Format: double */
+            intellect: number;
+            /** Format: double */
+            orderliness: number;
+            /** Format: double */
+            politeness: number;
+            /** Format: double */
+            volatility: number;
+            /** Format: double */
+            withdrawal: number;
+        };
+        WorkbenchStateFact: {
+            entities?: string[] | null;
+            fact_type: string;
+            /** Format: double */
+            importance: number;
+            sentiment?: string;
+            text: string;
+            topic_tags?: string[] | null;
+        };
+        WorkbenchStateHabit: {
+            category: string;
+            formed: boolean;
+            name: string;
+            /** Format: double */
+            strength: number;
+        };
+        WorkbenchStateInterest: {
+            category: string;
+            /** Format: double */
+            confidence: number;
+            topic: string;
+        };
+        WorkbenchStateMood: {
+            /** Format: double */
+            affiliation: number;
+            /** Format: double */
+            arousal: number;
+            label: string;
+            /** Format: double */
+            tension: number;
+            /** Format: double */
+            valence: number;
+        };
+        WorkbenchStateRelation: {
+            /** Format: int64 */
+            agent_to_user: number;
+            /** Format: int64 */
+            user_to_agent: number;
+        };
+        WorkbenchStateResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/WorkbenchStateResponse.json
+             */
+            readonly $schema?: string;
+            big5?: components["schemas"]["WorkbenchStateBig5"];
+            diary_entries: components["schemas"]["WorkbenchStateDiaryEntry"][] | null;
+            dimensions?: components["schemas"]["WorkbenchStateDimensions"];
+            facts: components["schemas"]["WorkbenchStateFact"][] | null;
+            habits: components["schemas"]["WorkbenchStateHabit"][] | null;
+            interests: components["schemas"]["WorkbenchStateInterest"][] | null;
+            mood?: components["schemas"]["WorkbenchStateMood"];
+            /** Format: double */
+            next_event_hours: number;
+            relationship?: components["schemas"]["WorkbenchStateRelation"];
         };
     };
     responses: never;
@@ -11456,8 +12029,12 @@ export interface operations {
             query: {
                 /** @description Search query text */
                 q: string;
+                /** @description Optional user ID. When set and a vector index is available, search uses cosine similarity over fact embeddings; otherwise falls back to BM25. */
+                user_id?: string;
                 /** @description Optional instance ID for scoping */
                 instance_id?: string;
+                /** @description Retrieval mode: 'semantic' (requires user_id), 'bm25', or 'auto' (default). 'auto' picks semantic when user_id is set and a vector index is wired. */
+                mode?: string;
                 /** @description Max results to return (default 20, max 100) */
                 limit?: string;
             };
@@ -14614,7 +15191,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["TenantBillingProfile"];
                 };
             };
             /** @description Error */
@@ -14647,7 +15224,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["OrgBillingURLBody"];
                 };
             };
             /** @description Error */
@@ -14676,7 +15253,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["OrgBillingURLBody"];
                 };
             };
             /** @description Error */
@@ -14708,7 +15285,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["ActiveCharacterSummary"];
                 };
             };
             /** @description Error */
@@ -14737,7 +15314,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["EnterpriseContract"];
                 };
             };
             /** @description Error */
@@ -14770,7 +15347,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["OrgBillingURLBody"];
                 };
             };
             /** @description Error */
@@ -14802,7 +15379,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["ContextEngineEventSummary"];
                 };
             };
             /** @description Error */
@@ -14834,7 +15411,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["TenantBillingLedgerEntry"][] | null;
                 };
             };
             /** @description Error */
@@ -14863,7 +15440,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["OrgModelPriceItem"][] | null;
                 };
             };
             /** @description Error */
@@ -14892,7 +15469,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["ProjectServiceCharge"][] | null;
                 };
             };
             /** @description Error */
@@ -14924,7 +15501,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["ServiceUsageSummary"];
                 };
             };
             /** @description Error */
@@ -14956,7 +15533,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["OrgUsageSummaryBody"];
                 };
             };
             /** @description Error */
@@ -14989,7 +15566,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["RedeemVoucherResponse"];
                 };
             };
             /** @description Error */
@@ -17700,7 +18277,39 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["WorkbenchAdvanceTimeResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    workbenchGetAdvanceTimeJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Async advance-time job UUID */
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkbenchAdvanceTimeJobBody"];
                 };
             };
             /** @description Error */
@@ -17766,7 +18375,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["WorkbenchGenerateBioBody"];
                 };
             };
             /** @description Error */
@@ -17799,7 +18408,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["WorkbenchGenerateCharacterBody"];
                 };
             };
             /** @description Error */
@@ -17832,7 +18441,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["WorkbenchGenerateSeedMemoriesBody"];
                 };
             };
             /** @description Error */
@@ -17865,7 +18474,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["WorkbenchPrepareBody"];
                 };
             };
             /** @description Error */
@@ -17898,7 +18507,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["WorkbenchResetAgentBody"];
                 };
             };
             /** @description Error */
@@ -17931,7 +18540,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["WorkbenchSessionEndBody"];
                 };
             };
             /** @description Error */
@@ -17964,7 +18573,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["WorkbenchSimulateUserBody"];
                 };
             };
             /** @description Error */
@@ -17997,7 +18606,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["WorkbenchStateResponse"];
                 };
             };
             /** @description Error */

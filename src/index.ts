@@ -319,6 +319,11 @@ export type {
   DeleteUserPersonaResponse,
   // Tool Schemas (BYO-LLM, distinct from custom tool list)
   GetToolSchemasResponse,
+  // Workbench
+  AdvanceTimeOptions,
+  AdvanceTimeResponse,
+  AdvanceTimeJob,
+  WakeupExecution,
 } from "./types.js";
 
 // Runtime value exports (non-type)
