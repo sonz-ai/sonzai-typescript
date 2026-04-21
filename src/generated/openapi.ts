@@ -8363,6 +8363,8 @@ export interface components {
             metadata?: {
                 [key: string]: unknown;
             };
+            session_id?: string;
+            source_id?: string;
             source_type?: string;
             updated_at: string;
         };
