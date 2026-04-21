@@ -1,5 +1,6 @@
 import { HTTPClient } from "./http.js";
 import { Agents } from "./resources/agents.js";
+import { Analytics } from "./resources/analytics.js";
 import { CustomLLM } from "./resources/custom-llm.js";
 import { EvalRuns } from "./resources/eval-runs.js";
 import { EvalTemplates } from "./resources/eval-templates.js";
@@ -7,6 +8,8 @@ import { Knowledge } from "./resources/knowledge.js";
 import { AccountConfig } from "./resources/account-config.js";
 import { ProjectConfig } from "./resources/project-config.js";
 import { ProjectNotifications } from "./resources/project-notifications.js";
+import { Projects } from "./resources/projects.js";
+import { UserPersonas } from "./resources/user-personas.js";
 import { Voices } from "./resources/voice.js";
 import { Webhooks } from "./resources/webhooks.js";
 import type { PlatformModelsResponse, SonzaiConfig } from "./types.js";
@@ -100,6 +103,8 @@ declare const Deno:
  */
 export class Sonzai {
   readonly agents: Agents;
+  /** Usage, cost, and real-time analytics for the current project. */
+  readonly analytics: Analytics;
   /** Project-scoped knowledge base (documents, graph, schemas, search, analytics). */
   readonly knowledge: Knowledge;
   readonly evalTemplates: EvalTemplates;
@@ -114,6 +119,10 @@ export class Sonzai {
   readonly customLLM: CustomLLM;
   /** Project-scoped notification polling for backends. */
   readonly projectNotifications: ProjectNotifications;
+  /** Project management (create, update, delete projects and API keys). */
+  readonly projects: Projects;
+  /** User persona management (create, update, delete user personas). */
+  readonly userPersonas: UserPersonas;
 
   private readonly http: HTTPClient;
 
@@ -131,6 +140,7 @@ export class Sonzai {
     });
 
     this.agents = new Agents(this.http);
+    this.analytics = new Analytics(this.http);
     this.knowledge = new Knowledge(this.http);
     this.evalTemplates = new EvalTemplates(this.http);
     this.evalRuns = new EvalRuns(this.http);
@@ -140,6 +150,8 @@ export class Sonzai {
     this.accountConfig = new AccountConfig(this.http);
     this.customLLM = new CustomLLM(this.http);
     this.projectNotifications = new ProjectNotifications(this.http);
+    this.projects = new Projects(this.http);
+    this.userPersonas = new UserPersonas(this.http);
   }
 
   /**

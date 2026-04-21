@@ -85,6 +85,7 @@ import type {
   UsersResponse,
   WakeupsResponse,
   WisdomAuditResponse,
+  GetToolSchemasResponse,
 } from "../types.js";
 import { CustomStates } from "./custom-states.js";
 import { Generation } from "./generation.js";
@@ -1017,6 +1018,14 @@ export class Agents {
     requireNonEmpty(agentId, "agentId");
     return this.http.get<ToolSchemasResponse>(
       `/api/v1/agents/${agentId}/tools`,
+    );
+  }
+
+  /** Get OpenAPI-style tool schemas for BYO-LLM tool calling. */
+  async getToolSchemas(agentId: string): Promise<GetToolSchemasResponse> {
+    requireNonEmpty(agentId, "agentId");
+    return this.http.get<GetToolSchemasResponse>(
+      `/api/v1/agents/${agentId}/tools/schemas`,
     );
   }
 

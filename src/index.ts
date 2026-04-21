@@ -370,6 +370,26 @@ export type {
   AcknowledgeNotificationsOptions,
   AcknowledgeResponse,
   AcknowledgeAllOptions,
+  // Projects
+  Project,
+  ProjectListResponse,
+  ProjectAPIKey,
+  ProjectAPIKeyListResponse,
+  CreateProjectOptions,
+  UpdateProjectDetailsOptions,
+  DeleteProjectResponse,
+  CreateAPIKeyOptions,
+  CreateAPIKeyResponse,
+  RevokeAPIKeyResponse,
+  // User Personas (API resource)
+  UserPersonaRecord,
+  UserPersonaListResponse,
+  CreateUserPersonaOptions,
+  UpdateUserPersonaOptions,
+  DeleteUserPersonaResponse,
+  // Tool Schemas (distinct from custom tool list)
+  ToolSchemaEntry,
+  GetToolSchemasResponse,
 } from "./types.js";
 
 // Runtime value exports (non-type)

@@ -2972,3 +2972,129 @@ export interface PlatformModelsResponse {
   /** Enabled LLM providers and their available model variants. */
   providers: ModelsProviderEntry[];
 }
+
+// ---------------------------------------------------------------------------
+// Projects
+// ---------------------------------------------------------------------------
+
+export interface Project {
+  project_id: string;
+  tenant_id: string;
+  name: string;
+  game_name: string;
+  environment: string;
+  created_at: string;
+  is_active: boolean;
+}
+
+export interface ProjectListResponse {
+  projects?: Project[] | null;
+}
+
+export interface ProjectAPIKey {
+  key_id: string;
+  project_id: string;
+  tenant_id: string;
+  name: string;
+  key_prefix: string;
+  created_by: string;
+  created_at: string;
+  expires_at?: string;
+  last_used_at?: string;
+  is_active: boolean;
+  is_admin_managed: boolean;
+  scopes?: string[] | null;
+}
+
+export interface ProjectAPIKeyListResponse {
+  keys?: ProjectAPIKey[] | null;
+}
+
+export interface CreateProjectOptions {
+  name: string;
+  environment?: string;
+}
+
+export interface UpdateProjectDetailsOptions {
+  name?: string;
+  gameName?: string;
+  environment?: string;
+}
+
+export interface DeleteProjectResponse {
+  status: string;
+}
+
+export interface CreateAPIKeyOptions {
+  name?: string;
+  expiresDays?: number;
+  scopes?: string[];
+}
+
+export interface CreateAPIKeyResponse {
+  key_id: string;
+  project_id: string;
+  tenant_id: string;
+  name: string;
+  key_prefix: string;
+  key: string;
+  is_active: boolean;
+  scopes?: string[] | null;
+  created_at: string;
+  created_by?: string;
+  expires_at?: string;
+}
+
+export interface RevokeAPIKeyResponse {
+  success: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// User Personas (API resource)
+// ---------------------------------------------------------------------------
+
+export interface UserPersonaRecord {
+  persona_id: string;
+  name: string;
+  description: string;
+  style: string;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+  tenant_id?: string;
+}
+
+export interface UserPersonaListResponse {
+  personas?: UserPersonaRecord[] | null;
+}
+
+export interface CreateUserPersonaOptions {
+  name: string;
+  description?: string;
+  style?: string;
+}
+
+export interface UpdateUserPersonaOptions {
+  name?: string;
+  description?: string;
+  style?: string;
+}
+
+export interface DeleteUserPersonaResponse {
+  success: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Tool Schemas (distinct from custom tool list)
+// ---------------------------------------------------------------------------
+
+export interface ToolSchemaEntry {
+  name: string;
+  description: string;
+  endpoint: string;
+  parameters?: Record<string, unknown>;
+}
+
+export interface GetToolSchemasResponse {
+  tools?: ToolSchemaEntry[] | null;
+}
