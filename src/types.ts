@@ -1501,6 +1501,10 @@ export interface GenerateCharacterOptions {
   gender?: string;
   description?: string;
   fields?: string[];
+  /** LLM provider for generation ("gemini" | "openrouter" | "xai"). Platform defaults to gemini when omitted. */
+  provider?: string;
+  /** Optional model override for the chosen provider. */
+  model?: string;
 }
 
 export interface SDKInteractionPreferences {
@@ -1553,6 +1557,10 @@ export interface GenerateAndCreateOptions {
   fields?: string[];
   projectId?: string;
   language?: string;
+  /** LLM provider for generation ("gemini" | "openrouter" | "xai"). Platform defaults to gemini when omitted. */
+  provider?: string;
+  /** Optional model override for the chosen provider. */
+  model?: string;
 }
 
 export interface GenerateAndCreateResponse {

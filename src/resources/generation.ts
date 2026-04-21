@@ -49,6 +49,8 @@ export class Generation {
     if (options.gender) body.gender = options.gender;
     if (options.description) body.description = options.description;
     if (options.fields) body.fields = options.fields;
+    if (options.provider) body.provider = options.provider;
+    if (options.model) body.model = options.model;
 
     return this.http.post<GenerateCharacterResponse>(
       "/api/v1/agents/generate-character",
@@ -70,6 +72,8 @@ export class Generation {
     if (options.fields) body.fields = options.fields;
     if (options.projectId) body.project_id = options.projectId;
     if (options.language) body.language = options.language;
+    if (options.provider) body.provider = options.provider;
+    if (options.model) body.model = options.model;
 
     return this.http.post<GenerateAndCreateResponse>(
       "/api/v1/agents/generate-and-create",
