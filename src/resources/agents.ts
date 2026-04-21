@@ -96,6 +96,7 @@ import { Personality } from "./personality.js";
 import { Sessions } from "./sessions.js";
 import { Inventory } from "./inventory.js";
 import { Priming } from "./priming.js";
+import { Schedules } from "./schedules.js";
 import { Voice } from "./voice.js";
 
 export class Agents {
@@ -109,6 +110,7 @@ export class Agents {
   readonly generation: Generation;
   readonly priming: Priming;
   readonly inventory: Inventory;
+  readonly schedules: Schedules;
 
   constructor(private readonly http: HTTPClient) {
     this.memory = new Memory(http);
@@ -121,6 +123,7 @@ export class Agents {
     this.generation = new Generation(http);
     this.priming = new Priming(http);
     this.inventory = new Inventory(http);
+    this.schedules = new Schedules(http);
   }
 
   // -- Agent CRUD --

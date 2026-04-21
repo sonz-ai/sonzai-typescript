@@ -3934,7 +3934,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AcknowledgeAllProjectNotificationsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/AcknowledgeAllProjectNotificationsOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -3947,7 +3947,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AcknowledgeProjectNotificationsInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/AcknowledgeProjectNotificationsInputBody.json
              */
             readonly $schema?: string;
             /** @description IDs of notifications to acknowledge */
@@ -3957,7 +3957,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AcknowledgeProjectNotificationsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/AcknowledgeProjectNotificationsOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -3970,7 +3970,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ActiveCharacterSummary.json
+             * @example https://api.sonz.ai/api/v1/schemas/ActiveCharacterSummary.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -3987,7 +3987,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AddCommentRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/AddCommentRequest.json
              */
             readonly $schema?: string;
             content: string;
@@ -3997,7 +3997,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AddContentRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/AddContentRequest.json
              */
             readonly $schema?: string;
             content: components["schemas"]["PrimeContentBlock"][] | null;
@@ -4007,7 +4007,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AddUserContentHumaOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/AddUserContentHumaOutputBody.json
              */
             readonly $schema?: string;
             /** @description Import job UUID for tracking */
@@ -4033,7 +4033,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AgentCapabilities.json
+             * @example https://api.sonz.ai/api/v1/schemas/AgentCapabilities.json
              */
             readonly $schema?: string;
             customTools?: components["schemas"]["CustomToolDefinition"][] | null;
@@ -4065,7 +4065,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AgentDetailResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/AgentDetailResponse.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -4099,7 +4099,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AgentDialogueInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/AgentDialogueInputBody.json
              */
             readonly $schema?: string;
             /** @description Pre-built enriched context JSON */
@@ -4121,7 +4121,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AgentDialogueOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/AgentDialogueOutputBody.json
              */
             readonly $schema?: string;
             /** @description Agent dialogue response */
@@ -4149,7 +4149,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AgentInstance.json
+             * @example https://api.sonz.ai/api/v1/schemas/AgentInstance.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -4167,7 +4167,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AgentKBSearchInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/AgentKBSearchInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -4190,7 +4190,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AnalyticsOverview.json
+             * @example https://api.sonz.ai/api/v1/schemas/AnalyticsOverview.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -4208,7 +4208,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AnalyticsRealtimeResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/AnalyticsRealtimeResponse.json
              */
             readonly $schema?: string;
             daily: components["schemas"]["DailyStatsEntry"][] | null;
@@ -4218,7 +4218,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AtomicFact.json
+             * @example https://api.sonz.ai/api/v1/schemas/AtomicFact.json
              */
             readonly $schema?: string;
             agent_framing?: string;
@@ -4279,7 +4279,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BatchGetPersonalitiesInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/BatchGetPersonalitiesInputBody.json
              */
             readonly $schema?: string;
             /** @description List of agent IDs (max 50) */
@@ -4289,7 +4289,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BatchImportRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/BatchImportRequest.json
              */
             readonly $schema?: string;
             source?: string;
@@ -4309,7 +4309,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BatchImportUsersHumaOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/BatchImportUsersHumaOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -4339,7 +4339,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BatchInventoryRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/BatchInventoryRequest.json
              */
             readonly $schema?: string;
             items: components["schemas"]["BatchInventoryItem"][] | null;
@@ -4349,7 +4349,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BatchInventoryResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/BatchInventoryResponse.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -4370,7 +4370,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BatchPersonalityResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/BatchPersonalityResponse.json
              */
             readonly $schema?: string;
             personalities: {
@@ -4451,7 +4451,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BreakthroughsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/BreakthroughsResponse.json
              */
             readonly $schema?: string;
             breakthroughs: components["schemas"]["Breakthrough"][] | null;
@@ -4467,7 +4467,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CachedModelsPayload.json
+             * @example https://api.sonz.ai/api/v1/schemas/CachedModelsPayload.json
              */
             readonly $schema?: string;
             default_model: string;
@@ -4488,7 +4488,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ChatSSEChunk.json
+             * @example https://api.sonz.ai/api/v1/schemas/ChatSSEChunk.json
              */
             readonly $schema?: string;
             /**
@@ -4533,7 +4533,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ConstellationResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ConstellationResponse.json
              */
             readonly $schema?: string;
             edges: components["schemas"]["Edge"][] | null;
@@ -4544,7 +4544,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ConsumeNotificationOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ConsumeNotificationOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the notification was consumed */
@@ -4563,7 +4563,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ContextEngineEventSummary.json
+             * @example https://api.sonz.ai/api/v1/schemas/ContextEngineEventSummary.json
              */
             readonly $schema?: string;
             byType: components["schemas"]["ContextEngineEventByType"][] | null;
@@ -4602,7 +4602,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CostBreakdownResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/CostBreakdownResponse.json
              */
             readonly $schema?: string;
             byAgent: components["schemas"]["CostBreakdownEntry"][] | null;
@@ -4677,7 +4677,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CostResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/CostResponse.json
              */
             readonly $schema?: string;
             byCharacter?: components["schemas"]["CostByCharacter"][] | null;
@@ -4719,7 +4719,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateAPIKeyInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateAPIKeyInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -4736,7 +4736,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateAPIKeyOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateAPIKeyOutputBody.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -4758,7 +4758,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateAgentBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateAgentBody.json
              */
             readonly $schema?: string;
             /** @description Optional pre-set agent UUID */
@@ -4896,7 +4896,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateConstellationNodeInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateConstellationNodeInputBody.json
              */
             readonly $schema?: string;
             /** @description Human-readable description */
@@ -4917,7 +4917,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateCustomStateInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateCustomStateInputBody.json
              */
             readonly $schema?: string;
             /** @description Content type (text or json, defaults to text) */
@@ -4937,7 +4937,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateCustomToolInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateCustomToolInputBody.json
              */
             readonly $schema?: string;
             /** @description Tool description */
@@ -4951,7 +4951,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateEvalTemplateInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateEvalTemplateInputBody.json
              */
             readonly $schema?: string;
             /** @description Evaluation categories */
@@ -4981,7 +4981,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateFactInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateFactInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -5013,7 +5013,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateGoalInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateGoalInputBody.json
              */
             readonly $schema?: string;
             /** @description Goal description */
@@ -5036,7 +5036,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateHabitInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateHabitInputBody.json
              */
             readonly $schema?: string;
             /** @description Habit category (defaults to behavioral) */
@@ -5059,7 +5059,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateInstanceInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateInstanceInputBody.json
              */
             readonly $schema?: string;
             /** @description Optional description */
@@ -5071,7 +5071,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateProjectInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateProjectInputBody.json
              */
             readonly $schema?: string;
             /** @description Environment (production / development / staging); defaults to production */
@@ -5083,7 +5083,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateScheduleInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateScheduleInputBody.json
              */
             readonly $schema?: string;
             /** @description Optional quiet-hours/days filter: {hours:{start,end},days_of_week}. */
@@ -5103,7 +5103,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateScheduleOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateScheduleOutputBody.json
              */
             readonly $schema?: string;
             enabled: boolean;
@@ -5115,7 +5115,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateTicketRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateTicketRequest.json
              */
             readonly $schema?: string;
             description: string;
@@ -5127,7 +5127,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateUserPersonaInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateUserPersonaInputBody.json
              */
             readonly $schema?: string;
             /** @description Free-text persona description */
@@ -5141,7 +5141,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CustomLLMConfigResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/CustomLLMConfigResponse.json
              */
             readonly $schema?: string;
             api_key_prefix: string;
@@ -5155,7 +5155,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CustomState.json
+             * @example https://api.sonz.ai/api/v1/schemas/CustomState.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -5175,7 +5175,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CustomToolDefinition.json
+             * @example https://api.sonz.ai/api/v1/schemas/CustomToolDefinition.json
              */
             readonly $schema?: string;
             description: string;
@@ -5193,7 +5193,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DeleteAgentOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/DeleteAgentOutputBody.json
              */
             readonly $schema?: string;
             /** @description Counts of deleted sub-resources */
@@ -5211,7 +5211,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DeleteCustomToolOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/DeleteCustomToolOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -5220,7 +5220,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DeleteEvalRunOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/DeleteEvalRunOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -5229,7 +5229,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DeleteEvalTemplateOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/DeleteEvalTemplateOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -5238,7 +5238,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DeleteInstanceOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/DeleteInstanceOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the instance was deleted */
@@ -5248,7 +5248,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DeleteProjectOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/DeleteProjectOutputBody.json
              */
             readonly $schema?: string;
             /** @description Deletion status — "deleted" on success */
@@ -5258,7 +5258,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DeleteUserPersonaOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/DeleteUserPersonaOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -5267,7 +5267,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DeleteWisdomResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/DeleteWisdomResponse.json
              */
             readonly $schema?: string;
             fact_id: string;
@@ -5300,7 +5300,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DiaryPolymorphicResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/DiaryPolymorphicResponse.json
              */
             readonly $schema?: string;
             entries?: components["schemas"]["DiaryEntry"][] | null;
@@ -5354,7 +5354,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DirectUpdateRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/DirectUpdateRequest.json
              */
             readonly $schema?: string;
             properties: {
@@ -5365,7 +5365,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DirectUpdateResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/DirectUpdateResponse.json
              */
             readonly $schema?: string;
             error?: string;
@@ -5391,7 +5391,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EffectivePostProcessingModelOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/EffectivePostProcessingModelOutputBody.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -5405,7 +5405,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EndSessionInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/EndSessionInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -5435,7 +5435,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EndSessionOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/EndSessionOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether processing continues asynchronously */
@@ -5447,7 +5447,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EnterpriseContract.json
+             * @example https://api.sonz.ai/api/v1/schemas/EnterpriseContract.json
              */
             readonly $schema?: string;
             autoRenew: boolean;
@@ -5507,7 +5507,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ErrorModel.json
+             * @example https://api.sonz.ai/api/v1/schemas/ErrorModel.json
              */
             readonly $schema?: string;
             /**
@@ -5581,7 +5581,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EvalOnlyRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/EvalOnlyRequest.json
              */
             readonly $schema?: string;
             /** @description Optional adaptation-eval template UUID */
@@ -5597,7 +5597,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EvalRun.json
+             * @example https://api.sonz.ai/api/v1/schemas/EvalRun.json
              */
             readonly $schema?: string;
             adaptation_result: unknown;
@@ -5642,7 +5642,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EvalRunEvent.json
+             * @example https://api.sonz.ai/api/v1/schemas/EvalRunEvent.json
              */
             readonly $schema?: string;
             /** @description Adaptation-evaluation result payload (final_status only) */
@@ -5660,7 +5660,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EvalTemplate.json
+             * @example https://api.sonz.ai/api/v1/schemas/EvalTemplate.json
              */
             readonly $schema?: string;
             categories: components["schemas"]["EvalCategory"][] | null;
@@ -5685,7 +5685,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EvaluateAcceptedBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/EvaluateAcceptedBody.json
              */
             readonly $schema?: string;
             /** @description Eval run UUID — poll GET /eval-runs/{runId} for the result */
@@ -5697,7 +5697,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EvaluateRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/EvaluateRequest.json
              */
             readonly $schema?: string;
             /** @description Optional adaptation-eval template UUID; defaults to tenant's first adaptation template */
@@ -5736,7 +5736,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/FactHistoryResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/FactHistoryResponse.json
              */
             readonly $schema?: string;
             current: components["schemas"]["AtomicFact"];
@@ -5746,7 +5746,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ForkAgentInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ForkAgentInputBody.json
              */
             readonly $schema?: string;
             /** @description Display name for the forked agent */
@@ -5756,7 +5756,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ForkResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ForkResponse.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -5768,7 +5768,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ForkStatusResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ForkStatusResponse.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -5787,7 +5787,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GenerateAndCreateInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GenerateAndCreateInputBody.json
              */
             readonly $schema?: string;
             /** @description Pre-existing agent UUID (optional) */
@@ -5813,7 +5813,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GenerateBioInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GenerateBioInputBody.json
              */
             readonly $schema?: string;
             /** @description Current bio to improve upon */
@@ -5837,7 +5837,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GenerateBioOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GenerateBioOutputBody.json
              */
             readonly $schema?: string;
             /** @description Generated bio text */
@@ -5854,7 +5854,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GenerateCharacterInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GenerateCharacterInputBody.json
              */
             readonly $schema?: string;
             /** @description Pre-existing agent UUID (optional) */
@@ -5878,7 +5878,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GenerateImageInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GenerateImageInputBody.json
              */
             readonly $schema?: string;
             /** @description Model to use (default: gemini-3.1-flash-image-preview) */
@@ -5896,7 +5896,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GenerateImageOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GenerateImageOutputBody.json
              */
             readonly $schema?: string;
             /** @description GCS URI of the image */
@@ -5919,7 +5919,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GenerateSeedMemoriesInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GenerateSeedMemoriesInputBody.json
              */
             readonly $schema?: string;
             /** @description Agent display name */
@@ -5953,7 +5953,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GenerateSeedMemoriesOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GenerateSeedMemoriesOutputBody.json
              */
             readonly $schema?: string;
             /** @description Generated seed memories */
@@ -5963,7 +5963,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GetAgentModelsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GetAgentModelsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Default LLM model */
@@ -5977,7 +5977,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GetToolSchemasOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GetToolSchemasOutputBody.json
              */
             readonly $schema?: string;
             /** @description Available tools for this agent */
@@ -5987,7 +5987,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/Goal.json
+             * @example https://api.sonz.ai/api/v1/schemas/Goal.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -6011,7 +6011,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GoalsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/GoalsResponse.json
              */
             readonly $schema?: string;
             goals: components["schemas"]["Goal"][] | null;
@@ -6026,7 +6026,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/Habit.json
+             * @example https://api.sonz.ai/api/v1/schemas/Habit.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -6056,7 +6056,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/HabitsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/HabitsResponse.json
              */
             readonly $schema?: string;
             habits: components["schemas"]["Habit"][] | null;
@@ -6065,7 +6065,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ImportJob.json
+             * @example https://api.sonz.ai/api/v1/schemas/ImportJob.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -6176,7 +6176,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/InterestsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/InterestsResponse.json
              */
             readonly $schema?: string;
             interests: components["schemas"]["Interest"][] | null;
@@ -6198,7 +6198,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/InventoryReadResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/InventoryReadResponse.json
              */
             readonly $schema?: string;
             groups?: components["schemas"]["GroupResult"][] | null;
@@ -6214,7 +6214,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/InventoryWriteRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/InventoryWriteRequest.json
              */
             readonly $schema?: string;
             action: string;
@@ -6230,7 +6230,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/InventoryWriteResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/InventoryWriteResponse.json
              */
             readonly $schema?: string;
             candidates?: components["schemas"]["KbCandidate"][] | null;
@@ -6261,7 +6261,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KBAnalyticsRule.json
+             * @example https://api.sonz.ai/api/v1/schemas/KBAnalyticsRule.json
              */
             readonly $schema?: string;
             config: unknown;
@@ -6306,7 +6306,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KBDocument.json
+             * @example https://api.sonz.ai/api/v1/schemas/KBDocument.json
              */
             readonly $schema?: string;
             checksum: string;
@@ -6357,7 +6357,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KBEntitySchema.json
+             * @example https://api.sonz.ai/api/v1/schemas/KBEntitySchema.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -6375,7 +6375,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KBNode.json
+             * @example https://api.sonz.ai/api/v1/schemas/KBNode.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -6420,7 +6420,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KBNodeWithScope.json
+             * @example https://api.sonz.ai/api/v1/schemas/KBNodeWithScope.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -6486,7 +6486,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KBSearchResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/KBSearchResponse.json
              */
             readonly $schema?: string;
             query: string;
@@ -6554,7 +6554,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbBulkUpdateInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbBulkUpdateInputBody.json
              */
             readonly $schema?: string;
             /** @description Source identifier (defaults to 'bulk_api') */
@@ -6566,7 +6566,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbBulkUpdateOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbBulkUpdateOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -6608,7 +6608,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbCreateAnalyticsRuleInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbCreateAnalyticsRuleInputBody.json
              */
             readonly $schema?: string;
             /** @description Rule configuration object */
@@ -6626,7 +6626,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbCreateOrgNodeInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbCreateOrgNodeInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -6647,7 +6647,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbCreateSchemaInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbCreateSchemaInputBody.json
              */
             readonly $schema?: string;
             /** @description Human-readable description */
@@ -6663,7 +6663,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetConversionStatsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbGetConversionStatsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Conversion statistics */
@@ -6678,7 +6678,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetNodeHistoryOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbGetNodeHistoryOutputBody.json
              */
             readonly $schema?: string;
             /** @description Version history entries */
@@ -6693,7 +6693,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetNodeOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbGetNodeOutputBody.json
              */
             readonly $schema?: string;
             /** @description Version history (when requested) */
@@ -6709,7 +6709,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetRecommendationsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbGetRecommendationsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Scored recommendations */
@@ -6724,7 +6724,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetStatsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbGetStatsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Document counts by status */
@@ -6750,7 +6750,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetTrendRankingsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbGetTrendRankingsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Ranked trends */
@@ -6765,7 +6765,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetTrendsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbGetTrendsOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -6780,7 +6780,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbInsertFactsInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbInsertFactsInputBody.json
              */
             readonly $schema?: string;
             /** @description Entities to insert or update */
@@ -6794,7 +6794,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbInsertFactsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbInsertFactsOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -6821,7 +6821,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbListAnalyticsRulesOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbListAnalyticsRulesOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of analytics rules */
@@ -6836,7 +6836,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbListDocumentsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbListDocumentsOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of documents */
@@ -6851,7 +6851,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbListNodesOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbListNodesOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of active nodes */
@@ -6866,7 +6866,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbListOrgNodesOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbListOrgNodesOutputBody.json
              */
             readonly $schema?: string;
             nodes: components["schemas"]["KBNode"][] | null;
@@ -6877,7 +6877,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbListSchemasOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbListSchemasOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of schemas */
@@ -6892,7 +6892,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbPromoteNodeInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbPromoteNodeInputBody.json
              */
             readonly $schema?: string;
             /** @description Target tenant; server rejects if it does not match the authenticated tenant. */
@@ -6902,7 +6902,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbRecordFeedbackInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbRecordFeedbackInputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the recommendation converted */
@@ -6923,7 +6923,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbRecordFeedbackOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbRecordFeedbackOutputBody.json
              */
             readonly $schema?: string;
             /** @description Result status */
@@ -6941,7 +6941,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbRunAnalyticsRuleOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbRunAnalyticsRuleOutputBody.json
              */
             readonly $schema?: string;
             /** @description Human-readable message */
@@ -6955,7 +6955,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbSearchResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbSearchResponse.json
              */
             readonly $schema?: string;
             query: string;
@@ -6974,7 +6974,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbUpdateAnalyticsRuleInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbUpdateAnalyticsRuleInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated rule configuration */
@@ -6990,7 +6990,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbUpdateSchemaInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbUpdateSchemaInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated description */
@@ -7006,7 +7006,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbUploadDocumentOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbUploadDocumentOutputBody.json
              */
             readonly $schema?: string;
             /** @description SHA-256 hex digest */
@@ -7029,7 +7029,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListAllFactsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListAllFactsResponse.json
              */
             readonly $schema?: string;
             facts: components["schemas"]["StoredFact"][] | null;
@@ -7040,7 +7040,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListCustomStatesOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListCustomStatesOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of custom states */
@@ -7050,7 +7050,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListCustomToolsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListCustomToolsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Developer-defined custom tools */
@@ -7060,7 +7060,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListDeliveryAttemptsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListDeliveryAttemptsOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of delivery attempts */
@@ -7070,7 +7070,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListEvalRunsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListEvalRunsOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of eval runs */
@@ -7085,7 +7085,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListEvalTemplatesOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListEvalTemplatesOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of eval templates */
@@ -7095,7 +7095,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListFactsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListFactsResponse.json
              */
             readonly $schema?: string;
             facts: components["schemas"]["StoredFact"][] | null;
@@ -7106,7 +7106,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListImportJobUsersOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListImportJobUsersOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -7121,7 +7121,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListImportJobsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListImportJobsOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -7136,7 +7136,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListInstancesOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListInstancesOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of agent instances */
@@ -7146,7 +7146,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListSchedulesOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListSchedulesOutputBody.json
              */
             readonly $schema?: string;
             schedules: components["schemas"]["ScheduleDTO"][] | null;
@@ -7155,7 +7155,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListUserPersonasOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListUserPersonasOutputBody.json
              */
             readonly $schema?: string;
             /** @description Personas owned by the caller's tenant (auto-seeded with defaults) */
@@ -7165,7 +7165,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListVoicesResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListVoicesResponse.json
              */
             readonly $schema?: string;
             voices: components["schemas"]["VoiceInfo"][] | null;
@@ -7174,7 +7174,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListWebhooksOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListWebhooksOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of registered webhooks */
@@ -7184,7 +7184,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/MeResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/MeResponse.json
              */
             readonly $schema?: string;
             email: string;
@@ -7230,7 +7230,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/MemoryResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/MemoryResponse.json
              */
             readonly $schema?: string;
             contents?: {
@@ -7257,7 +7257,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/MoodAggregateResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/MoodAggregateResponse.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -7300,7 +7300,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/MoodHistoryResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/MoodHistoryResponse.json
              */
             readonly $schema?: string;
             entries: components["schemas"]["MoodHistoryEntry"][] | null;
@@ -7309,7 +7309,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/MoodResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/MoodResponse.json
              */
             readonly $schema?: string;
             mood: components["schemas"]["MoodState"];
@@ -7347,7 +7347,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/Node.json
+             * @example https://api.sonz.ai/api/v1/schemas/Node.json
              */
             readonly $schema?: string;
             AgentID: string;
@@ -7390,7 +7390,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/OrgBillingCheckoutInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/OrgBillingCheckoutInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -7405,7 +7405,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/OrgBillingSubscribeInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/OrgBillingSubscribeInputBody.json
              */
             readonly $schema?: string;
             /** @description Enterprise contract UUID to subscribe to */
@@ -7415,7 +7415,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/OrgBillingURLBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/OrgBillingURLBody.json
              */
             readonly $schema?: string;
             url: string;
@@ -7424,7 +7424,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/OrgBillingVoucherInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/OrgBillingVoucherInputBody.json
              */
             readonly $schema?: string;
             /** @description Voucher code to redeem */
@@ -7450,7 +7450,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/OrgUsageSummaryBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/OrgUsageSummaryBody.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -7484,7 +7484,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PaginatedAgentsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/PaginatedAgentsResponse.json
              */
             readonly $schema?: string;
             has_more: boolean;
@@ -7497,7 +7497,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PatchScheduleInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/PatchScheduleInputBody.json
              */
             readonly $schema?: string;
             active_window?: unknown;
@@ -7594,7 +7594,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PersonalityResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/PersonalityResponse.json
              */
             readonly $schema?: string;
             evolution: components["schemas"]["PersonalityDelta"][] | null;
@@ -7687,7 +7687,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PrimeUserRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/PrimeUserRequest.json
              */
             readonly $schema?: string;
             /** @description Raw content blocks for LLM fact extraction. */
@@ -7722,7 +7722,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ProactiveNotificationsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ProactiveNotificationsResponse.json
              */
             readonly $schema?: string;
             notifications: components["schemas"]["ProactiveNotificationEntry"][] | null;
@@ -7731,7 +7731,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ProcessInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ProcessInputBody.json
              */
             readonly $schema?: string;
             /** @description Agent instance scope */
@@ -7755,7 +7755,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ProcessResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ProcessResponse.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -7775,7 +7775,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/Project.json
+             * @example https://api.sonz.ai/api/v1/schemas/Project.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -7808,7 +7808,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ProjectNotificationsListOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ProjectNotificationsListOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -7846,7 +7846,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RecentShiftsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/RecentShiftsResponse.json
              */
             readonly $schema?: string;
             shifts: components["schemas"]["PersonalityShift"][] | null;
@@ -7855,7 +7855,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RedeemVoucherResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/RedeemVoucherResponse.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -7869,7 +7869,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RegenerateAvatarInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/RegenerateAvatarInputBody.json
              */
             readonly $schema?: string;
             /** @description Avatar art style override */
@@ -7879,7 +7879,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RegenerateAvatarOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/RegenerateAvatarOutputBody.json
              */
             readonly $schema?: string;
             /** @description Public URL of generated avatar */
@@ -7907,7 +7907,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RelationshipsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/RelationshipsResponse.json
              */
             readonly $schema?: string;
             relationships: components["schemas"]["RelationshipEntry"][] | null;
@@ -7916,7 +7916,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ResetInstanceOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ResetInstanceOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -7936,7 +7936,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ResetMemoryResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ResetMemoryResponse.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -7956,7 +7956,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RevokeAPIKeyOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/RevokeAPIKeyOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -7965,7 +7965,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RotateSigningSecretOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/RotateSigningSecretOutputBody.json
              */
             readonly $schema?: string;
             /** @description The new HMAC signing secret */
@@ -7977,7 +7977,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RunEvalRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/RunEvalRequest.json
              */
             readonly $schema?: string;
             /** @description Optional adaptation-eval template UUID; defaults to the tenant's first adaptation template */
@@ -8001,7 +8001,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RunningBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/RunningBody.json
              */
             readonly $schema?: string;
             /** @description Eval run UUID — stream progress via GET /eval-runs/{runId}/events */
@@ -8013,7 +8013,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ScheduleDTO.json
+             * @example https://api.sonz.ai/api/v1/schemas/ScheduleDTO.json
              */
             readonly $schema?: string;
             active_window?: string;
@@ -8036,7 +8036,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ScheduleWakeupInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ScheduleWakeupInputBody.json
              */
             readonly $schema?: string;
             /** @description Type of check to perform on wakeup */
@@ -8055,7 +8055,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ScheduleWakeupOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ScheduleWakeupOutputBody.json
              */
             readonly $schema?: string;
             /** @description ISO 8601 timestamp when the wakeup is scheduled */
@@ -8067,7 +8067,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SearchResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/SearchResponse.json
              */
             readonly $schema?: string;
             results: components["schemas"]["SearchResult"][] | null;
@@ -8139,7 +8139,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ServiceUsageSummary.json
+             * @example https://api.sonz.ai/api/v1/schemas/ServiceUsageSummary.json
              */
             readonly $schema?: string;
             byOperation: components["schemas"]["ServiceUsageByOp"][] | null;
@@ -8175,7 +8175,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SetAccountConfigOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/SetAccountConfigOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -8184,7 +8184,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SetAgentStatusInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/SetAgentStatusInputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the agent should be active */
@@ -8194,7 +8194,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SetAgentStatusOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/SetAgentStatusOutputBody.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -8205,7 +8205,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SetCustomLLMConfigInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/SetCustomLLMConfigInputBody.json
              */
             readonly $schema?: string;
             /** @description Plaintext API key for the endpoint (encrypted at rest) */
@@ -8223,7 +8223,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SetProjectConfigOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/SetProjectConfigOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -8232,7 +8232,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SetSessionToolsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/SetSessionToolsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the tools were registered successfully */
@@ -8252,7 +8252,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SignificantMomentsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/SignificantMomentsResponse.json
              */
             readonly $schema?: string;
             moments: components["schemas"]["SignificantMoment"][] | null;
@@ -8278,7 +8278,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SimulateRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/SimulateRequest.json
              */
             readonly $schema?: string;
             /** @description Simulator configuration (durations, proactivity, consolidation) */
@@ -8298,7 +8298,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SimulateRunningBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/SimulateRunningBody.json
              */
             readonly $schema?: string;
             /** @description Eval run UUID — stream progress via GET /eval-runs/{runId}/events */
@@ -8310,7 +8310,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SpeechToTextInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/SpeechToTextInputBody.json
              */
             readonly $schema?: string;
             /** @description Base64-encoded audio data */
@@ -8324,7 +8324,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/StartSessionInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/StartSessionInputBody.json
              */
             readonly $schema?: string;
             /** @description Optional agent instance identifier */
@@ -8342,7 +8342,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/StartSessionOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/StartSessionOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the session was started successfully */
@@ -8363,6 +8363,8 @@ export interface components {
             metadata?: {
                 [key: string]: unknown;
             };
+            session_id?: string;
+            source_id?: string;
             source_type?: string;
             updated_at: string;
         };
@@ -8370,7 +8372,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/Storefront.json
+             * @example https://api.sonz.ai/api/v1/schemas/Storefront.json
              */
             readonly $schema?: string;
             accent_color: string;
@@ -8402,7 +8404,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/StorefrontAgent.json
+             * @example https://api.sonz.ai/api/v1/schemas/StorefrontAgent.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -8428,7 +8430,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/StorefrontGetOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/StorefrontGetOutputBody.json
              */
             readonly $schema?: string;
             slug: string;
@@ -8438,7 +8440,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/StorefrontListAgentsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/StorefrontListAgentsOutputBody.json
              */
             readonly $schema?: string;
             agents: components["schemas"]["StorefrontAgent"][] | null;
@@ -8447,7 +8449,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/StorefrontUpdateInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/StorefrontUpdateInputBody.json
              */
             readonly $schema?: string;
             /** @description open | code | invite */
@@ -8476,7 +8478,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/StorefrontUpsertAgentInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/StorefrontUpsertAgentInputBody.json
              */
             readonly $schema?: string;
             /** @description Avatar image URL */
@@ -8507,7 +8509,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SummariesResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/SummariesResponse.json
              */
             readonly $schema?: string;
             summaries: components["schemas"]["MemorySummary"][] | null;
@@ -8516,7 +8518,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SupportTicket.json
+             * @example https://api.sonz.ai/api/v1/schemas/SupportTicket.json
              */
             readonly $schema?: string;
             assigned_to?: string;
@@ -8544,7 +8546,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SupportTicketComment.json
+             * @example https://api.sonz.ai/api/v1/schemas/SupportTicketComment.json
              */
             readonly $schema?: string;
             author_email: string;
@@ -8572,7 +8574,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/Tenant.json
+             * @example https://api.sonz.ai/api/v1/schemas/Tenant.json
              */
             readonly $schema?: string;
             clerk_org_id?: string;
@@ -8604,7 +8606,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TenantBillingProfile.json
+             * @example https://api.sonz.ai/api/v1/schemas/TenantBillingProfile.json
              */
             readonly $schema?: string;
             billingMode: string;
@@ -8639,7 +8641,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TextToSpeechInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/TextToSpeechInputBody.json
              */
             readonly $schema?: string;
             /** @description Language code (e.g. en-US) */
@@ -8655,7 +8657,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TicketDetailResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/TicketDetailResponse.json
              */
             readonly $schema?: string;
             history?: components["schemas"]["SupportTicketHistory"][] | null;
@@ -8665,7 +8667,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TicketListResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/TicketListResponse.json
              */
             readonly $schema?: string;
             has_more: boolean;
@@ -8703,7 +8705,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TimeMachineResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/TimeMachineResponse.json
              */
             readonly $schema?: string;
             current_personality: components["schemas"]["Big5Assessment"];
@@ -8716,7 +8718,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TimelineResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/TimelineResponse.json
              */
             readonly $schema?: string;
             sessions: components["schemas"]["TimelineSession"][] | null;
@@ -8755,7 +8757,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TriggerConsolidationInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/TriggerConsolidationInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -8770,7 +8772,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TriggerConsolidationOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/TriggerConsolidationOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the consolidation was triggered successfully */
@@ -8780,7 +8782,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TriggerEventInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/TriggerEventInputBody.json
              */
             readonly $schema?: string;
             /** @description Human-readable event description */
@@ -8804,7 +8806,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TriggerEventOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/TriggerEventOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the event was accepted for processing */
@@ -8819,7 +8821,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpcomingScheduleOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpcomingScheduleOutputBody.json
              */
             readonly $schema?: string;
             upcoming: string[] | null;
@@ -8828,7 +8830,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateAgentPostProcessingModelInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentPostProcessingModelInputBody.json
              */
             readonly $schema?: string;
             /** @description Model for post-processing. Empty string clears the override. */
@@ -8840,7 +8842,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateAgentPostProcessingModelOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentPostProcessingModelOutputBody.json
              */
             readonly $schema?: string;
             post_processing_model: string;
@@ -8851,7 +8853,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateAgentProfileInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentProfileInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated bio */
@@ -8871,7 +8873,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateAgentProfileOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentProfileOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -8880,7 +8882,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateAgentProjectInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentProjectInputBody.json
              */
             readonly $schema?: string;
             /** @description Project UUID to assign; null/omitted to detach */
@@ -8890,7 +8892,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateAgentProjectOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentProjectOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -8899,7 +8901,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateCapabilitiesInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateCapabilitiesInputBody.json
              */
             readonly $schema?: string;
             /** @description Enable/disable image generation */
@@ -8922,7 +8924,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateConstellationNodeInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateConstellationNodeInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated description */
@@ -8941,7 +8943,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateCustomStateInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateCustomStateInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated content type */
@@ -8953,7 +8955,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateCustomToolInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateCustomToolInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated description */
@@ -8965,7 +8967,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateCustomToolOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateCustomToolOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -8974,7 +8976,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateEvalTemplateInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateEvalTemplateInputBody.json
              */
             readonly $schema?: string;
             /** @description Evaluation categories */
@@ -9002,7 +9004,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateFactInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateFactInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -9030,7 +9032,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateGoalInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateGoalInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated description */
@@ -9053,7 +9055,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateHabitInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateHabitInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated category */
@@ -9074,7 +9076,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateInstanceInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateInstanceInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated description */
@@ -9088,7 +9090,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateMetadataRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateMetadataRequest.json
              */
             readonly $schema?: string;
             company?: string;
@@ -9104,7 +9106,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdatePersonalityBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdatePersonalityBody.json
              */
             readonly $schema?: string;
             /** @description Big Five personality scores to set */
@@ -9116,7 +9118,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdatePersonalityOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdatePersonalityOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the update was applied */
@@ -9126,7 +9128,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateProjectInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateProjectInputBody.json
              */
             readonly $schema?: string;
             /** @description Environment */
@@ -9140,7 +9142,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateUserMetadataHumaOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateUserMetadataHumaOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -9155,7 +9157,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateUserPersonaInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateUserPersonaInputBody.json
              */
             readonly $schema?: string;
             /** @description Free-text description */
@@ -9169,7 +9171,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpsertCustomStateByKeyInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpsertCustomStateByKeyInputBody.json
              */
             readonly $schema?: string;
             /** @description Content type (text or json, defaults to text) */
@@ -9189,7 +9191,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpsertWebhookForTenantInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpsertWebhookForTenantInputBody.json
              */
             readonly $schema?: string;
             /** @description Optional Authorization header value sent with each delivery */
@@ -9201,7 +9203,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpsertWebhookInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpsertWebhookInputBody.json
              */
             readonly $schema?: string;
             /** @description Optional Authorization header value sent with each delivery */
@@ -9213,7 +9215,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpsertWebhookOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpsertWebhookOutputBody.json
              */
             readonly $schema?: string;
             /** @description HMAC signing secret (only returned on first registration) */
@@ -9252,7 +9254,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UsageResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/UsageResponse.json
              */
             readonly $schema?: string;
             byProject: components["schemas"]["UsageByProject"][] | null;
@@ -9293,7 +9295,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UserOverlayDetailResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/UserOverlayDetailResponse.json
              */
             readonly $schema?: string;
             base: components["schemas"]["PersonalityProfile"];
@@ -9315,7 +9317,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UserOverlaysListResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/UserOverlaysListResponse.json
              */
             readonly $schema?: string;
             overlays: components["schemas"]["UserOverlayResponse"][] | null;
@@ -9329,7 +9331,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UserPersonaRecord.json
+             * @example https://api.sonz.ai/api/v1/schemas/UserPersonaRecord.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -9347,7 +9349,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UserPrimingMetadata.json
+             * @example https://api.sonz.ai/api/v1/schemas/UserPrimingMetadata.json
              */
             readonly $schema?: string;
             AgentID: string;
@@ -9381,7 +9383,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UsersResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/UsersResponse.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -9400,7 +9402,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/VoiceLiveWSTokenInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/VoiceLiveWSTokenInputBody.json
              */
             readonly $schema?: string;
             /** @description Pre-compiled system prompt for the voice session */
@@ -9416,7 +9418,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/VoiceLiveWSTokenOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/VoiceLiveWSTokenOutputBody.json
              */
             readonly $schema?: string;
             /** @description Short-lived authentication token */
@@ -9444,7 +9446,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WakeupsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/WakeupsResponse.json
              */
             readonly $schema?: string;
             wakeups: components["schemas"]["WakeupEntry"][] | null;
@@ -9482,7 +9484,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WisdomAuditResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/WisdomAuditResponse.json
              */
             readonly $schema?: string;
             content: string;
@@ -9499,7 +9501,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchAdvanceTimeJobBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchAdvanceTimeJobBody.json
              */
             readonly $schema?: string;
             agent_id?: string;
@@ -9513,12 +9515,6 @@ export interface components {
             user_id?: string;
         };
         WorkbenchAdvanceTimeResponse: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchAdvanceTimeResponse.json
-             */
-            readonly $schema?: string;
             /** Format: int64 */
             consolidation_processed: number;
             consolidation_ran: boolean;
@@ -9535,7 +9531,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchGenerateBioBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchGenerateBioBody.json
              */
             readonly $schema?: string;
             bio: string;
@@ -9567,7 +9563,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchGenerateCharacterBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchGenerateCharacterBody.json
              */
             readonly $schema?: string;
             agent_id?: string;
@@ -9616,7 +9612,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchGenerateSeedMemoriesBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchGenerateSeedMemoriesBody.json
              */
             readonly $schema?: string;
             memories: components["schemas"]["WorkbenchSeedMemoryItem"][] | null;
@@ -9625,7 +9621,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchPrepareBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchPrepareBody.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -9637,7 +9633,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchResetAgentBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchResetAgentBody.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -9655,7 +9651,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchSessionEndBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchSessionEndBody.json
              */
             readonly $schema?: string;
             ok: boolean;
@@ -9664,7 +9660,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchSimulateUserBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchSimulateUserBody.json
              */
             readonly $schema?: string;
             end_session: boolean;
@@ -9753,7 +9749,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchStateResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchStateResponse.json
              */
             readonly $schema?: string;
             big5?: components["schemas"]["WorkbenchStateBig5"];
@@ -18277,7 +18273,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["WorkbenchAdvanceTimeResponse"];
+                    "application/json": unknown;
                 };
             };
             /** @description Error */

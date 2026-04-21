@@ -1,6 +1,7 @@
 export { Sonzai } from "./client.js";
 export * as providers from "./providers.js";
 export { VoiceStreamInstance } from "./resources/voice.js";
+export type { ScheduleUpcomingOptions } from "./resources/schedules.js";
 
 // Errors
 export {

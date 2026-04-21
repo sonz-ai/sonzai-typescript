@@ -2419,6 +2419,15 @@ export interface StoredFact {
   confidence: number;
   entity?: string;
   source_type?: string;
+  /**
+   * Session that produced this fact, when attribution is known.
+   * Empty for facts created outside a session (manual writes, agent-global
+   * wisdom, pre-attribution writes). Clients can use this to map a retrieved
+   * `fact_id` back to the conversation it came from without a follow-up call.
+   */
+  session_id?: string;
+  /** Stable source identifier for the fact (e.g. the originating message). */
+  source_id?: string;
   mention_count: number;
   metadata?: Record<string, unknown>;
   created_at: string;
