@@ -1,4 +1,113 @@
 // ---------------------------------------------------------------------------
+// Generated type imports (used within this file and re-exported to consumers)
+// ---------------------------------------------------------------------------
+
+// These types are imported so they can be used in interface definitions below,
+// and also re-exported (see the `export type { ... }` block after this).
+import type {
+  // Types referenced within this file
+  PersonalityDelta,
+  Goal,
+  KBRelatedNode,
+  KBSchemaField,
+  KBSimilarityConfig,
+  KBResolutionInfo,
+  KBCandidate,
+  Project,
+  ProjectAPIKey,
+  UserPersonaRecord,
+  ToolSchemaEntry,
+} from "./generated/aliases.js";
+
+// ---------------------------------------------------------------------------
+// Generated type re-exports (auto-generated from openapi.ts via aliases.ts)
+// ---------------------------------------------------------------------------
+
+export type {
+  // Direct same-name re-exports
+  Goal,
+  Habit,
+  HabitsResponse,
+  GoalsResponse,
+  BreakthroughsResponse,
+  Breakthrough,
+  InterestsResponse,
+  KBDocument,
+  KBEntitySchema,
+  KBSchemaField,
+  KBSearchResponse,
+  KBAnalyticsRule,
+  WakeupsResponse,
+  MoodAggregateResponse,
+  MoodHistoryResponse,
+  MoodResponse,
+  FactHistoryResponse,
+  TimeMachineResponse,
+  TimeMachineMoodSnapshot,
+  SummariesResponse,
+  RecentShiftsResponse,
+  UserOverlayDetailResponse,
+  UserOverlaysListResponse,
+  CustomState,
+  CustomToolDefinition,
+  ToolSchemaEntry,
+  Project,
+  ProjectAPIKey,
+  UserPersonaRecord,
+  WisdomAuditResponse,
+  DeleteWisdomResponse,
+  ForkResponse,
+  ForkStatusResponse,
+  AgentIndex,
+  AgentCapabilities,
+  PendingCapability,
+  KBTrendAggregation,
+  KBTrendRanking,
+  KBConversionStats,
+  KBSimilarityConfig,
+  KBNodeWithScope,
+  KBRelatedNode,
+  PersonalityDelta,
+  // Renamed types
+  ScheduledWakeup,
+  AgentListResponse,
+  WebhookEndpoint,
+  ConsolidateResponse,
+  GenerateAvatarResponse,
+  SetStatusResponse,
+  TriggerEventResponse,
+  DeliveryAttemptsResponse,
+  WebhookListResponse,
+  AcknowledgeResponse,
+  NotificationListResponse,
+  RelationshipResponse,
+  MemorySearchResponse,
+  MemorySearchResult,
+  MemoryTimelineResponse,
+  VoiceListResponse,
+  CustomToolListResponse,
+  CustomStateListResponse,
+  EvalTemplateListResponse,
+  EvalRunListResponse,
+  FactListResponse,
+  KBDocumentListResponse,
+  KBNodeListResponse,
+  KBNodeDetailResponse,
+  KBNodeHistoryResponse,
+  KBSchemaListResponse,
+  KBAnalyticsRuleListResponse,
+  KBRecommendationsResponse,
+  KBTrendsResponse,
+  KBTrendRankingsResponse,
+  KBConversionsResponse,
+  InsertFactsResponse,
+  KBBulkUpdateResponse,
+  KBResolutionInfo,
+  KBCandidate,
+  ImportJobListResponse,
+} from "./generated/aliases.js";
+
+// ---------------------------------------------------------------------------
 // Chat
 // ---------------------------------------------------------------------------
 
@@ -159,16 +268,9 @@ export interface MemoryResponse {
   contents: Record<string, AtomicFact[]>;
 }
 
-export interface MemorySearchResult {
-  fact_id: string;
-  content: string;
-  fact_type: string;
-  score: number;
-}
+// MemorySearchResult is now re-exported from ./generated/aliases.js (as SearchResult)
 
-export interface MemorySearchResponse {
-  results: MemorySearchResult[];
-}
+// MemorySearchResponse is now re-exported from ./generated/aliases.js (as SearchResponse)
 
 export interface TimelineSession {
   session_id: string;
@@ -178,10 +280,7 @@ export interface TimelineSession {
   fact_count: number;
 }
 
-export interface MemoryTimelineResponse {
-  sessions: TimelineSession[];
-  total_facts: number;
-}
+// MemoryTimelineResponse is now re-exported from ./generated/aliases.js (as TimelineResponse)
 
 export interface MemoryListOptions {
   userId?: string;
@@ -276,12 +375,7 @@ export interface PersonalityProfile {
   created_at?: string;
 }
 
-export interface PersonalityDelta {
-  delta_id: string;
-  change: string;
-  reason: string;
-  created_at?: string;
-}
+// PersonalityDelta is now re-exported from ./generated/aliases.js
 
 export interface PersonalityResponse {
   profile: PersonalityProfile;
@@ -359,9 +453,7 @@ export interface Notification {
   created_at?: string;
 }
 
-export interface NotificationListResponse {
-  notifications: Notification[];
-}
+// NotificationListResponse is now re-exported from ./generated/aliases.js (as ProactiveNotificationsResponse)
 
 export interface NotificationListOptions {
   status?: string;
@@ -394,9 +486,7 @@ export interface MoodState {
   affection?: number;
 }
 
-export interface MoodResponse {
-  mood: MoodState;
-}
+// MoodResponse is now re-exported from ./generated/aliases.js
 
 export interface MoodHistoryEntry {
   valence: number;
@@ -413,19 +503,9 @@ export interface MoodHistoryEntry {
   timestamp: string;
 }
 
-export interface MoodHistoryResponse {
-  entries: MoodHistoryEntry[];
-}
+// MoodHistoryResponse is now re-exported from ./generated/aliases.js
 
-export interface MoodAggregateResponse {
-  valence: number;
-  arousal: number;
-  tension: number;
-  affiliation: number;
-  label: string;
-  user_count: number;
-  days_window: number;
-}
+// MoodAggregateResponse is now re-exported from ./generated/aliases.js
 
 export interface RelationshipData {
   user_id: string;
@@ -436,9 +516,7 @@ export interface RelationshipData {
   updated_at?: string;
 }
 
-export interface RelationshipResponse {
-  relationships: RelationshipData[];
-}
+// RelationshipResponse is now re-exported from ./generated/aliases.js
 
 export interface HabitData {
   name: string;
@@ -451,30 +529,13 @@ export interface HabitData {
   last_update?: string;
 }
 
-export interface HabitsResponse {
-  habits: HabitData[];
-}
+// HabitsResponse is now re-exported from ./generated/aliases.js
 
 // ---------------------------------------------------------------------------
 // Habits (CRUD)
 // ---------------------------------------------------------------------------
 
-export interface Habit {
-  id?: string;
-  agent_id: string;
-  user_id?: string;
-  name: string;
-  category: string;
-  description: string;
-  display_name?: string;
-  strength: number;
-  formed: boolean;
-  observation_count: number;
-  last_reinforced_at?: string;
-  formed_at?: string;
-  created_at?: string;
-  updated_at?: string;
-}
+// Habit is now re-exported from ./generated/aliases.js
 
 export interface CreateHabitOptions {
   userId?: string;
@@ -511,24 +572,9 @@ export type GoalStatus = "active" | "achieved" | "abandoned";
 
 export type GoalPriority = 0 | 1 | 2;
 
-export interface Goal {
-  goal_id: string;
-  agent_id: string;
-  user_id?: string;
-  type: GoalType;
-  title: string;
-  description: string;
-  priority: GoalPriority;
-  status: GoalStatus;
-  related_traits?: string[];
-  created_at: string;
-  achieved_at?: string;
-  updated_at: string;
-}
+// Goal is now re-exported from ./generated/aliases.js
 
-export interface GoalsResponse {
-  goals: Goal[];
-}
+// GoalsResponse is now re-exported from ./generated/aliases.js
 
 export interface CreateGoalOptions {
   /** When set, creates a per-user goal instead of an agent-global goal. */
@@ -582,9 +628,7 @@ export interface InterestData {
   updated_at?: string;
 }
 
-export interface InterestsResponse {
-  interests: InterestData[];
-}
+// InterestsResponse is now re-exported from ./generated/aliases.js
 
 export interface DiaryEntry {
   entry_id: string;
@@ -678,29 +722,11 @@ export interface UpdateConstellationNodeOptions {
   nodeType?: string;
 }
 
-export interface Breakthrough {
-  breakthrough_id: string;
-  agent_id: string;
-  user_id: string;
-  breakthrough_number: number;
-  level_at_breakthrough: number;
-  narrative: string;
-  personality_shifts: string[];
-  trait_evolved?: string;
-  new_goals: string[];
-  achieved_goals: string[];
-  skill_points_awarded: number;
-  acknowledged: boolean;
-  created_at: string;
-}
+// Breakthrough is now re-exported from ./generated/aliases.js
 
-export interface BreakthroughsResponse {
-  breakthroughs: Breakthrough[];
-}
+// BreakthroughsResponse is now re-exported from ./generated/aliases.js
 
-export interface WakeupsResponse {
-  wakeups: ScheduledWakeup[];
-}
+// WakeupsResponse is now re-exported from ./generated/aliases.js
 
 // ---------------------------------------------------------------------------
 // Process (full pipeline — extraction + side effects + memory + session end)
@@ -1086,9 +1112,7 @@ export interface EvalTemplate {
   updated_at?: string;
 }
 
-export interface EvalTemplateListResponse {
-  templates: EvalTemplate[];
-}
+// EvalTemplateListResponse is now re-exported from ./generated/aliases.js (as ListEvalTemplatesOutputBody)
 
 export interface EvalTemplateCreateOptions {
   name: string;
@@ -1149,10 +1173,7 @@ export interface EvalRun {
   completed_at?: string;
 }
 
-export interface EvalRunListResponse {
-  runs: EvalRun[];
-  total_count: number;
-}
+// EvalRunListResponse is now re-exported from ./generated/aliases.js (as ListEvalRunsOutputBody)
 
 export interface EvalRunListOptions {
   agentId?: string;
@@ -1282,10 +1303,7 @@ export interface TriggerEventOptions {
   messages?: ChatMessage[];
 }
 
-export interface TriggerEventResponse {
-  accepted: boolean;
-  event_id: string;
-}
+// TriggerEventResponse is now re-exported from ./generated/aliases.js (as TriggerEventOutputBody)
 
 // ---------------------------------------------------------------------------
 // Dialogue
@@ -1322,11 +1340,7 @@ export interface Fact {
   context_examples?: string[];
 }
 
-export interface FactListResponse {
-  facts: Fact[];
-  total_count: number;
-  has_more: boolean;
-}
+// FactListResponse is now re-exported from ./generated/aliases.js (as ListFactsResponse)
 
 export interface FactListOptions {
   userId?: string;
@@ -1486,11 +1500,7 @@ export interface VoiceEntry {
   availability: string;
 }
 
-export interface VoiceListResponse {
-  voices: VoiceEntry[];
-  total_count: number;
-  has_more: boolean;
-}
+// VoiceListResponse is now re-exported from ./generated/aliases.js (as ListVoicesResponse)
 
 export interface VoiceListOptions {
   tier?: number;
@@ -1722,22 +1732,9 @@ export interface CustomStateUpdateOptions {
   contentType?: string;
 }
 
-export interface CustomState {
-  state_id: string;
-  agent_id: string;
-  scope: string;
-  key: string;
-  value: unknown;
-  content_type: string;
-  user_id?: string;
-  instance_id?: string;
-  created_at?: string;
-  updated_at?: string;
-}
+// CustomState is now re-exported from ./generated/aliases.js
 
-export interface CustomStateListResponse {
-  states: CustomState[];
-}
+// CustomStateListResponse is now re-exported from ./generated/aliases.js (as ListCustomStatesOutputBody)
 
 export interface CustomStateUpsertOptions {
   key: string;
@@ -1773,34 +1770,13 @@ export interface ScheduleWakeupOptions {
   delayHours?: number;
 }
 
-export interface ScheduledWakeup {
-  wakeup_id: string;
-  agent_id: string;
-  user_id: string;
-  scheduled_at: string;
-  check_type: string;
-  status: string;
-  intent?: string;
-  last_topic?: string;
-  event_description?: string;
-  occasion?: string;
-  interest_topic?: string;
-  research_summary?: string;
-  executed_at?: string;
-  created_at?: string;
-}
+// ScheduledWakeup is now re-exported from ./generated/aliases.js (as WakeupEntry)
 
 // ---------------------------------------------------------------------------
 // Webhooks
 // ---------------------------------------------------------------------------
 
-export interface WebhookEndpoint {
-  event_type: string;
-  webhook_url: string;
-  auth_header?: string;
-  is_active?: boolean;
-  created_at?: string;
-}
+// WebhookEndpoint is now re-exported from ./generated/aliases.js (as Webhook)
 
 export interface WebhookRegisterOptions {
   webhookUrl: string;
@@ -1812,9 +1788,7 @@ export interface WebhookRegisterResponse {
   signing_secret?: string;
 }
 
-export interface WebhookListResponse {
-  webhooks: WebhookEndpoint[];
-}
+// WebhookListResponse is now re-exported from ./generated/aliases.js (as ListWebhooksOutputBody)
 
 export interface WebhookDeliveryAttempt {
   attempt_id: string;
@@ -1829,9 +1803,7 @@ export interface WebhookDeliveryAttempt {
   created_at: string;
 }
 
-export interface DeliveryAttemptsResponse {
-  attempts: WebhookDeliveryAttempt[];
-}
+// DeliveryAttemptsResponse is now re-exported from ./generated/aliases.js (as ListDeliveryAttemptsOutputBody)
 
 // ---------------------------------------------------------------------------
 // Client Config
@@ -1857,32 +1829,9 @@ export interface AgentListOptions {
   projectId?: string;
 }
 
-export interface AgentIndex {
-  /** Agent UUID. Alias for agent_id. */
-  id: string;
-  agent_id?: string;
-  tenant_id?: string;
-  name: string;
-  bio?: string;
-  gender?: string;
-  avatar_url?: string;
-  status?: string;
-  is_active?: boolean;
-  project_id?: string;
-  instance_count?: number;
-  last_seen_at?: string;
-  owner_user_id?: string;
-  owner_display_name?: string;
-  owner_email?: string;
-  created_at?: string;
-}
+// AgentIndex is now re-exported from ./generated/aliases.js
 
-export interface AgentListResponse {
-  items: AgentIndex[];
-  next_cursor?: string;
-  has_more: boolean;
-  total_count?: number;
-}
+// AgentListResponse is now re-exported from ./generated/aliases.js (as PaginatedAgentsResponse)
 
 // ---------------------------------------------------------------------------
 // Batch Personality
@@ -1934,9 +1883,7 @@ export interface PersonalityShift {
   [key: string]: unknown;
 }
 
-export interface RecentShiftsResponse {
-  shifts: PersonalityShift[];
-}
+// RecentShiftsResponse is now re-exported from ./generated/aliases.js
 
 export interface UserPersonalityOverlay {
   agent_id: string;
@@ -1950,15 +1897,9 @@ export interface UserPersonalityOverlay {
   updated_at?: string;
 }
 
-export interface UserOverlaysListResponse {
-  overlays: UserPersonalityOverlay[];
-}
+// UserOverlaysListResponse is now re-exported from ./generated/aliases.js
 
-export interface UserOverlayDetailResponse {
-  overlay: UserPersonalityOverlay;
-  base: PersonalityProfile;
-  evolution: PersonalityShift[];
-}
+// UserOverlayDetailResponse is now re-exported from ./generated/aliases.js
 
 export interface UserOverlayOptions {
   instanceId?: string;
@@ -1969,10 +1910,7 @@ export interface UserOverlayOptions {
 // Fact History
 // ---------------------------------------------------------------------------
 
-export interface FactHistoryResponse {
-  current: AtomicFact;
-  previous_versions: AtomicFact[];
-}
+// FactHistoryResponse is now re-exported from ./generated/aliases.js
 
 // ---------------------------------------------------------------------------
 // Time Machine
@@ -1984,21 +1922,9 @@ export interface TimeMachineOptions {
   instanceId?: string;
 }
 
-export interface TimeMachineMoodSnapshot {
-  valence?: number;
-  arousal?: number;
-  tension?: number;
-  affiliation?: number;
-  label?: string;
-}
+// TimeMachineMoodSnapshot is now re-exported from ./generated/aliases.js
 
-export interface TimeMachineResponse {
-  personality_at?: Record<string, unknown>;
-  current_personality?: Record<string, unknown>;
-  evolution_events?: PersonalityShift[];
-  mood_at?: TimeMachineMoodSnapshot;
-  requested_at?: string;
-}
+// TimeMachineResponse is now re-exported from ./generated/aliases.js
 
 // ---------------------------------------------------------------------------
 // Agent Status
@@ -2008,40 +1934,15 @@ export interface SetStatusOptions {
   is_active: boolean;
 }
 
-export interface SetStatusResponse {
-  success: boolean;
-  agent_id: string;
-  is_active: boolean;
-}
+// SetStatusResponse is now re-exported from ./generated/aliases.js (as SetAgentStatusOutputBody)
 
 // ---------------------------------------------------------------------------
 // Capabilities
 // ---------------------------------------------------------------------------
 
-export interface PendingCapability {
-  capability: string;
-  context?: string;
-}
+// PendingCapability is now re-exported from ./generated/aliases.js
 
-export interface AgentCapabilities {
-  webSearch: boolean;
-  rememberName: boolean;
-  imageGeneration: boolean;
-  inventory: boolean;
-  knowledgeBase?: boolean;
-  knowledgeBaseProjectId?: string;
-  voiceGeneration: boolean;
-  voiceId?: string;
-  voiceTier?: number;
-  voiceUnlockedAt?: string;
-  imageUnlockedAt?: string;
-  musicGeneration: boolean;
-  musicUnlockedAt?: string;
-  videoGeneration: boolean;
-  videoUnlockedAt?: string;
-  pendingCapabilities?: PendingCapability[];
-  customTools?: CustomToolDefinition[];
-}
+// AgentCapabilities is now re-exported from ./generated/aliases.js
 
 export interface UpdateCapabilitiesOptions {
   webSearch?: boolean;
@@ -2055,15 +1956,9 @@ export interface UpdateCapabilitiesOptions {
 // Custom Tools
 // ---------------------------------------------------------------------------
 
-export interface CustomToolDefinition {
-  name: string;
-  description: string;
-  parameters?: Record<string, unknown>;
-}
+// CustomToolDefinition is now re-exported from ./generated/aliases.js
 
-export interface CustomToolListResponse {
-  tools: CustomToolDefinition[];
-}
+// CustomToolListResponse is now re-exported from ./generated/aliases.js (as ListCustomToolsOutputBody)
 
 export interface CreateCustomToolOptions {
   name: string;
@@ -2084,12 +1979,7 @@ export interface GenerateAvatarOptions {
   style?: string;
 }
 
-export interface GenerateAvatarResponse {
-  success: boolean;
-  avatar_url: string;
-  prompt: string;
-  generation_time_ms: number;
-}
+// GenerateAvatarResponse is now re-exported from ./generated/aliases.js (as RegenerateAvatarOutputBody)
 
 // ---------------------------------------------------------------------------
 // Consolidation
@@ -2100,9 +1990,7 @@ export interface ConsolidateOptions {
   user_id?: string;
 }
 
-export interface ConsolidateResponse {
-  success: boolean;
-}
+// ConsolidateResponse is now re-exported from ./generated/aliases.js (as TriggerConsolidationOutputBody)
 
 // ---------------------------------------------------------------------------
 // Summaries
@@ -2123,9 +2011,7 @@ export interface MemorySummary {
   [key: string]: unknown;
 }
 
-export interface SummariesResponse {
-  summaries: MemorySummary[];
-}
+// SummariesResponse is now re-exported from ./generated/aliases.js
 
 // ---------------------------------------------------------------------------
 // Update Project Association
@@ -2155,25 +2041,9 @@ export interface UpdateInstanceOptions {
 // Knowledge Base
 // ---------------------------------------------------------------------------
 
-export interface KBDocument {
-  project_id: string;
-  document_id: string;
-  file_name: string;
-  content_type: string;
-  file_size: number;
-  gcs_path: string;
-  checksum: string;
-  status: "pending" | "parsing" | "extracting" | "indexed" | "failed";
-  uploaded_by?: string;
-  extraction_tokens?: number;
-  created_at?: string;
-  updated_at?: string;
-}
+// KBDocument is now re-exported from ./generated/aliases.js
 
-export interface KBDocumentListResponse {
-  documents: KBDocument[];
-  total: number;
-}
+// KBDocumentListResponse is now re-exported from ./generated/aliases.js (as KbListDocumentsOutputBody)
 
 export interface KBNode {
   project_id: string;
@@ -2190,11 +2060,7 @@ export interface KBNode {
   updated_at?: string;
 }
 
-export interface KBNodeListResponse {
-  nodes: KBNode[];
-  total: number;
-  next_cursor?: string;
-}
+// KBNodeListResponse is now re-exported from ./generated/aliases.js (as KbListNodesOutputBody)
 
 // ----------------------------------------------------------------------------
 // Organization-global KB (see docs/ORGANIZATION_GLOBAL_KB.md)
@@ -2223,11 +2089,7 @@ export interface CreateOrgNodeOptions {
   confidence?: number;
 }
 
-/** KBNode with scope provenance, returned by cascade reads + promote. */
-export interface KBNodeWithScope extends KBNode {
-  scope_type: "project" | "organization";
-  relevance: number;
-}
+// KBNodeWithScope is now re-exported from ./generated/aliases.js
 
 export interface KBEdge {
   project_id: string;
@@ -2250,25 +2112,11 @@ export interface KBNodeHistory {
   changed_at?: string;
 }
 
-export interface KBNodeDetailResponse {
-  node: KBNode;
-  outgoing: KBEdge[];
-  incoming: KBEdge[];
-  history: KBNodeHistory[];
-}
+// KBNodeDetailResponse is now re-exported from ./generated/aliases.js (as KbGetNodeOutputBody)
 
-export interface KBNodeHistoryResponse {
-  history: KBNodeHistory[];
-  total: number;
-}
+// KBNodeHistoryResponse is now re-exported from ./generated/aliases.js (as KbGetNodeHistoryOutputBody)
 
-export interface KBRelatedNode {
-  node_id: string;
-  label: string;
-  node_type: string;
-  edge_type: string;
-  properties?: Record<string, unknown>;
-}
+// KBRelatedNode is now re-exported from ./generated/aliases.js
 
 export interface KBSearchResult {
   node_id: string;
@@ -2282,11 +2130,7 @@ export interface KBSearchResult {
   history?: KBNodeHistory[];
 }
 
-export interface KBSearchResponse {
-  query: string;
-  results: KBSearchResult[];
-  total: number;
-}
+// KBSearchResponse is now re-exported from ./generated/aliases.js
 
 export interface KBSearchOptions {
   query: string;
@@ -2297,32 +2141,13 @@ export interface KBSearchOptions {
   hops?: number;
 }
 
-export interface KBSchemaField {
-  name: string;
-  type: string;
-  required?: boolean;
-}
+// KBSchemaField is now re-exported from ./generated/aliases.js
 
-export interface KBSimilarityConfig {
-  match_fields?: string[];
-  threshold?: number;
-}
+// KBSimilarityConfig is now re-exported from ./generated/aliases.js
 
-export interface KBEntitySchema {
-  project_id: string;
-  schema_id: string;
-  entity_type: string;
-  fields: KBSchemaField[];
-  description?: string;
-  similarity_config?: KBSimilarityConfig;
-  created_at?: string;
-  updated_at?: string;
-}
+// KBEntitySchema is now re-exported from ./generated/aliases.js
 
-export interface KBSchemaListResponse {
-  schemas: KBEntitySchema[];
-  total: number;
-}
+// KBSchemaListResponse is now re-exported from ./generated/aliases.js (as KbListSchemasOutputBody)
 
 export interface KBStats {
   documents: {
@@ -2369,13 +2194,7 @@ export interface InsertFactEdgeDetail {
   relation: string;
 }
 
-export interface InsertFactsResponse {
-  processed: number;
-  created: number;
-  updated: number;
-  details: InsertFactDetail[];
-  edges?: InsertFactEdgeDetail[];
-}
+// InsertFactsResponse is now re-exported from ./generated/aliases.js (as KbInsertFactsOutputBody)
 
 export interface CreateSchemaOptions {
   entity_type: string;
@@ -2384,25 +2203,9 @@ export interface CreateSchemaOptions {
   similarity_config?: KBSimilarityConfig;
 }
 
-export interface KBAnalyticsRule {
-  project_id: string;
-  rule_id: string;
-  rule_type: "recommendation" | "trend";
-  name: string;
-  config: unknown;
-  enabled: boolean;
-  schedule?: string;
-  last_run_at?: string;
-  last_run_status?: string;
-  last_run_duration_ms?: number;
-  created_at?: string;
-  updated_at?: string;
-}
+// KBAnalyticsRule is now re-exported from ./generated/aliases.js
 
-export interface KBAnalyticsRuleListResponse {
-  rules: KBAnalyticsRule[];
-  total: number;
-}
+// KBAnalyticsRuleListResponse is now re-exported from ./generated/aliases.js (as KbListAnalyticsRulesOutputBody)
 
 export interface CreateAnalyticsRuleOptions {
   rule_type: "recommendation" | "trend";
@@ -2428,54 +2231,19 @@ export interface KBRecommendationScore {
   score: number;
 }
 
-export interface KBRecommendationsResponse {
-  recommendations: KBRecommendationScore[];
-  total: number;
-}
+// KBRecommendationsResponse is now re-exported from ./generated/aliases.js (as KbGetRecommendationsOutputBody)
 
-export interface KBTrendAggregation {
-  project_id: string;
-  node_id: string;
-  rule_id: string;
-  window: string;
-  value: number;
-  direction: string;
-}
+// KBTrendAggregation is now re-exported from ./generated/aliases.js
 
-export interface KBTrendsResponse {
-  trends: KBTrendAggregation[];
-  total: number;
-}
+// KBTrendsResponse is now re-exported from ./generated/aliases.js (as KbGetTrendsOutputBody)
 
-export interface KBTrendRanking {
-  project_id: string;
-  node_id: string;
-  rule_id: string;
-  type: string;
-  window: string;
-  rank: number;
-  score: number;
-}
+// KBTrendRanking is now re-exported from ./generated/aliases.js
 
-export interface KBTrendRankingsResponse {
-  rankings: KBTrendRanking[];
-  total: number;
-}
+// KBTrendRankingsResponse is now re-exported from ./generated/aliases.js (as KbGetTrendRankingsOutputBody)
 
-export interface KBConversionStats {
-  project_id: string;
-  rule_id: string;
-  segment_key: string;
-  target_type: string;
-  shown_count: number;
-  conversion_count: number;
-  conversion_rate: number;
-}
+// KBConversionStats is now re-exported from ./generated/aliases.js
 
-export interface KBConversionsResponse {
-  conversions: KBConversionStats[];
-  total: number;
-}
+// KBConversionsResponse is now re-exported from ./generated/aliases.js (as KbGetConversionStatsOutputBody)
 
 export interface RecordFeedbackOptions {
   source_node_id: string;
@@ -2615,10 +2383,7 @@ export interface ImportJob {
   updated_at?: string;
 }
 
-export interface ImportJobListResponse {
-  jobs: ImportJob[];
-  count: number;
-}
+// ImportJobListResponse is now re-exported from ./generated/aliases.js (as ListImportJobsOutputBody)
 
 // ---------------------------------------------------------------------------
 // Inventory
@@ -2633,18 +2398,9 @@ export interface InventoryUpdateOptions {
   project_id?: string;
 }
 
-export interface KBResolutionInfo {
-  resolved: boolean;
-  kb_node_id?: string;
-  kb_label?: string;
-  kb_properties?: Record<string, unknown>;
-}
+// KBResolutionInfo is now re-exported from ./generated/aliases.js (as KbResolutionInfo)
 
-export interface KBCandidate {
-  kb_node_id: string;
-  label: string;
-  properties?: Record<string, unknown>;
-}
+// KBCandidate is now re-exported from ./generated/aliases.js (as KbCandidate)
 
 export interface InventoryUpdateResponse {
   status: string;
@@ -2766,14 +2522,7 @@ export interface KBBulkUpdateOptions {
   updates: KBBulkUpdateEntry[];
 }
 
-export interface KBBulkUpdateResponse {
-  processed?: number;
-  updated?: number;
-  not_found?: number;
-  created?: number;
-  status?: string;
-  count?: number;
-}
+// KBBulkUpdateResponse is now re-exported from ./generated/aliases.js (as KbBulkUpdateOutputBody)
 
 // ---------------------------------------------------------------------------
 // Project Config
@@ -2864,9 +2613,7 @@ export interface AcknowledgeNotificationsOptions {
   notificationIds: string[];
 }
 
-export interface AcknowledgeResponse {
-  acknowledged: number;
-}
+// AcknowledgeResponse is now re-exported from ./generated/aliases.js (as AcknowledgeProjectNotificationsOutputBody)
 
 export interface AcknowledgeAllOptions {
   agentId?: string;
@@ -2921,45 +2668,17 @@ export interface ForkAgentOptions {
   name?: string;
 }
 
-/** Response from forking an agent. */
-export interface ForkResponse {
-  agent_id: string;
-  source_agent_id: string;
-  status: string;
-  name: string;
-}
+// ForkResponse is now re-exported from ./generated/aliases.js
 
-/** Response from checking fork status. */
-export interface ForkStatusResponse {
-  status: string;
-  source_agent_id: string;
-  started_at?: string;
-  completed_at?: string;
-  tables_copied: number;
-  tables_total: number;
-  error_message?: string;
-}
+// ForkStatusResponse is now re-exported from ./generated/aliases.js
 
 // ---------------------------------------------------------------------------
 // Wisdom
 // ---------------------------------------------------------------------------
 
-/** Response from deleting a wisdom fact. */
-export interface DeleteWisdomResponse {
-  success: boolean;
-  fact_id: string;
-}
+// DeleteWisdomResponse is now re-exported from ./generated/aliases.js
 
-/** Response from the wisdom audit endpoint. */
-export interface WisdomAuditResponse {
-  fact_id: string;
-  content: string;
-  target_path?: string;
-  derived_from_hashes?: string[];
-  source_user_count: number;
-  promotion_confidence: number;
-  promoted_at?: string;
-}
+// WisdomAuditResponse is now re-exported from ./generated/aliases.js
 
 // ---------------------------------------------------------------------------
 // Platform models
@@ -2977,34 +2696,13 @@ export interface PlatformModelsResponse {
 // Projects
 // ---------------------------------------------------------------------------
 
-export interface Project {
-  project_id: string;
-  tenant_id: string;
-  name: string;
-  game_name: string;
-  environment: string;
-  created_at: string;
-  is_active: boolean;
-}
+// Project is now re-exported from ./generated/aliases.js
 
 export interface ProjectListResponse {
   projects?: Project[] | null;
 }
 
-export interface ProjectAPIKey {
-  key_id: string;
-  project_id: string;
-  tenant_id: string;
-  name: string;
-  key_prefix: string;
-  created_by: string;
-  created_at: string;
-  expires_at?: string;
-  last_used_at?: string;
-  is_active: boolean;
-  is_admin_managed: boolean;
-  scopes?: string[] | null;
-}
+// ProjectAPIKey is now re-exported from ./generated/aliases.js
 
 export interface ProjectAPIKeyListResponse {
   keys?: ProjectAPIKey[] | null;
@@ -3053,16 +2751,7 @@ export interface RevokeAPIKeyResponse {
 // User Personas (API resource)
 // ---------------------------------------------------------------------------
 
-export interface UserPersonaRecord {
-  persona_id: string;
-  name: string;
-  description: string;
-  style: string;
-  is_default: boolean;
-  created_at: string;
-  updated_at: string;
-  tenant_id?: string;
-}
+// UserPersonaRecord is now re-exported from ./generated/aliases.js
 
 export interface UserPersonaListResponse {
   personas?: UserPersonaRecord[] | null;
@@ -3088,12 +2777,7 @@ export interface DeleteUserPersonaResponse {
 // Tool Schemas (distinct from custom tool list)
 // ---------------------------------------------------------------------------
 
-export interface ToolSchemaEntry {
-  name: string;
-  description: string;
-  endpoint: string;
-  parameters?: Record<string, unknown>;
-}
+// ToolSchemaEntry is now re-exported from ./generated/aliases.js
 
 export interface GetToolSchemasResponse {
   tools?: ToolSchemaEntry[] | null;

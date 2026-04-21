@@ -49,12 +49,15 @@
     "lint": "biome check src/",
     "clean": "rm -rf dist",
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
-    "sync-spec": "curl -sfL https://api.sonz.ai/docs/openapi.json -o openapi.json && git diff --stat openapi.json"
+    "sync-spec": "curl -sfL https://api.sonz.ai/docs/openapi.json -o openapi.json && git diff --stat openapi.json",
+    "generate-types": "openapi-typescript openapi.json --output src/generated/openapi.ts",
+    "sync-and-generate": "npm run sync-spec && npm run generate-types"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.0",
     "@types/node": "^25.4.0",
     "msw": "^2.6.0",
+    "openapi-typescript": "^7.13.0",
     "tsup": "^8.3.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
