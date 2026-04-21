@@ -1178,7 +1178,7 @@ export interface paths {
         get: operations["getPersonality"];
         /**
          * Update agent personality scores
-         * @description Sets the agent's Big5 and/or personality dimension scores. At least one of `big5` or `dimensions` must be provided.
+         * @description Sets the agent's Big5 and/or personality dimension scores. At least one of `big5` or `dimensions` must be provided. When `big5` is set, `dimensions` is automatically re-derived from it unless the caller also passes a `dimensions` block explicitly.
          */
         put: operations["updatePersonality"];
         post?: never;
@@ -1672,6 +1672,26 @@ export interface paths {
          * @description Returns the current status of a batch user import job.
          */
         get: operations["getImportStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/users/import/{jobId}/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List per-user progress for a batch import job
+         * @description Returns one row per user that the priming worker has started, with current status, counts, and error message. Use this to diagnose stuck or failed users during a large migration.
+         */
+        get: operations["listImportJobUsers"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4144,6 +4164,10 @@ export interface components {
         BatchImportUser: {
             content?: components["schemas"]["PrimeContentBlock"][] | null;
             display_name?: string;
+            facts?: components["schemas"]["PrimeFact"][] | null;
+            /** Format: date-time */
+            first_met_at?: string;
+            messages?: components["schemas"]["PrimeMessage"][] | null;
             metadata?: components["schemas"]["PrimeUserMetadata"];
             user_id: string;
         };
@@ -5817,6 +5841,24 @@ export interface components {
             kb_resolution?: components["schemas"]["KbResolutionInfo"];
             status: string;
         };
+        JobUser: {
+            /** Format: date-time */
+            completed_at?: string;
+            error_message?: string;
+            /** Format: int64 */
+            facts_deduped: number;
+            /** Format: int64 */
+            facts_stored: number;
+            job_id: string;
+            /** Format: date-time */
+            started_at?: string;
+            status: string;
+            /** Format: date-time */
+            updated_at: string;
+            user_id: string;
+            /** Format: int64 */
+            warmth_score: number;
+        };
         KBAnalyticsRule: {
             /**
              * Format: uri
@@ -6643,6 +6685,21 @@ export interface components {
             /** Format: int64 */
             total_count: number;
         };
+        ListImportJobUsersOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListImportJobUsersOutputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: int64
+             * @description Number of rows returned
+             */
+            count: number;
+            /** @description Per-user progress rows for this job */
+            users: components["schemas"]["JobUser"][] | null;
+        };
         ListImportJobsOutputBody: {
             /**
              * Format: uri
@@ -7071,6 +7128,60 @@ export interface components {
             body: string;
             type: string;
         };
+        PrimeFact: {
+            /** @description The fact, e.g. 'User is vegetarian' */
+            atomic_text: string;
+            /**
+             * Format: double
+             * @description 0..1
+             */
+            confidence: number;
+            /**
+             * Format: date-time
+             * @description When the source system first learned this fact. Defaults to import time when omitted.
+             */
+            created_at?: string;
+            /**
+             * Format: double
+             * @description 0..1
+             */
+            emotional_intensity?: number;
+            entities?: string[] | null;
+            /**
+             * Format: date-time
+             * @description When the event the fact describes actually happened.
+             */
+            event_time?: string;
+            /** @description One of: preference, commitment, fact, experience, correction, milestone, habit, identity, emotion */
+            fact_type: string;
+            /**
+             * Format: double
+             * @description 0..1
+             */
+            importance: number;
+            /**
+             * Format: double
+             * @description 0..1
+             */
+            relationship_relevance?: number;
+            /** @description positive | negative | neutral | mixed */
+            sentiment?: string;
+            /** @description External id for traceability (e.g. 'legacy:fact-42'). */
+            source_id?: string;
+            /** @description ongoing | past | future | recurring | one_time */
+            temporal_relevance?: string;
+            topic_tags?: string[] | null;
+        };
+        PrimeMessage: {
+            content: string;
+            /**
+             * Format: date-time
+             * @description Original message timestamp. Advisory — DialogueMessage has no timestamp field today, so this is preserved in the import job payload for future extensions.
+             */
+            occurred_at?: string;
+            /** @description 'user' or 'assistant' */
+            role: string;
+        };
         PrimeUserMetadata: {
             company?: string;
             custom?: {
@@ -7087,8 +7198,18 @@ export interface components {
              * @example /api/v1/schemas/PrimeUserRequest.json
              */
             readonly $schema?: string;
+            /** @description Raw content blocks for LLM fact extraction. */
             content?: components["schemas"]["PrimeContentBlock"][] | null;
             display_name: string;
+            /** @description Pre-extracted facts written directly to memory. Skips LLM re-extraction and preserves supplied timestamps. Use when migrating from another context service. */
+            facts?: components["schemas"]["PrimeFact"][] | null;
+            /**
+             * Format: date-time
+             * @description Original date the source system first knew this user. Persisted on UserPrimingMetadata.FirstMetAt.
+             */
+            first_met_at?: string;
+            /** @description Dialogue history. When >= 3 messages are supplied, the worker invokes the session-end pipeline so consolidation summaries, diary, constellation, and personality systems populate as if the conversation had occurred live. */
+            messages?: components["schemas"]["PrimeMessage"][] | null;
             metadata?: components["schemas"]["PrimeUserMetadata"];
             source?: string;
             structured_import?: components["schemas"]["StructuredImportSpec"];
@@ -8267,11 +8388,11 @@ export interface components {
             phone?: string;
             title?: string;
         };
-        UpdatePersonalityInputBody: {
+        UpdatePersonalityBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdatePersonalityInputBody.json
+             * @example /api/v1/schemas/UpdatePersonalityBody.json
              */
             readonly $schema?: string;
             /** @description Big Five personality scores to set */
@@ -8476,6 +8597,8 @@ export interface components {
             Email: string;
             /** Format: int64 */
             FactsCount: number;
+            /** Format: date-time */
+            FirstMetAt: string | null;
             LinkedinURL: string;
             Phone: string;
             /** Format: date-time */
@@ -11386,7 +11509,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdatePersonalityInputBody"];
+                "application/json": components["schemas"]["UpdatePersonalityBody"];
             };
         };
         responses: {
@@ -12401,6 +12524,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ImportJob"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listImportJobUsers: {
+        parameters: {
+            query?: {
+                /** @description Max user rows to return */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+                /** @description Import job UUID */
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListImportJobUsersOutputBody"];
                 };
             };
             /** @description Error */
