@@ -1,11 +1,9 @@
-// ---------------------------------------------------------------------------
-// Generated type imports (used within this file and re-exported to consumers)
-// ---------------------------------------------------------------------------
+// Re-export all spec-derived types so resource files can import from this module
+// without knowing about the generated layer.
+export type * from "./generated/flat-exports.js";
 
-// These types are imported so they can be used in interface definitions below,
-// and also re-exported (see the `export type { ... }` block after this).
+// Import spec types used in hand-written interface bodies below.
 import type {
-  // Types referenced within this file
   PersonalityDelta,
   Goal,
   KBRelatedNode,
@@ -17,95 +15,7 @@ import type {
   ProjectAPIKey,
   UserPersonaRecord,
   ToolSchemaEntry,
-} from "./generated/aliases.js";
-
-// ---------------------------------------------------------------------------
-// Generated type re-exports (auto-generated from openapi.ts via aliases.ts)
-// ---------------------------------------------------------------------------
-
-export type {
-  // Direct same-name re-exports
-  Goal,
-  Habit,
-  HabitsResponse,
-  GoalsResponse,
-  BreakthroughsResponse,
-  Breakthrough,
-  InterestsResponse,
-  KBDocument,
-  KBEntitySchema,
-  KBSchemaField,
-  KBSearchResponse,
-  KBAnalyticsRule,
-  WakeupsResponse,
-  MoodAggregateResponse,
-  MoodHistoryResponse,
-  MoodResponse,
-  FactHistoryResponse,
-  TimeMachineResponse,
-  TimeMachineMoodSnapshot,
-  SummariesResponse,
-  RecentShiftsResponse,
-  UserOverlayDetailResponse,
-  UserOverlaysListResponse,
-  CustomState,
-  CustomToolDefinition,
-  ToolSchemaEntry,
-  Project,
-  ProjectAPIKey,
-  UserPersonaRecord,
-  WisdomAuditResponse,
-  DeleteWisdomResponse,
-  ForkResponse,
-  ForkStatusResponse,
-  AgentIndex,
-  AgentCapabilities,
-  PendingCapability,
-  KBTrendAggregation,
-  KBTrendRanking,
-  KBConversionStats,
-  KBSimilarityConfig,
-  KBNodeWithScope,
-  KBRelatedNode,
-  PersonalityDelta,
-  // Renamed types
-  ScheduledWakeup,
-  AgentListResponse,
-  WebhookEndpoint,
-  ConsolidateResponse,
-  GenerateAvatarResponse,
-  SetStatusResponse,
-  TriggerEventResponse,
-  DeliveryAttemptsResponse,
-  WebhookListResponse,
-  AcknowledgeResponse,
-  NotificationListResponse,
-  RelationshipResponse,
-  MemorySearchResponse,
-  MemorySearchResult,
-  MemoryTimelineResponse,
-  VoiceListResponse,
-  CustomToolListResponse,
-  CustomStateListResponse,
-  EvalTemplateListResponse,
-  EvalRunListResponse,
-  FactListResponse,
-  KBDocumentListResponse,
-  KBNodeListResponse,
-  KBNodeDetailResponse,
-  KBNodeHistoryResponse,
-  KBSchemaListResponse,
-  KBAnalyticsRuleListResponse,
-  KBRecommendationsResponse,
-  KBTrendsResponse,
-  KBTrendRankingsResponse,
-  KBConversionsResponse,
-  InsertFactsResponse,
-  KBBulkUpdateResponse,
-  KBResolutionInfo,
-  KBCandidate,
-  ImportJobListResponse,
-} from "./generated/aliases.js";
+} from "./generated/flat-exports.js";
 
 // ---------------------------------------------------------------------------
 // Chat

@@ -50,7 +50,7 @@
     "clean": "rm -rf dist",
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
     "sync-spec": "curl -sfL https://api.sonz.ai/docs/openapi.json -o openapi.json && git diff --stat openapi.json",
-    "generate-types": "openapi-typescript openapi.json --output src/generated/openapi.ts",
+    "generate-types": "openapi-typescript openapi.json --output src/generated/openapi.ts && node scripts/generate-flat-exports.mjs",
     "sync-and-generate": "npm run sync-spec && npm run generate-types"
   },
   "devDependencies": {

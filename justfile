@@ -105,7 +105,7 @@ _build:
     bun run build
 
 _commit VERSION:
-    git add package.json package-lock.json src/http.ts src/generated/openapi.ts
+    git add package.json package-lock.json src/http.ts src/generated/openapi.ts src/generated/flat-exports.ts
     git commit -m "release: v{{VERSION}}"
 
 _publish VERSION:

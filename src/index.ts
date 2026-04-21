@@ -15,7 +15,12 @@ export {
   StreamError,
 } from "./errors.js";
 
-// Types
+// All spec-derived types — auto-maintained from openapi.json.
+// New types added to the API appear here automatically after `just sync-spec`.
+export type * from "./generated/flat-exports.js";
+
+// SDK-specific types: options, config, streaming, and types where the hand-written
+// version differs from (or extends) the spec schema.
 export type {
   // Config
   SonzaiConfig,
@@ -41,20 +46,15 @@ export type {
   DialogueResponse,
   // Events
   TriggerEventOptions,
-  TriggerEventResponse,
-  // Memory
+  // Memory (hand-written — differs from spec)
   MemoryNode,
   AtomicFact,
   MemoryResponse,
-  MemorySearchResult,
-  MemorySearchResponse,
   TimelineSession,
-  MemoryTimelineResponse,
   MemoryListOptions,
   MemorySearchOptions,
   MemoryTimelineOptions,
   Fact,
-  FactListResponse,
   FactListOptions,
   CreateFactOptions,
   UpdateFactOptions,
@@ -62,14 +62,13 @@ export type {
   MemoryResetResponse,
   SeedMemoriesOptions,
   SeedMemoriesResponse,
-  // Personality
+  // Personality (hand-written SDK types)
   Big5Trait,
   Big5,
   PersonalityDimensions,
   PersonalityPreferences,
   PersonalityBehaviors,
   PersonalityProfile,
-  PersonalityDelta,
   PersonalityResponse,
   PersonalityGetOptions,
   PersonalityUpdateOptions,
@@ -84,36 +83,28 @@ export type {
   InstanceCreateOptions,
   // Notifications
   Notification,
-  NotificationListResponse,
   NotificationListOptions,
-  // Context data
+  // Context data options
   ContextDataOptions,
-  MoodResponse,
-  MoodAggregateResponse,
-  RelationshipResponse,
-  HabitsResponse,
-  Habit,
+  MoodState,
+  MoodHistoryEntry,
   CreateHabitOptions,
   UpdateHabitOptions,
   DeleteHabitOptions,
-  Goal,
   GoalType,
   GoalStatus,
   GoalPriority,
-  GoalsResponse,
   CreateGoalOptions,
   UpdateGoalOptions,
   DeleteGoalOptions,
   InitialGoal,
-  InterestsResponse,
   DiaryResponse,
+  DiaryEntry,
   UsersResponse,
   ConstellationResponse,
   ConstellationNode,
   CreateConstellationNodeOptions,
   UpdateConstellationNodeOptions,
-  BreakthroughsResponse,
-  WakeupsResponse,
   // Context (single-call enriched context)
   GetContextOptions,
   EnrichedContextResponse,
@@ -121,7 +112,7 @@ export type {
   ContextLongTermSummary,
   ContextProactiveMemory,
   ContextConstellationPattern,
-  // Process (full pipeline)
+  // Process
   ProcessOptions,
   ProcessResponse,
   ProcessSideEffectsSummary,
@@ -151,7 +142,6 @@ export type {
   VoiceStreamEvent,
   VoiceUsage,
   VoiceEntry,
-  VoiceListResponse,
   VoiceListOptions,
   // Voice TTS/STT
   TTSOptions,
@@ -172,25 +162,18 @@ export type {
   IdentityMemory,
   ImageGenerateOptions,
   ImageGenerateResponse,
-  // Custom States
-  CustomState,
+  // Custom States options
   CustomStateListOptions,
   CustomStateCreateOptions,
   CustomStateUpdateOptions,
-  CustomStateListResponse,
   CustomStateUpsertOptions,
   CustomStateGetByKeyOptions,
   CustomStateDeleteByKeyOptions,
-  // Wakeups
+  // Wakeups options
   ScheduleWakeupOptions,
-  ScheduledWakeup,
-  // Webhooks
-  WebhookEndpoint,
+  // Webhooks options
   WebhookRegisterOptions,
   WebhookRegisterResponse,
-  WebhookListResponse,
-  WebhookDeliveryAttempt,
-  DeliveryAttemptsResponse,
   // Evaluation
   EvalCategory,
   EvaluationResult,
@@ -207,58 +190,40 @@ export type {
   // Eval templates
   EvalTemplateCategory,
   EvalTemplate,
-  EvalTemplateListResponse,
   EvalTemplateCreateOptions,
   EvalTemplateUpdateOptions,
   // Eval runs
   EvalRun,
-  EvalRunListResponse,
   EvalRunListOptions,
-  // Agent list
+  // Agent list options
   AgentListOptions,
-  AgentIndex,
-  AgentListResponse,
-  // Batch personality
+  // Batch personality (hand-written)
   BatchPersonalityEntry,
   BatchPersonalityResponse,
   // Session tools
   SetSessionToolsOptions,
-  // Personality extensions
+  // Personality extensions (hand-written)
   SignificantMoment,
   SignificantMomentsResponse,
   PersonalityShift,
-  RecentShiftsResponse,
   UserPersonalityOverlay,
-  UserOverlaysListResponse,
-  UserOverlayDetailResponse,
   UserOverlayOptions,
-  // Fact history
-  FactHistoryResponse,
-  // Time machine
+  // Time machine options
   TimeMachineOptions,
-  TimeMachineMoodSnapshot,
-  TimeMachineResponse,
-  // Agent status
+  // Agent status options
   SetStatusOptions,
-  SetStatusResponse,
-  // Capabilities
-  AgentCapabilities,
+  // Capabilities options
   UpdateCapabilitiesOptions,
-  // Avatar Generation
+  // Avatar Generation options
   GenerateAvatarOptions,
-  GenerateAvatarResponse,
-  // Custom tools
-  CustomToolDefinition,
-  CustomToolListResponse,
+  // Custom tools options
   CreateCustomToolOptions,
   UpdateCustomToolOptions,
-  // Consolidation
+  // Consolidation options
   ConsolidateOptions,
-  ConsolidateResponse,
-  // Summaries
+  // Summaries options
   SummariesOptions,
   MemorySummary,
-  SummariesResponse,
   // Project association
   UpdateProjectOptions,
   UpdateProjectResponse,
@@ -271,53 +236,26 @@ export type {
   // Tool Schemas (BYO-LLM)
   ToolSchema,
   ToolSchemasResponse,
-  // Fork
+  // Fork options
   ForkAgentOptions,
-  ForkResponse,
-  ForkStatusResponse,
-  // Wisdom
-  DeleteWisdomResponse,
-  WisdomAuditResponse,
-  // Knowledge Base
-  KBDocument,
-  KBDocumentListResponse,
+  // Knowledge Base (hand-written — differ from spec or SDK-specific)
   KBNode,
-  KBNodeListResponse,
   KBEdge,
   KBNodeHistory,
-  KBNodeDetailResponse,
-  KBNodeHistoryResponse,
-  // Knowledge Base — organization-global scope
   KBScopeMode,
-  KBNodeWithScope,
   CreateOrgNodeOptions,
-  KBRelatedNode,
   KBSearchResult,
-  KBSearchResponse,
   KBSearchOptions,
-  KBSchemaField,
-  KBSimilarityConfig,
-  KBEntitySchema,
-  KBSchemaListResponse,
   KBStats,
   InsertFactEntry,
   InsertRelEntry,
   InsertFactsOptions,
   InsertFactDetail,
-  InsertFactsResponse,
+  InsertFactEdgeDetail,
   CreateSchemaOptions,
-  KBAnalyticsRule,
-  KBAnalyticsRuleListResponse,
   CreateAnalyticsRuleOptions,
   UpdateAnalyticsRuleOptions,
   KBRecommendationScore,
-  KBRecommendationsResponse,
-  KBTrendAggregation,
-  KBTrendsResponse,
-  KBTrendRanking,
-  KBTrendRankingsResponse,
-  KBConversionStats,
-  KBConversionsResponse,
   RecordFeedbackOptions,
   // User Priming
   PrimeUserMetadata,
@@ -333,14 +271,11 @@ export type {
   BatchImportOptions,
   BatchImportResponse,
   ImportJob,
-  ImportJobListResponse,
   StructuredColumnMapping,
   StructuredImportSpec,
   // Inventory
   InventoryUpdateOptions,
   InventoryUpdateResponse,
-  KBResolutionInfo,
-  KBCandidate,
   InventoryQueryOptions,
   InventoryQueryResponse,
   InventoryItem,
@@ -356,7 +291,6 @@ export type {
   // KB Bulk Update
   KBBulkUpdateEntry,
   KBBulkUpdateOptions,
-  KBBulkUpdateResponse,
   // Project Config
   ProjectConfigEntry,
   ProjectConfigListResponse,
@@ -368,12 +302,9 @@ export type {
   ProjectNotificationListOptions,
   ProjectNotificationListResponse,
   AcknowledgeNotificationsOptions,
-  AcknowledgeResponse,
   AcknowledgeAllOptions,
   // Projects
-  Project,
   ProjectListResponse,
-  ProjectAPIKey,
   ProjectAPIKeyListResponse,
   CreateProjectOptions,
   UpdateProjectDetailsOptions,
@@ -381,14 +312,12 @@ export type {
   CreateAPIKeyOptions,
   CreateAPIKeyResponse,
   RevokeAPIKeyResponse,
-  // User Personas (API resource)
-  UserPersonaRecord,
+  // User Personas options
   UserPersonaListResponse,
   CreateUserPersonaOptions,
   UpdateUserPersonaOptions,
   DeleteUserPersonaResponse,
-  // Tool Schemas (distinct from custom tool list)
-  ToolSchemaEntry,
+  // Tool Schemas (BYO-LLM, distinct from custom tool list)
   GetToolSchemasResponse,
 } from "./types.js";
 
