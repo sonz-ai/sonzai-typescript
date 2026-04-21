@@ -292,14 +292,10 @@ export class Agents {
   ): Promise<ScheduledWakeup> {
     const body: Record<string, unknown> = {
       user_id: options.userId,
-      scheduled_at: options.scheduledAt,
       check_type: options.checkType,
+      intent: options.intent,
     };
-    if (options.intent) body.intent = options.intent;
-    if (options.occasion) body.occasion = options.occasion;
-    if (options.interestTopic) body.interest_topic = options.interestTopic;
-    if (options.eventDescription)
-      body.event_description = options.eventDescription;
+    if (options.delayHours != null) body.delay_hours = options.delayHours;
 
     return this.http.post<ScheduledWakeup>(
       `/api/v1/agents/${agentId}/wakeups`,

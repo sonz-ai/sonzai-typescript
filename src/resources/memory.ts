@@ -104,10 +104,10 @@ export class Memory {
     );
   }
 
-  /** Reset (delete) all memory for an agent, optionally scoped to a user. */
+  /** Reset (delete) all memory for an agent scoped to a user. */
   async reset(
     agentId: string,
-    options: MemoryResetOptions = {},
+    options: MemoryResetOptions,
   ): Promise<MemoryResetResponse> {
     return this.http.delete<MemoryResetResponse>(
       `/api/v1/agents/${agentId}/memory`,

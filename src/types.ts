@@ -1357,7 +1357,7 @@ export interface UpdateFactOptions {
 }
 
 export interface MemoryResetOptions {
-  userId?: string;
+  userId: string;
   instanceId?: string;
 }
 
@@ -1664,11 +1664,10 @@ export interface IdentityMemory {
 }
 
 export interface GenerateSeedMemoriesOptions {
-  userId?: string;
   agentName?: string;
   big5?: Big5Scores;
   personalityPrompt?: string;
-  guideSummary?: string;
+  primaryTraits?: string[];
   trueInterests?: string[];
   trueDislikes?: string[];
   speechPatterns?: string[];
@@ -1678,7 +1677,6 @@ export interface GenerateSeedMemoriesOptions {
   identityMemoryTemplates?: IdentityMemory[];
   generateOriginStory?: boolean;
   generatePersonalizedMemories?: boolean;
-  storeMemories?: boolean;
 }
 
 export interface GenerateSeedMemoriesResponse {
@@ -1770,12 +1768,9 @@ export interface CustomStateDeleteByKeyOptions {
 
 export interface ScheduleWakeupOptions {
   userId: string;
-  scheduledAt: string;
   checkType: string;
-  intent?: string;
-  occasion?: string;
-  interestTopic?: string;
-  eventDescription?: string;
+  intent: string;
+  delayHours?: number;
 }
 
 export interface ScheduledWakeup {

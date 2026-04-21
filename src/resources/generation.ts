@@ -83,12 +83,11 @@ export class Generation {
     options: GenerateSeedMemoriesOptions = {},
   ): Promise<GenerateSeedMemoriesResponse> {
     const body: Record<string, unknown> = {};
-    if (options.userId) body.user_id = options.userId;
     if (options.agentName) body.agentName = options.agentName;
     if (options.big5) body.big5 = options.big5;
     if (options.personalityPrompt)
       body.personalityPrompt = options.personalityPrompt;
-    if (options.guideSummary) body.guide_summary = options.guideSummary;
+    if (options.primaryTraits) body.primaryTraits = options.primaryTraits;
     if (options.trueInterests) body.trueInterests = options.trueInterests;
     if (options.trueDislikes) body.trueDislikes = options.trueDislikes;
     if (options.speechPatterns) body.speechPatterns = options.speechPatterns;
@@ -104,8 +103,6 @@ export class Generation {
       body.generateOriginStory = options.generateOriginStory;
     if (options.generatePersonalizedMemories != null)
       body.generatePersonalizedMemories = options.generatePersonalizedMemories;
-    if (options.storeMemories != null)
-      body.store_memories = options.storeMemories;
 
     return this.http.post<GenerateSeedMemoriesResponse>(
       `/api/v1/agents/${agentId}/memory/seed`,
