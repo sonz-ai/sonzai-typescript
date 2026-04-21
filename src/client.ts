@@ -6,13 +6,18 @@ import { EvalRuns } from "./resources/eval-runs.js";
 import { EvalTemplates } from "./resources/eval-templates.js";
 import { Knowledge } from "./resources/knowledge.js";
 import { AccountConfig } from "./resources/account-config.js";
+import { OrgBilling } from "./resources/org-billing.js";
 import { ProjectConfig } from "./resources/project-config.js";
 import { ProjectNotifications } from "./resources/project-notifications.js";
 import { Projects } from "./resources/projects.js";
+import { Storefront } from "./resources/storefront.js";
+import { Support } from "./resources/support.js";
+import { Tenants } from "./resources/tenants.js";
 import { UserPersonas } from "./resources/user-personas.js";
 import { Voices } from "./resources/voice.js";
 import { Webhooks } from "./resources/webhooks.js";
-import type { PlatformModelsResponse, SonzaiConfig } from "./types.js";
+import { Workbench } from "./resources/workbench.js";
+import type { MeResponse, PlatformModelsResponse, SonzaiConfig } from "./types.js";
 
 const DEFAULT_BASE_URL = "https://api.sonz.ai";
 const DEFAULT_TIMEOUT = 30_000;
@@ -123,6 +128,16 @@ export class Sonzai {
   readonly projects: Projects;
   /** User persona management (create, update, delete user personas). */
   readonly userPersonas: UserPersonas;
+  /** Tenant listing (platform-admin scope). */
+  readonly tenants: Tenants;
+  /** Support-ticket operations for the caller. */
+  readonly support: Support;
+  /** Storefront operations (public agent marketplace). */
+  readonly storefront: Storefront;
+  /** Interactive testing sandbox ("workbench"). */
+  readonly workbench: Workbench;
+  /** Org-level billing: Stripe sessions, ledger, usage, contracts, vouchers. */
+  readonly orgBilling: OrgBilling;
 
   private readonly http: HTTPClient;
 
@@ -152,6 +167,11 @@ export class Sonzai {
     this.projectNotifications = new ProjectNotifications(this.http);
     this.projects = new Projects(this.http);
     this.userPersonas = new UserPersonas(this.http);
+    this.tenants = new Tenants(this.http);
+    this.support = new Support(this.http);
+    this.storefront = new Storefront(this.http);
+    this.workbench = new Workbench(this.http);
+    this.orgBilling = new OrgBilling(this.http);
   }
 
   /**
@@ -170,5 +190,15 @@ export class Sonzai {
    */
   listModels(): Promise<PlatformModelsResponse> {
     return this.http.get<PlatformModelsResponse>("/api/v1/models");
+  }
+
+  /**
+   * Return the caller's user profile with all orgs they belong to.
+   *
+   * Maps to `GET /me`. Useful for admin UIs that need to render an org
+   * switcher or show the authenticated user's roles.
+   */
+  getMyOrg(): Promise<MeResponse> {
+    return this.http.get<MeResponse>("/api/v1/me");
   }
 }

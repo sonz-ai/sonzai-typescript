@@ -3098,3 +3098,166 @@ export interface ToolSchemaEntry {
 export interface GetToolSchemasResponse {
   tools?: ToolSchemaEntry[] | null;
 }
+
+// ---------------------------------------------------------------------------
+// Tenants
+// ---------------------------------------------------------------------------
+
+export interface Tenant {
+  tenant_id: string;
+  name: string;
+  created_at: string;
+  is_active: boolean;
+  slug?: string;
+  clerk_org_id?: string;
+  license_key_id?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Me / Org (Users tag)
+// ---------------------------------------------------------------------------
+
+export interface OrgResponse {
+  id: string;
+  name: string;
+  role: string;
+  member_count: number;
+  created_at: string;
+  slug?: string;
+}
+
+export interface MeResponse {
+  user_id: string;
+  email: string;
+  orgs?: OrgResponse[] | null;
+}
+
+// ---------------------------------------------------------------------------
+// Support tickets
+// ---------------------------------------------------------------------------
+
+export interface SupportTicketComment {
+  comment_id: string;
+  ticket_id: string;
+  author_id: string;
+  author_email: string;
+  author_type: string;
+  content: string;
+  is_internal: boolean;
+  created_at: string;
+}
+
+export interface SupportTicket {
+  ticket_id: string;
+  tenant_id: string;
+  created_by: string;
+  created_by_email: string;
+  title: string;
+  description: string;
+  type: string;
+  status: string;
+  priority: string;
+  created_at: string;
+  updated_at?: string;
+  resolved_at?: string;
+  assigned_to?: string;
+  assigned_to_email?: string;
+  comment_count?: number;
+  comments?: SupportTicketComment[] | null;
+}
+
+export interface SupportTicketHistory {
+  history_id: string;
+  ticket_id: string;
+  changed_by: string;
+  changed_by_email: string;
+  field_changed: string;
+  created_at: string;
+  old_value?: string;
+  new_value?: string;
+}
+
+export interface TicketSummary {
+  ticket_id: string;
+  title: string;
+  type: string;
+  status: string;
+  priority: string;
+  created_by_email: string;
+  created_at: string;
+  updated_at: string;
+  comment_count: number;
+  assigned_to_email?: string;
+}
+
+export interface TicketListResponse {
+  tickets?: TicketSummary[] | null;
+  total: number;
+  has_more: boolean;
+}
+
+export interface TicketDetailResponse {
+  ticket: SupportTicket;
+  history?: SupportTicketHistory[] | null;
+}
+
+export interface CreateTicketOptions {
+  title: string;
+  description: string;
+  type: string;
+  priority?: string;
+}
+
+export interface AddTicketCommentOptions {
+  content: string;
+  is_internal?: boolean;
+}
+
+export interface ListMyTicketsOptions {
+  limit?: number;
+  offset?: number;
+  status?: string;
+  type?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Storefront
+// ---------------------------------------------------------------------------
+
+export interface StorefrontUpdateOptions {
+  slug?: string;
+  display_name?: string;
+  description?: string;
+  hero_image_url?: string;
+  theme?: string;
+  access_type?: string;
+  invite_code?: string;
+  contact_email?: string;
+  max_visits_per_user?: number;
+}
+
+export interface StorefrontUpsertAgentOptions {
+  slug?: string;
+  display_name?: string;
+  description?: string;
+  avatar_url?: string;
+  featured?: boolean;
+  max_turns_per_visit?: number;
+}
+
+// ---------------------------------------------------------------------------
+// Org billing
+// ---------------------------------------------------------------------------
+
+export interface OrgBillingCheckoutOptions {
+  amount: number;
+  currency?: string;
+}
+
+export interface OrgBillingSubscribeOptions {
+  contractId: string;
+}
+
+export interface OrgBillingRedeemVoucherOptions {
+  code: string;
+}

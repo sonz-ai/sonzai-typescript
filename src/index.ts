@@ -390,6 +390,28 @@ export type {
   // Tool Schemas (distinct from custom tool list)
   ToolSchemaEntry,
   GetToolSchemasResponse,
+  // Tenants
+  Tenant,
+  // Me / Org (Users tag)
+  MeResponse,
+  OrgResponse,
+  // Support tickets
+  SupportTicket,
+  SupportTicketComment,
+  SupportTicketHistory,
+  TicketSummary,
+  TicketListResponse,
+  TicketDetailResponse,
+  CreateTicketOptions,
+  AddTicketCommentOptions,
+  ListMyTicketsOptions,
+  // Storefront
+  StorefrontUpdateOptions,
+  StorefrontUpsertAgentOptions,
+  // Org billing
+  OrgBillingCheckoutOptions,
+  OrgBillingSubscribeOptions,
+  OrgBillingRedeemVoucherOptions,
 } from "./types.js";
 
 // Runtime value exports (non-type)
