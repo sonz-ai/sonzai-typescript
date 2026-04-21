@@ -350,6 +350,84 @@ for await (const event of client.evalRuns.streamEvents("run-id")) {
 }
 ```
 
+### Platform, Tenants & Me
+
+```ts
+// Caller profile + all orgs they belong to (GET /me)
+const me = await client.getMyOrg();
+console.log(me.email, me.orgs?.map(o => o.name));
+
+// Tenant listing (platform-admin scope)
+const tenants = await client.tenants.list();
+const tenant = await client.tenants.get("tenant-id");
+```
+
+### Org Billing
+
+Stripe checkout/portal sessions, credit ledger, usage summaries, and
+enterprise contracts for the authenticated tenant.
+
+```ts
+const profile = await client.orgBilling.getBilling();
+const usage = await client.orgBilling.getUsageSummary(30);
+const ledger = await client.orgBilling.getLedger(30);
+const pricing = await client.orgBilling.getModelPricing();
+
+// Stripe
+const checkout = await client.orgBilling.createCheckout({ amount: 5000, currency: "USD" }); // cents
+const portal = await client.orgBilling.createPortal();
+
+// Contracts / vouchers
+const contract = await client.orgBilling.getContract();
+await client.orgBilling.subscribeToContract({ contractId: "contract-uuid" });
+await client.orgBilling.redeemVoucher({ code: "PROMO2026" });
+```
+
+### Storefront (Agent Marketplace)
+
+Publish a tenant-branded storefront with a curated list of agents.
+
+```ts
+const sf = await client.storefront.get();
+await client.storefront.update({ slug: "my-studio", display_name: "My Studio", access_type: "open" });
+await client.storefront.publish();
+
+// Agents on the storefront
+await client.storefront.listAgents();
+await client.storefront.upsertAgent("agent-id", { display_name: "Luna", featured: true });
+await client.storefront.removeAgent("agent-id");
+```
+
+### Workbench (Interactive Testing)
+
+A scratch environment for iterating on an agent: advance simulated time,
+run chat turns, reset, regenerate character. Bodies/returns are
+`Record<string, unknown>` while the server schemas stabilize.
+
+```ts
+await client.workbench.prepare({ agent_id: "agent-id" });
+const state = await client.workbench.getState();
+await client.workbench.chat({ messages: [{ role: "user", content: "hi" }] });
+await client.workbench.simulateUser({ turns: 3 });
+await client.workbench.advanceTime({ hours: 24 });
+await client.workbench.resetAgent({ agent_id: "agent-id" });
+```
+
+### Support Tickets
+
+```ts
+const tickets = await client.support.listTickets({ status: "open" });
+const created = await client.support.createTicket({
+  title: "Streaming chat drops mid-response",
+  description: "...",
+  type: "bug",
+  priority: "high",
+});
+const detail = await client.support.getTicket(created.ticket_id);
+await client.support.addComment(created.ticket_id, { content: "Reproduced on Node 20." });
+await client.support.closeTicket(created.ticket_id);
+```
+
 ## Configuration
 
 ```ts
