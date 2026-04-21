@@ -769,7 +769,7 @@ export class Agents {
     agentId: string,
     options: UpdateCapabilitiesOptions,
   ): Promise<AgentCapabilities> {
-    return this.http.patch<AgentCapabilities>(
+    return this.http.put<AgentCapabilities>(
       `/api/v1/agents/${agentId}/capabilities`,
       options as unknown as Record<string, unknown>,
     );
