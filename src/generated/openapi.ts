@@ -1892,6 +1892,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/agents/{agentId}/users/{userId}/schedules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all schedules for a (agent, user) pair. */
+        get: operations["listSchedules"];
+        put?: never;
+        /** Create a recurring schedule for a user. */
+        post: operations["createSchedule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/users/{userId}/schedules/{scheduleId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Fetch a single schedule by ID. */
+        get: operations["getSchedule"];
+        put?: never;
+        post?: never;
+        /** Delete a schedule. Idempotent — missing IDs return 204. */
+        delete: operations["deleteSchedule"];
+        options?: never;
+        head?: never;
+        /** Partially update a schedule. Recomputes next_fire_at only when cadence/active_window/starts_at change. */
+        patch: operations["patchSchedule"];
+        trace?: never;
+    };
+    "/agents/{agentId}/users/{userId}/schedules/{scheduleId}/upcoming": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preview the next N allowed fire times (honors active_window). Does not mutate state. */
+        get: operations["upcomingSchedule"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/agents/{agentId}/voice/live-ws-token": {
         parameters: {
             query?: never;
@@ -4080,6 +4134,34 @@ export interface components {
             /** @description Human-readable provider name */
             provider_name: string;
         };
+        AnalyticsOverview: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/AnalyticsOverview.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            activeAgents: number;
+            /** Format: int64 */
+            activeSessions: number;
+            /** Format: int64 */
+            totalAgents: number;
+            /** Format: int64 */
+            totalMessages: number;
+            /** Format: int64 */
+            totalSessions: number;
+        };
+        AnalyticsRealtimeResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/AnalyticsRealtimeResponse.json
+             */
+            readonly $schema?: string;
+            daily: components["schemas"]["DailyStatsEntry"][] | null;
+            overview: components["schemas"]["AnalyticsOverview"];
+        };
         AtomicFact: {
             /**
              * Format: uri
@@ -4415,6 +4497,135 @@ export interface components {
             readonly $schema?: string;
             /** @description Whether the notification was consumed */
             success: boolean;
+        };
+        CostBreakdownEntry: {
+            /** Format: double */
+            costUsd: number;
+            /** Format: int64 */
+            inputTokens: number;
+            key: string;
+            label: string;
+            /** Format: int64 */
+            outputTokens: number;
+            /** Format: int64 */
+            turns: number;
+        };
+        CostBreakdownResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CostBreakdownResponse.json
+             */
+            readonly $schema?: string;
+            byAgent: components["schemas"]["CostBreakdownEntry"][] | null;
+            byModel: components["schemas"]["CostBreakdownEntry"][] | null;
+            byOperation: components["schemas"]["CostBreakdownEntry"][] | null;
+            period: components["schemas"]["CostBreakdownResponsePeriodStruct"];
+            /** Format: double */
+            totalCostUsd: number;
+            /** Format: int64 */
+            totalInputTokens: number;
+            /** Format: int64 */
+            totalOutputTokens: number;
+        };
+        CostBreakdownResponsePeriodStruct: {
+            end: string;
+            start: string;
+        };
+        CostByCharacter: {
+            agentId: string;
+            agentName: string;
+            projectId: string;
+            projectName: string;
+        };
+        CostByProject: {
+            /** Format: int64 */
+            agentCount: number;
+            /** Format: double */
+            costUsd: number;
+            /** Format: int64 */
+            inputTokens: number;
+            /** Format: int64 */
+            outputTokens: number;
+            projectId: string;
+            projectName: string;
+            /** Format: double */
+            serviceCostUsd: number;
+            /** Format: int64 */
+            totalTokens: number;
+        };
+        CostByService: {
+            /** Format: double */
+            costUsd: number;
+            /** Format: int64 */
+            count: number;
+            service: string;
+        };
+        CostByTrafficSource: {
+            /** Format: double */
+            costUsd: number;
+            /** Format: int64 */
+            entryCount: number;
+            /** Format: int64 */
+            tokens: number;
+            trafficSource: string;
+        };
+        CostDailyEntry: {
+            /** Format: double */
+            costUsd: number;
+            date: string;
+            /** Format: int64 */
+            inputTokens: number;
+            /** Format: int64 */
+            outputTokens: number;
+            /** Format: double */
+            serviceCostUsd: number;
+            /** Format: double */
+            totalCostUsd: number;
+            /** Format: int64 */
+            totalTokens: number;
+        };
+        CostResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CostResponse.json
+             */
+            readonly $schema?: string;
+            byCharacter?: components["schemas"]["CostByCharacter"][] | null;
+            byProject?: components["schemas"]["CostByProject"][] | null;
+            byService?: components["schemas"]["CostByService"][] | null;
+            byTrafficSource?: components["schemas"]["CostByTrafficSource"][] | null;
+            daily: components["schemas"]["CostDailyEntry"][] | null;
+            period: components["schemas"]["CostResponsePeriodStruct"];
+            summary: components["schemas"]["CostSummary"];
+        };
+        CostResponsePeriodStruct: {
+            end: string;
+            start: string;
+        };
+        CostSummary: {
+            billingMode: string;
+            /** Format: double */
+            creditBalanceUsd: number;
+            /** Format: double */
+            inputCostUsd: number;
+            /** Format: double */
+            outputCostUsd: number;
+            /** Format: double */
+            serviceCostUsd: number;
+            /** Format: double */
+            tokenCostUsd: number;
+            /** Format: double */
+            tokenPricePer1KUsd: number;
+            /** Format: double */
+            totalCostUsd: number;
+            /** Format: int64 */
+            totalInputTokens: number;
+            /** Format: int64 */
+            totalOutputTokens: number;
+            /** Format: int64 */
+            totalTokens: number;
         };
         CreateAPIKeyInputBody: {
             /**
@@ -4780,6 +4991,38 @@ export interface components {
             /** @description Project name */
             name: string;
         };
+        CreateScheduleInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CreateScheduleInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Optional quiet-hours/days filter: {hours:{start,end},days_of_week}. */
+            active_window?: unknown;
+            /** @description Cadence spec: {simple:{...}}|{cron:"..."} with required timezone field. */
+            cadence: unknown;
+            check_type: string;
+            /** @description RFC3339. */
+            ends_at?: string;
+            intent: string;
+            inventory_item_id?: string;
+            metadata?: unknown;
+            /** @description RFC3339. */
+            starts_at?: string;
+        };
+        CreateScheduleOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CreateScheduleOutputBody.json
+             */
+            readonly $schema?: string;
+            enabled: boolean;
+            next_fire_at: string;
+            next_fire_at_local: string;
+            schedule_id: string;
+        };
         CreateTicketRequest: {
             /**
              * Format: uri
@@ -4850,6 +5093,13 @@ export interface components {
             description: string;
             name: string;
             parameters: unknown;
+        };
+        DailyStatsEntry: {
+            date: string;
+            /** Format: int64 */
+            messages: number;
+            /** Format: int64 */
+            sessions: number;
         };
         DeleteAgentOutputBody: {
             /**
@@ -5410,10 +5660,14 @@ export interface components {
             gender: string;
             /** @description Language for generation */
             language?: string;
+            /** @description Optional model override for the chosen provider. */
+            model?: string;
             /** @description Agent display name */
             name: string;
             /** @description Project UUID to assign agent to */
             project_id?: string;
+            /** @description LLM provider for generation (gemini | openrouter | xai). Defaults to gemini. */
+            provider?: string;
         };
         GenerateBioInputBody: {
             /**
@@ -5471,8 +5725,12 @@ export interface components {
             fields?: string[] | null;
             /** @description Agent gender */
             gender: string;
+            /** @description Optional model override for the chosen provider. */
+            model?: string;
             /** @description Agent display name */
             name: string;
+            /** @description LLM provider for generation (gemini | openrouter | xai). Defaults to gemini. */
+            provider?: string;
             /** @description Force regeneration even if agent exists */
             regenerate?: boolean;
         };
@@ -6553,6 +6811,25 @@ export interface components {
             /** @description Accepted status */
             status: string;
         };
+        KbSearchResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbSearchResponse.json
+             */
+            readonly $schema?: string;
+            query: string;
+            results: components["schemas"]["KbSearchResultItem"][] | null;
+        };
+        KbSearchResultItem: {
+            content: string;
+            label: string;
+            scope?: string;
+            /** Format: double */
+            score: number;
+            source?: string;
+            type: string;
+        };
         KbUpdateAnalyticsRuleInputBody: {
             /**
              * Format: uri
@@ -6724,6 +7001,15 @@ export interface components {
             readonly $schema?: string;
             /** @description List of agent instances */
             instances: components["schemas"]["AgentInstance"][] | null;
+        };
+        ListSchedulesOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListSchedulesOutputBody.json
+             */
+            readonly $schema?: string;
+            schedules: components["schemas"]["ScheduleDTO"][] | null;
         };
         ListUserPersonasOutputBody: {
             /**
@@ -7016,6 +7302,22 @@ export interface components {
             next_cursor?: string;
             /** Format: int64 */
             total_count: number;
+        };
+        PatchScheduleInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PatchScheduleInputBody.json
+             */
+            readonly $schema?: string;
+            active_window?: unknown;
+            cadence?: unknown;
+            check_type?: string;
+            enabled?: boolean;
+            ends_at?: string;
+            intent?: string;
+            metadata?: unknown;
+            starts_at?: string;
         };
         PendingCapability: {
             capability: string;
@@ -7485,6 +7787,29 @@ export interface components {
             /** @description Initial run status (always "running") */
             status: string;
         };
+        ScheduleDTO: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ScheduleDTO.json
+             */
+            readonly $schema?: string;
+            active_window?: string;
+            cadence: string;
+            cadence_type: string;
+            check_type: string;
+            created_at: string;
+            enabled: boolean;
+            ends_at?: string;
+            intent: string;
+            inventory_item_id?: string;
+            metadata?: string;
+            next_fire_at: string;
+            schedule_id: string;
+            starts_at?: string;
+            timezone: string;
+            updated_at: string;
+        };
         ScheduleWakeupInputBody: {
             /**
              * Format: uri
@@ -7795,6 +8120,83 @@ export interface components {
             };
             source_type?: string;
             updated_at: string;
+        };
+        Storefront: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/Storefront.json
+             */
+            readonly $schema?: string;
+            accent_color: string;
+            access_mode: string;
+            /** Format: int64 */
+            anon_msg_limit_per_session: number;
+            /** Format: int64 */
+            anon_rate_limit_per_min: number;
+            /** Format: int64 */
+            anon_session_ttl_minutes: number;
+            background_color: string;
+            /** Format: date-time */
+            created_at: string;
+            custom_css: string;
+            display_name: string;
+            is_published: boolean;
+            layout: string;
+            logo_url: string;
+            primary_color: string;
+            show_agent_avatars: boolean;
+            storefront_id: string;
+            tagline: string;
+            tenant_id: string;
+            /** Format: date-time */
+            updated_at: string;
+            welcome_message: string;
+        };
+        StorefrontAgent: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/StorefrontAgent.json
+             */
+            readonly $schema?: string;
+            agent_id: string;
+            available_models: string[] | null;
+            available_providers: string[] | null;
+            avatar_url: string;
+            /** Format: date-time */
+            created_at: string;
+            description: string;
+            display_name: string;
+            instance_id?: string;
+            is_visible: boolean;
+            placeholder_text: string;
+            slug: string;
+            /** Format: int64 */
+            sort_order: number;
+            storefront_id: string;
+            /** Format: date-time */
+            updated_at: string;
+            welcome_message: string;
+        };
+        StorefrontGetOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/StorefrontGetOutputBody.json
+             */
+            readonly $schema?: string;
+            slug: string;
+            storefront: components["schemas"]["Storefront"];
+        };
+        StorefrontListAgentsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/StorefrontListAgentsOutputBody.json
+             */
+            readonly $schema?: string;
+            agents: components["schemas"]["StorefrontAgent"][] | null;
         };
         StorefrontUpdateInputBody: {
             /**
@@ -8116,6 +8518,15 @@ export interface components {
         };
         Turn: {
             user_message: string;
+        };
+        UpcomingScheduleOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/UpcomingScheduleOutputBody.json
+             */
+            readonly $schema?: string;
+            upcoming: string[] | null;
         };
         UpdateAgentPostProcessingModelInputBody: {
             /**
@@ -8508,6 +8919,58 @@ export interface components {
             signing_secret?: string;
             /** @description Whether the webhook was registered */
             success: boolean;
+        };
+        UsageByProject: {
+            /** Format: int64 */
+            cacheTokens: number;
+            /** Format: double */
+            costUsd: number;
+            /** Format: int64 */
+            inputTokens: number;
+            /** Format: int64 */
+            outputTokens: number;
+            projectId: string;
+            projectName: string;
+            /** Format: int64 */
+            turns: number;
+        };
+        UsageDailyEntry: {
+            /** Format: int64 */
+            cacheTokens: number;
+            /** Format: double */
+            costUsd: number;
+            date: string;
+            /** Format: int64 */
+            inputTokens: number;
+            /** Format: int64 */
+            outputTokens: number;
+            /** Format: int64 */
+            turns: number;
+        };
+        UsageResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/UsageResponse.json
+             */
+            readonly $schema?: string;
+            byProject: components["schemas"]["UsageByProject"][] | null;
+            daily: components["schemas"]["UsageDailyEntry"][] | null;
+            period: components["schemas"]["UsageResponsePeriodStruct"];
+            /** Format: int64 */
+            totalCacheTokens: number;
+            /** Format: double */
+            totalCostUsd: number;
+            /** Format: int64 */
+            totalInputTokens: number;
+            /** Format: int64 */
+            totalOutputTokens: number;
+            /** Format: int64 */
+            totalTurns: number;
+        };
+        UsageResponsePeriodStruct: {
+            end: string;
+            start: string;
         };
         UserEntry: {
             created_at?: string;
@@ -12275,7 +12738,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["KbSearchResponse"];
+                };
             };
             /** @description Error */
             default: {
@@ -12309,7 +12774,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["KbSearchResponse"];
+                };
             };
             /** @description Error */
             default: {
@@ -13063,6 +13530,363 @@ export interface operations {
             };
         };
     };
+    listSchedules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agentId: string;
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListSchedulesOutputBody"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    createSchedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agentId: string;
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateScheduleInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateScheduleOutputBody"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getSchedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agentId: string;
+                userId: string;
+                scheduleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleDTO"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteSchedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agentId: string;
+                userId: string;
+                scheduleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    patchSchedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agentId: string;
+                userId: string;
+                scheduleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatchScheduleInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleDTO"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    upcomingSchedule: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                agentId: string;
+                userId: string;
+                scheduleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UpcomingScheduleOutputBody"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     getVoiceLiveWSToken: {
         parameters: {
             query?: never;
@@ -13252,8 +14076,14 @@ export interface operations {
     analyticsCost: {
         parameters: {
             query?: {
-                /** @description Lookback window in days */
-                days?: number;
+                /** @description Start date YYYY-MM-DD (defaults to 30 days ago) */
+                start?: string;
+                /** @description End date YYYY-MM-DD (defaults to today) */
+                end?: string;
+                /** @description Group by 'project' (default) or 'character' */
+                group_by?: string;
+                /** @description Optional project UUID filter */
+                project_id?: string;
             };
             header?: never;
             path?: never;
@@ -13261,13 +14091,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Cost payload — see CostResponse in the domain model. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["CostResponse"];
                 };
             };
             /** @description Error */
@@ -13284,8 +14114,14 @@ export interface operations {
     analyticsCostBreakdown: {
         parameters: {
             query?: {
-                /** @description Lookback window in days */
-                days?: number;
+                /** @description Month shortcut YYYY-MM (takes priority over start/end) */
+                month?: string;
+                /** @description Start date YYYY-MM-DD */
+                start?: string;
+                /** @description End date YYYY-MM-DD */
+                end?: string;
+                /** @description Optional project UUID filter */
+                project_id?: string;
             };
             header?: never;
             path?: never;
@@ -13293,13 +14129,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Cost breakdown payload */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["CostBreakdownResponse"];
                 };
             };
             /** @description Error */
@@ -13322,13 +14158,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Overview payload — see AnalyticsOverview in the domain model. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["AnalyticsOverview"];
                 };
             };
             /** @description Error */
@@ -13351,13 +14187,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Realtime payload — see AnalyticsRealtimeResponse in the domain model. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["AnalyticsRealtimeResponse"];
                 };
             };
             /** @description Error */
@@ -13374,8 +14210,10 @@ export interface operations {
     analyticsUsage: {
         parameters: {
             query?: {
-                /** @description Lookback window in days */
-                days?: number;
+                /** @description Month filter YYYY-MM (defaults to current month) */
+                month?: string;
+                /** @description Optional project UUID filter */
+                project_id?: string;
             };
             header?: never;
             path?: never;
@@ -13383,13 +14221,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Usage payload — see UsageResponse in the domain model. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["UsageResponse"];
                 };
             };
             /** @description Error */
@@ -13770,7 +14608,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Billing profile. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -13803,7 +14641,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Stripe session URL. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -13832,7 +14670,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Stripe portal URL. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -13864,7 +14702,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Active characters. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -13893,7 +14731,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Contract details. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -13926,7 +14764,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Subscription result. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -13958,7 +14796,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description CE event counts. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -13990,7 +14828,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Ledger entries. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -14019,7 +14857,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Model pricing. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -14048,7 +14886,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Service agreements. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -14080,7 +14918,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Service usage. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -14112,7 +14950,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Usage summary. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -14145,7 +14983,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Redemption result. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -15974,13 +16812,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Storefront config. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["StorefrontGetOutputBody"];
                 };
             };
             /** @description Error */
@@ -16007,13 +16845,13 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Updated storefront config. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["Storefront"];
                 };
             };
             /** @description Error */
@@ -16036,13 +16874,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Storefront agent list. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["StorefrontListAgentsOutputBody"];
                 };
             };
             /** @description Error */
@@ -16072,13 +16910,13 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Upserted storefront agent entry. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["StorefrontAgent"];
                 };
             };
             /** @description Error */
@@ -16104,7 +16942,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Removal result. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -16133,7 +16971,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Publish result. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -16162,7 +17000,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Unpublish result. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -16856,7 +17694,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Time-advance result (jobs triggered, new state). */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -16922,7 +17760,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Generated bio payload. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -16955,7 +17793,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Generated character payload. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -16988,7 +17826,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Generated seed memory list. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -17021,7 +17859,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Prepared workbench state (runId, warm caches). */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -17054,7 +17892,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Reset confirmation. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -17087,7 +17925,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Session-end result (consolidation, diary). */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -17120,7 +17958,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Simulated user turn. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -17153,7 +17991,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Workbench state snapshot. */
+            /** @description OK */
             200: {
                 headers: {
                     [name: string]: unknown;
