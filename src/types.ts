@@ -3261,3 +3261,25 @@ export interface OrgBillingSubscribeOptions {
 export interface OrgBillingRedeemVoucherOptions {
   code: string;
 }
+
+// ---------------------------------------------------------------------------
+// Per-user progress rows for a batch import job
+// ---------------------------------------------------------------------------
+
+export interface JobUser {
+  job_id: string;
+  user_id: string;
+  status: string;
+  facts_stored: number;
+  facts_deduped: number;
+  warmth_score: number;
+  updated_at: string;
+  started_at?: string;
+  completed_at?: string;
+  error_message?: string;
+}
+
+export interface ListImportJobUsersResponse {
+  users?: JobUser[] | null;
+  count: number;
+}

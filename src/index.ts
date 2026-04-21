@@ -334,6 +334,8 @@ export type {
   BatchImportResponse,
   ImportJob,
   ImportJobListResponse,
+  JobUser,
+  ListImportJobUsersResponse,
   StructuredColumnMapping,
   StructuredImportSpec,
   // Inventory

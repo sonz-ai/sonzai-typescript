@@ -11,6 +11,7 @@ import type {
   BatchImportResponse,
   ImportJob,
   ImportJobListResponse,
+  ListImportJobUsersResponse,
 } from "../types.js";
 
 /** User priming operations for agents. */
@@ -104,6 +105,20 @@ export class Priming {
     if (limit) params.limit = String(limit);
     return this.http.get<ImportJobListResponse>(
       `/api/v1/agents/${agentId}/users/imports`,
+      params,
+    );
+  }
+
+  /** List per-user progress rows for a batch import job. */
+  async listImportJobUsers(
+    agentId: string,
+    jobId: string,
+    limit?: number,
+  ): Promise<ListImportJobUsersResponse> {
+    const params: Record<string, string> = {};
+    if (limit) params.limit = String(limit);
+    return this.http.get<ListImportJobUsersResponse>(
+      `/api/v1/agents/${agentId}/users/import/${jobId}/users`,
       params,
     );
   }
