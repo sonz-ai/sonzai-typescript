@@ -6479,6 +6479,7 @@ export interface components {
         KBSchemaField: {
             description?: string;
             enum_values?: string[] | null;
+            indexed?: boolean;
             name: string;
             required: boolean;
             type: string;

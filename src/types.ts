@@ -191,6 +191,7 @@ export interface MemoryListOptions {
   parentId?: string;
   includeContents?: boolean;
   limit?: number;
+  memory_type?: string;
 }
 
 export interface MemorySearchOptions {
@@ -2168,6 +2169,7 @@ export interface RecordFeedbackOptions {
   rule_id: string;
   converted: boolean;
   score_at_time: number;
+  action?: string;
 }
 
 // ---------------------------------------------------------------------------

@@ -36,6 +36,7 @@ export class Memory {
         parent_id: options.parentId,
         include_contents: options.includeContents ? "true" : undefined,
         limit: options.limit,
+        memory_type: options.memory_type,
       },
     );
   }
