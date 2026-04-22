@@ -2386,6 +2386,17 @@ export interface InventoryBatchImportOptions {
   project_id?: string;
 }
 
+/** Options for the dedicated inventory-item create endpoint (POST .../inventory/items).
+ *  Equivalent to InventoryUpdateOptions with action:"add" but without requiring the action field. */
+export interface InventoryCreateItemOptions {
+  item_type: string;
+  description?: string;
+  label?: string;
+  kb_node_id?: string;
+  properties?: Record<string, unknown>;
+  project_id?: string;
+}
+
 export interface InventoryBatchImportResponse {
   status: string;
   added: number;

@@ -2,6 +2,7 @@ import type { HTTPClient } from "../http.js";
 import type {
   InventoryUpdateOptions,
   InventoryUpdateResponse,
+  InventoryCreateItemOptions,
   InventoryQueryOptions,
   InventoryQueryResponse,
   InventoryBatchImportOptions,
@@ -32,6 +33,25 @@ export class Inventory {
       `/api/v1/agents/${agentId}/users/${encodeURIComponent(userId)}/inventory`,
       options as unknown as Record<string, unknown>,
       params,
+    );
+  }
+
+  /**
+   * Create a new inventory item via the dedicated add endpoint.
+   * Equivalent to `update` with `action: "add"` but without requiring the action field.
+   * The route itself encodes the "add" semantic.
+   */
+  async create(
+    agentId: string,
+    userId: string,
+    options: InventoryCreateItemOptions,
+    instanceId?: string,
+  ): Promise<InventoryUpdateResponse> {
+    let path = `/api/v1/agents/${agentId}/users/${encodeURIComponent(userId)}/inventory/items`;
+    if (instanceId) path += `?instance_id=${encodeURIComponent(instanceId)}`;
+    return this.http.post<InventoryUpdateResponse>(
+      path,
+      options as unknown as Record<string, unknown>,
     );
   }
 
