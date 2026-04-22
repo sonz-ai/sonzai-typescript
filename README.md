@@ -130,19 +130,24 @@ Streams return an `AsyncGenerator<ChatStreamEvent>`. Each event carries a delta 
 
 Supplementary memory recall can run **synchronously** (blocks context build until recall completes — every fact lands in the current turn) or **asynchronously** (races a deadline — slow hits spill to the next turn for lower first-token latency). Default is `sync`.
 
+`memoryMode` is an agent-wide capability — set it once with `updateCapabilities` and every subsequent chat uses that mode until you change it:
+
 ```ts
-const response = await client.agents.chat({
-  agent: "agent-id",
-  messages: [{ role: "user", content: "Do you remember my favorite food?" }],
-  userId: "user-123",
-  toolCapabilities: {
-    memoryMode: "async",   // or "sync" (default)
-    knowledgeBase: true,
-    webSearch: true,
-    rememberName: true,
-  },
+// Switch to async for lower first-token latency
+const caps = await client.agents.updateCapabilities("agent-id", {
+  memoryMode: "async",   // or "sync"
 });
+console.log(caps.memoryMode);
+
+// Read the current mode
+const current = await client.agents.getCapabilities("agent-id");
+console.log(current.memoryMode);
+
+// Switch back to sync
+await client.agents.updateCapabilities("agent-id", { memoryMode: "sync" });
 ```
+
+`updateCapabilities` is PATCH-style — omitted fields are left unchanged. To skip the context engine entirely on a single chat (e.g. test paths), set `skipContextBuild: true` in the chat options.
 
 ### Advanced chat options
 
@@ -159,7 +164,7 @@ await client.agents.chat({
   language: "en",
   timezone: "America/New_York",
   compiledSystemPrompt: "You are a helpful assistant.",
-  toolCapabilities: { memoryMode: "sync", webSearch: true },
+  toolCapabilities: { web_search: true, remember_name: true },
   toolDefinitions: [
     {
       name: "get_weather",

@@ -1867,6 +1867,13 @@ export interface UpdateCapabilitiesOptions {
   imageGeneration?: boolean;
   inventory?: boolean;
   knowledgeBase?: boolean;
+  /**
+   * Supplementary memory recall timing. `"sync"` (default) blocks context
+   * build until recall returns so facts land in the current turn. `"async"`
+   * lets the recall race a deadline — slow hits spill to the next turn for
+   * lower first-token latency.
+   */
+  memoryMode?: "sync" | "async";
 }
 
 // ---------------------------------------------------------------------------
