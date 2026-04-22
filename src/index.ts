@@ -136,7 +136,6 @@ export type {
   // Tool definitions & tool calls
   ToolDefinition,
   ExternalToolCall,
-  ToolCallResponseOptions,
   // Voice
   VoiceStreamToken,
   VoiceTokenOptions,

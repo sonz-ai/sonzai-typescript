@@ -43,6 +43,8 @@ export class Sessions {
     };
     if (options.instanceId) body.instance_id = options.instanceId;
     if (options.messages) body.messages = options.messages;
+    if (options.userDisplayName) body.user_display_name = options.userDisplayName;
+    if (options.userTimezone) body.user_timezone = options.userTimezone;
 
     return this.http.post<SessionResponse>(
       `/api/v1/agents/${agentId}/sessions/end`,

@@ -26,14 +26,14 @@ export class EvalTemplates {
   async create(options: EvalTemplateCreateOptions): Promise<EvalTemplate> {
     const body: Record<string, unknown> = {
       name: options.name,
-      description: options.description ?? "",
-      template_type: options.templateType ?? "",
-      judge_model: options.judgeModel ?? "gemini-3.1-pro-preview",
-      temperature: options.temperature ?? 0.3,
-      max_tokens: options.maxTokens ?? 8192,
-      scoring_rubric: options.scoringRubric ?? "",
     };
-    if (options.categories) body.categories = options.categories;
+    if (options.description !== undefined) body.description = options.description;
+    if (options.templateType !== undefined) body.template_type = options.templateType;
+    if (options.judgeModel !== undefined) body.judge_model = options.judgeModel;
+    if (options.temperature !== undefined) body.temperature = options.temperature;
+    if (options.maxTokens !== undefined) body.max_tokens = options.maxTokens;
+    if (options.scoringRubric !== undefined) body.scoring_rubric = options.scoringRubric;
+    if (options.categories !== undefined) body.categories = options.categories;
 
     return this.http.post<EvalTemplate>("/api/v1/eval-templates", body);
   }

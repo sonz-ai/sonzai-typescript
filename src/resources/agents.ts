@@ -81,7 +81,6 @@ import type {
   UpdateHabitOptions,
   UpdateProjectOptions,
   UpdateProjectResponse,
-  ToolCallResponseOptions,
   UsersResponse,
   WakeupsResponse,
   WisdomAuditResponse,
@@ -294,12 +293,15 @@ export class Agents {
     agentId: string,
     options: ScheduleWakeupOptions,
   ): Promise<ScheduledWakeup> {
+    if (options.delayHours == null) {
+      throw new Error("delay_hours is required");
+    }
     const body: Record<string, unknown> = {
       user_id: options.userId,
       check_type: options.checkType,
       intent: options.intent,
+      delay_hours: options.delayHours,
     };
-    if (options.delayHours != null) body.delay_hours = options.delayHours;
 
     return this.http.post<ScheduledWakeup>(
       `/api/v1/agents/${agentId}/wakeups`,
@@ -629,18 +631,13 @@ export class Agents {
     });
   }
 
-  async getUsers(agentId: string): Promise<UsersResponse> {
-    return this.http.get(`/api/v1/agents/${agentId}/users`);
-  }
-
-  async respondToToolCall(
-    agentId: string,
-    options: ToolCallResponseOptions,
-  ): Promise<ChatResponse> {
-    return this.http.post<ChatResponse>(
-      `/api/v1/agents/${agentId}/tools/respond`,
-      options as unknown as Record<string, unknown>,
-    );
+  async getUsers(agentId: string, options?: { limit?: number; offset?: number; sortBy?: string; sortOrder?: string }): Promise<UsersResponse> {
+    const params: Record<string, string | number | boolean | undefined> = {};
+    if (options?.limit != null) params.limit = options.limit;
+    if (options?.offset != null) params.offset = options.offset;
+    if (options?.sortBy != null) params.sort_by = options.sortBy;
+    if (options?.sortOrder != null) params.sort_order = options.sortOrder;
+    return this.http.get(`/api/v1/agents/${agentId}/users`, params);
   }
 
   /** Get constellation data for an agent. */
@@ -911,8 +908,6 @@ export class Agents {
     if (options.instanceId) body.instanceId = options.instanceId;
     if (options.provider) body.provider = options.provider;
     if (options.model) body.model = options.model;
-    if (options.includeExtractions)
-      body.include_extractions = options.includeExtractions;
     return this.http.post<ProcessResponse>(
       `/api/v1/agents/${agentId}/process`,
       body,

@@ -76,13 +76,6 @@ export interface ExternalToolCall {
   parameters?: Record<string, unknown>;
 }
 
-export interface ToolCallResponseOptions {
-  session_id: string;
-  user_id?: string;
-  tool_call_id: string;
-  result: unknown;
-}
-
 export interface ToolDefinition {
   name: string;
   description: string;
@@ -316,6 +309,8 @@ export interface SessionEndOptions {
   totalMessages?: number;
   durationSeconds?: number;
   messages?: ChatMessage[];
+  userDisplayName?: string;
+  userTimezone?: string;
 }
 
 export interface SessionResponse {
@@ -651,8 +646,6 @@ export interface ProcessOptions {
   provider?: string;
   /** LLM model for extraction (e.g. "gemini-2.5-flash", "gpt-4o-mini"). Falls back to platform default. */
   model?: string;
-  /** When true, the response includes the full extraction payload in `extractions`. */
-  includeExtractions?: boolean;
 }
 
 export interface ProcessSideEffectsSummary {
@@ -812,8 +805,6 @@ export interface ProcessResponse {
   memories_created: number;
   facts_extracted: number;
   side_effects: ProcessSideEffectsSummary;
-  /** Present only when `includeExtractions` was set to true in the request. */
-  extractions?: SideEffectExtraction;
 }
 
 // ---------------------------------------------------------------------------
@@ -1685,7 +1676,7 @@ export interface ScheduleWakeupOptions {
   userId: string;
   checkType: string;
   intent: string;
-  delayHours?: number;
+  delayHours: number;
 }
 
 // ScheduledWakeup is now re-exported from ./generated/aliases.js (as WakeupEntry)
