@@ -801,7 +801,7 @@ export interface paths {
         };
         /**
          * Get memory tree nodes for an agent
-         * @description Returns the memory tree nodes. Supports filtering by user_id, parent_id, and scope. Optionally includes fact contents per node.
+         * @description Returns the memory tree nodes. Supports filtering by user_id, parent_id, scope, and memory_type. Optionally includes fact contents per node.
          */
         get: operations["getMemoryTree"];
         put?: never;
@@ -1798,6 +1798,26 @@ export interface paths {
          * @description Adds multiple inventory items in a single request. Max 1000 items per batch. Resolves KB nodes when kb_node_id and project_id are provided.
          */
         post: operations["batchImportInventory"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/users/{userId}/inventory/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create an inventory item (dedicated add endpoint)
+         * @description Equivalent to POST .../inventory with action:"add", but without requiring the action field in the body. Searches the knowledge base to resolve the item when a description or kb_node_id is provided.
+         */
+        post: operations["createInventoryItem"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4331,6 +4351,7 @@ export interface components {
             description?: string;
             item_type: string;
             kb_node_id?: string;
+            label?: string;
             properties?: {
                 [key: string]: unknown;
             };
@@ -5067,6 +5088,28 @@ export interface components {
             /** @description Instance display name */
             name: string;
         };
+        CreateInventoryItemHumaInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CreateInventoryItemHumaInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Natural-language description used for KB search */
+            description?: string;
+            /** @description Item type key (e.g. medication, pokemon_card) */
+            item_type: string;
+            /** @description Pre-resolved KB node ID; skips search when set */
+            kb_node_id?: string;
+            /** @description Short display label; takes priority over Description */
+            label?: string;
+            /** @description KB project scope for node resolution */
+            project_id?: string;
+            /** @description Additional metadata properties */
+            properties?: {
+                [key: string]: unknown;
+            };
+        };
         CreateProjectInputBody: {
             /**
              * Format: uri
@@ -5370,6 +5413,7 @@ export interface components {
             readonly $schema?: string;
             error?: string;
             fact_id?: string;
+            inventory_item_id?: string;
             status: string;
         };
         Edge: {
@@ -5430,6 +5474,8 @@ export interface components {
             user_id: string;
             /** @description Optional IANA timezone for the user (e.g., Asia/Singapore); when supplied, skips the CE UserPrimingMetadata lookup */
             user_timezone?: string;
+            /** @description When true, run CE pipeline synchronously before responding. Defaults to async for throughput; benchmarks and test harnesses that query memory immediately after should set wait=true. */
+            wait?: boolean;
         };
         EndSessionOutputBody: {
             /**
@@ -5796,8 +5842,8 @@ export interface components {
             description: string;
             /** @description Optional list of fields to generate */
             fields?: string[] | null;
-            /** @description Agent gender */
-            gender: string;
+            /** @description Agent gender (optional; generator infers from description when empty) */
+            gender?: string;
             /** @description Language for generation */
             language?: string;
             /** @description Optional model override for the chosen provider. */
@@ -5822,8 +5868,8 @@ export interface components {
             description: string;
             /** @description Pre-built enriched context (from orchestrator) */
             enriched_context_json?: unknown;
-            /** @description Agent gender */
-            gender: string;
+            /** @description Agent gender (optional; generator infers from description when empty) */
+            gender?: string;
             /** @description Agent instance identifier */
             instance_id?: string;
             /** @description Agent display name */
@@ -5863,8 +5909,8 @@ export interface components {
             description: string;
             /** @description Optional list of fields to generate */
             fields?: string[] | null;
-            /** @description Agent gender */
-            gender: string;
+            /** @description Agent gender (optional; generator infers from description when empty) */
+            gender?: string;
             /** @description Optional model override for the chosen provider. */
             model?: string;
             /** @description Agent display name */
@@ -6185,6 +6231,7 @@ export interface components {
             fact_id: string;
             /** Format: double */
             gain_loss?: number;
+            inventory_item_id?: string;
             item_label: string;
             kb_node_id?: string;
             market_properties?: {
@@ -6221,6 +6268,7 @@ export interface components {
             description?: string;
             item_type: string;
             kb_node_id?: string;
+            label?: string;
             project_id?: string;
             properties?: {
                 [key: string]: unknown;
@@ -6236,6 +6284,7 @@ export interface components {
             candidates?: components["schemas"]["KbCandidate"][] | null;
             error?: string;
             fact_id?: string;
+            inventory_item_id?: string;
             kb_resolution?: components["schemas"]["KbResolutionInfo"];
             status: string;
         };
@@ -6563,6 +6612,8 @@ export interface components {
             source?: string;
             /** @description Entries to upsert */
             updates: components["schemas"]["BulkUpdateEntry"][] | null;
+            /** @description When false, skip entries without an existing node (default true) */
+            upsert?: boolean;
         };
         KbBulkUpdateOutputBody: {
             /**
@@ -6654,7 +6705,9 @@ export interface components {
             readonly $schema?: string;
             /** @description Human-readable description */
             description?: string;
-            /** @description Entity type name */
+            /** @description Human-readable label shown in UIs (e.g. 'Medication') */
+            display_name?: string;
+            /** @description Entity type name (slug, e.g. 'medication') */
             entity_type: string;
             /** @description Schema field definitions */
             fields: components["schemas"]["KBSchemaField"][] | null;
@@ -6907,7 +6960,9 @@ export interface components {
              * @example /api/v1/schemas/KbRecordFeedbackInputBody.json
              */
             readonly $schema?: string;
-            /** @description Whether the recommendation converted */
+            /** @description Feedback action enum: converted, dismissed, clicked, ignored, etc. */
+            action?: string;
+            /** @description Whether the recommendation converted (legacy; prefer action) */
             converted: boolean;
             /** @description Rule ID */
             rule_id: string;
@@ -6997,6 +7052,8 @@ export interface components {
             readonly $schema?: string;
             /** @description Updated description */
             description?: string;
+            /** @description Updated human-readable label */
+            display_name?: string;
             /** @description Updated entity type name */
             entity_type?: string;
             /** @description Updated field definitions */
@@ -8045,11 +8102,19 @@ export interface components {
             check_type: string;
             /**
              * Format: int64
-             * @description Hours to delay before wakeup fires
+             * @description Hours to delay before wakeup fires (ignored when scheduled_at is provided)
              */
             delay_hours: number;
+            /** @description Narrative describing the event that motivated the wakeup */
+            event_description?: string;
             /** @description Intent/reason for the wakeup */
             intent: string;
+            /** @description Topic the user mentioned earlier worth revisiting */
+            interest_topic?: string;
+            /** @description Free-form occasion hint (e.g. 'their 30th birthday') */
+            occasion?: string;
+            /** @description RFC3339 absolute time; overrides delay_hours when set */
+            scheduled_at?: string;
             /** @description ID of the user to wake up for */
             user_id: string;
         };
@@ -8080,6 +8145,7 @@ export interface components {
             fact_type: string;
             /** Format: double */
             score: number;
+            session_id?: string;
         };
         SeedGeneratedMemory: {
             /** @description Memory content text */
@@ -11735,6 +11801,8 @@ export interface operations {
                 scope?: string;
                 /** @description Max nodes to return (default 50, max 200) */
                 limit?: string;
+                /** @description Optional filter: only return nodes with this memory_type (e.g. 'factual', 'episodic', 'semantic', 'procedural', 'identity', 'temporal', 'relational'). When user_id is also set, routes to the indexed memory_tree_nodes_by_type table (O(1)); otherwise falls back to post-fetch filter. */
+                memory_type?: string;
             };
             header?: never;
             path: {
@@ -13862,6 +13930,47 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BatchInventoryResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    createInventoryItem: {
+        parameters: {
+            query?: {
+                /** @description Optional instance ID for user scoping */
+                instance_id?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+                /** @description User ID */
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateInventoryItemHumaInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InventoryWriteResponse"];
                 };
             };
             /** @description Error */

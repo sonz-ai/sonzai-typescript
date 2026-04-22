@@ -77,6 +77,7 @@ export type CreateFactInputBody = components["schemas"]["CreateFactInputBody"];
 export type CreateGoalInputBody = components["schemas"]["CreateGoalInputBody"];
 export type CreateHabitInputBody = components["schemas"]["CreateHabitInputBody"];
 export type CreateInstanceInputBody = components["schemas"]["CreateInstanceInputBody"];
+export type CreateInventoryItemHumaInputBody = components["schemas"]["CreateInventoryItemHumaInputBody"];
 export type CreateProjectInputBody = components["schemas"]["CreateProjectInputBody"];
 export type CreateScheduleInputBody = components["schemas"]["CreateScheduleInputBody"];
 export type CreateScheduleOutputBody = components["schemas"]["CreateScheduleOutputBody"];
