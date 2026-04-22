@@ -5,18 +5,17 @@
 
 The official TypeScript SDK for the [Sonzai Mind Layer API](https://sonz.ai). Build AI agents with persistent memory, evolving personality, and proactive behaviors.
 
-**Zero runtime dependencies.** Uses the native `fetch` API. Works with Node.js (>=18), Bun, and Deno.
+**Zero runtime dependencies.** Uses the native `fetch` API. Works with Node.js (>=18), Bun, and Deno. Ships both ESM and CJS builds with full type definitions.
 
 ## Installation
 
 ```bash
-# npm
 npm install @sonzai-labs/agents
-
-# bun
+# or:
 bun add @sonzai-labs/agents
+pnpm add @sonzai-labs/agents
 
-# deno
+# Deno:
 import { Sonzai } from "npm:@sonzai-labs/agents";
 ```
 
@@ -25,9 +24,10 @@ import { Sonzai } from "npm:@sonzai-labs/agents";
 ```ts
 import { Sonzai } from "@sonzai-labs/agents";
 
-const client = new Sonzai({ apiKey: "your-api-key" });
+const client = new Sonzai({ apiKey: "your-api-key" }); // or set SONZAI_API_KEY
 
-const response = await client.agents.chat("your-agent-id", {
+const response = await client.agents.chat({
+  agent: "your-agent-id",
   messages: [{ role: "user", content: "Hello! What's your favorite hobby?" }],
   userId: "user-123",
 });
@@ -39,316 +39,11 @@ console.log(response.content);
 Get your API key from the [Sonzai Dashboard](https://platform.sonz.ai) under **Projects > API Keys**.
 
 ```ts
-// Pass directly
-const client = new Sonzai({ apiKey: "sk-..." });
-
-// Or set the environment variable
-// SONZAI_API_KEY=sk-...
-const client = new Sonzai();
+const client = new Sonzai({ apiKey: "sk-..." });  // explicit
+const client = new Sonzai();                      // or: SONZAI_API_KEY=sk-...
 ```
 
-## Usage
-
-### Chat (Streaming)
-
-```ts
-for await (const event of client.agents.chatStream("agent-id", {
-  messages: [{ role: "user", content: "Tell me a story" }],
-})) {
-  const content = event.choices?.[0]?.delta?.content ?? "";
-  process.stdout.write(content);
-}
-```
-
-### Chat (Non-streaming)
-
-```ts
-const response = await client.agents.chat("agent-id", {
-  messages: [{ role: "user", content: "Hello!" }],
-  userId: "user-123",
-  sessionId: "session-456", // optional, auto-created if omitted
-});
-console.log(response.content);
-console.log(`Tokens: ${response.usage?.totalTokens}`);
-```
-
-### Chat (Advanced Options)
-
-```ts
-const response = await client.agents.chat("agent-id", {
-  messages: [{ role: "user", content: "Hello!" }],
-  userId: "user-123",
-  userDisplayName: "Alex",
-  provider: "openai",
-  model: "gpt-4o",
-  language: "en",
-  timezone: "America/New_York",
-  compiledSystemPrompt: "You are a helpful assistant.",
-  toolCapabilities: { web_search: true, remember_name: true, image_generation: false },
-  toolDefinitions: [
-    { name: "get_weather", description: "Get current weather", parameters: { type: "object", properties: { city: { type: "string" } } } },
-  ],
-});
-```
-
-### Memory
-
-```ts
-// Get memory tree
-const memory = await client.agents.memory.list("agent-id", {
-  userId: "user-123",
-});
-for (const node of memory.nodes) {
-  console.log(`${node.title} (importance: ${node.importance})`);
-}
-
-// Search memories
-const results = await client.agents.memory.search("agent-id", {
-  query: "favorite food",
-});
-for (const fact of results.results) {
-  console.log(`${fact.content} (score: ${fact.score})`);
-}
-
-// Get memory timeline
-const timeline = await client.agents.memory.timeline("agent-id", {
-  userId: "user-123",
-  start: "2026-01-01",
-  end: "2026-03-01",
-});
-```
-
-### Personality
-
-```ts
-const personality = await client.agents.personality.get("agent-id");
-console.log(`Name: ${personality.profile.name}`);
-console.log(`Openness: ${personality.profile.big5.openness.score}`);
-console.log(`Warmth: ${personality.profile.dimensions.warmth}/10`);
-```
-
-### Sessions
-
-```ts
-// Start a session
-await client.agents.sessions.start("agent-id", {
-  userId: "user-123",
-  sessionId: "session-456",
-});
-
-// ... chat messages ...
-
-// End a session
-await client.agents.sessions.end("agent-id", {
-  userId: "user-123",
-  sessionId: "session-456",
-  totalMessages: 10,
-  durationSeconds: 300,
-});
-```
-
-### Agent Instances
-
-```ts
-// List instances
-const instances = await client.agents.instances.list("agent-id");
-
-// Create a new instance
-const instance = await client.agents.instances.create("agent-id", {
-  name: "Test Instance",
-});
-console.log(`Created: ${instance.instance_id}`);
-
-// Reset an instance
-await client.agents.instances.reset("agent-id", instance.instance_id);
-
-// Delete an instance
-await client.agents.instances.delete("agent-id", instance.instance_id);
-```
-
-### Notifications
-
-```ts
-// Get pending notifications
-const notifications = await client.agents.notifications.list("agent-id", {
-  status: "pending",
-});
-for (const n of notifications.notifications) {
-  console.log(`[${n.check_type}] ${n.generated_message}`);
-}
-
-// Consume a notification
-await client.agents.notifications.consume("agent-id", "msg-id");
-
-// Get notification history
-const history = await client.agents.notifications.history("agent-id");
-```
-
-### Context Engine Data
-
-```ts
-const mood = await client.agents.getMood("agent-id", { userId: "user-123" });
-const relationships = await client.agents.getRelationships("agent-id");
-const habits = await client.agents.getHabits("agent-id");
-const goals = await client.agents.getGoals("agent-id");
-const interests = await client.agents.getInterests("agent-id");
-const diary = await client.agents.getDiary("agent-id");
-const users = await client.agents.getUsers("agent-id");
-```
-
-### Evaluation
-
-```ts
-const result = await client.agents.evaluate("agent-id", {
-  messages: [
-    { role: "user", content: "I'm feeling sad today" },
-    { role: "assistant", content: "I'm sorry to hear that..." },
-  ],
-  templateId: "template-uuid",
-});
-console.log(`Score: ${result.score}`);
-console.log(`Feedback: ${result.feedback}`);
-```
-
-### Simulation
-
-```ts
-// Streaming — launches run, then streams events
-for await (const event of client.agents.simulate("agent-id", {
-  userPersona: {
-    name: "Alex",
-    background: "College student",
-    personality_traits: ["curious", "friendly"],
-    communication_style: "casual",
-  },
-  config: {
-    max_sessions: 3,
-    max_turns_per_session: 10,
-  },
-})) {
-  console.log(`[${event.type}] ${event.message}`);
-}
-
-// Fire-and-forget (returns RunRef immediately)
-const ref = await client.agents.simulateAsync("agent-id", {
-  userPersona: { name: "Alex", background: "Student" },
-  config: { max_sessions: 2 },
-});
-console.log(`Run started: ${ref.run_id}`);
-
-// Reconnect to stream later (supports resuming via fromIndex)
-for await (const event of client.evalRuns.streamEvents(ref.run_id, 0)) {
-  console.log(`[${event.type}] ${event.message}`);
-}
-```
-
-### Run Eval (Simulation + Evaluation)
-
-```ts
-// Combined simulation + evaluation
-for await (const event of client.agents.runEval("agent-id", {
-  templateId: "template-uuid",
-  userPersona: { name: "Alex", background: "Student" },
-  simulationConfig: { max_sessions: 2, max_turns_per_session: 5 },
-})) {
-  console.log(`[${event.type}] ${event.message}`);
-}
-
-// Fire-and-forget
-const ref = await client.agents.runEvalAsync("agent-id", {
-  templateId: "template-uuid",
-  simulationConfig: { max_sessions: 2 },
-});
-console.log(`Run started: ${ref.run_id}`);
-```
-
-### Re-evaluate (Eval Only)
-
-```ts
-// Re-evaluate an existing run with a different template
-for await (const event of client.agents.evalOnly("agent-id", {
-  templateId: "new-template-uuid",
-  sourceRunId: "existing-run-uuid",
-})) {
-  console.log(`[${event.type}] ${event.message}`);
-}
-```
-
-### Custom States
-
-```ts
-// Create a custom state
-const state = await client.agents.customStates.create("agent-id", {
-  key: "player_level",
-  value: { level: 15, xp: 2400 },
-  scope: "user",
-  contentType: "json",
-  userId: "user-123",
-});
-
-// List states
-const states = await client.agents.customStates.list("agent-id", {
-  scope: "global",
-});
-
-// Upsert by composite key (create or update)
-const updated = await client.agents.customStates.upsert("agent-id", {
-  key: "player_level",
-  value: { level: 16, xp: 3000 },
-  scope: "user",
-  userId: "user-123",
-});
-
-// Get by composite key
-const found = await client.agents.customStates.getByKey("agent-id", {
-  key: "player_level",
-  scope: "user",
-  userId: "user-123",
-});
-
-// Delete by composite key
-await client.agents.customStates.deleteByKey("agent-id", {
-  key: "player_level",
-  scope: "user",
-  userId: "user-123",
-});
-```
-
-### Eval Templates
-
-```ts
-// List
-const templates = await client.evalTemplates.list();
-
-// Create
-const template = await client.evalTemplates.create({
-  name: "Empathy Check",
-  scoringRubric: "Evaluate emotional awareness",
-  categories: [
-    { name: "Awareness", weight: 0.5, criteria: "..." },
-    { name: "Response", weight: 0.5, criteria: "..." },
-  ],
-});
-
-// Update
-await client.evalTemplates.update(template.id, { name: "Updated" });
-
-// Delete
-await client.evalTemplates.delete(template.id);
-```
-
-### Eval Runs
-
-```ts
-const runs = await client.evalRuns.list({ agentId: "agent-id" });
-const run = await client.evalRuns.get("run-id");
-await client.evalRuns.delete("run-id");
-
-// Stream events from a running eval (reconnectable)
-for await (const event of client.evalRuns.streamEvents("run-id")) {
-  console.log(`[${event.type}] ${event.message}`);
-}
-```
+API keys are sent as `Authorization: Bearer <key>`.
 
 ## Configuration
 
@@ -356,47 +51,555 @@ for await (const event of client.evalRuns.streamEvents("run-id")) {
 const client = new Sonzai({
   apiKey: "sk-...",              // or SONZAI_API_KEY env var
   baseUrl: "https://api.sonz.ai", // or SONZAI_BASE_URL env var
-  timeout: 30_000,              // request timeout in ms
-  maxRetries: 2,                // retry count for failed requests
+  timeout: 30_000,               // request timeout (ms)
+  maxRetries: 2,                 // retries for idempotent failures
+  defaultHeaders: { "X-My": "hdr" },
+  customFetch: fetch,            // swap in undici / a mock / a wrapper
 });
 ```
 
-## Error Handling
+Idempotent requests (GET, DELETE) retry with exponential backoff on transient failures. Mutating requests (POST, PATCH, PUT) do not retry.
+
+## Resources
+
+```ts
+client.agents             // chat, CRUD, dialogue, context engine
+client.knowledge          // project-scoped KB (docs, graph, facts, search)
+client.evalTemplates      // evaluation templates
+client.evalRuns           // eval/simulation runs, reconnectable streaming
+client.voices             // global voice catalog
+client.webhooks           // webhook registration and rotation
+client.projects           // project management & API keys
+client.userPersonas       // user persona CRUD
+client.analytics          // cost, usage, real-time analytics
+client.workbench          // internal simulation & time-machine
+client.projectConfig      // project-scoped config
+client.accountConfig      // tenant-scoped config
+client.customLLM          // bring-your-own-model (BYOM)
+client.projectNotifications
+```
+
+Agent sub-resources:
+
+```ts
+client.agents.memory           // tree, search, facts, timeline
+client.agents.personality      // Big5, dimensions, deltas, overlays
+client.agents.sessions         // start / end
+client.agents.instances        // parallel instances
+client.agents.notifications    // proactive notifications
+client.agents.customStates     // scoped key-value state
+client.agents.voice            // TTS / STT / live WebSocket
+client.agents.generation       // bio, character, seed memory
+client.agents.priming          // batch import / user priming
+client.agents.inventory        // user inventory
+client.agents.schedules        // user-scoped recurring events
+```
+
+## Usage
+
+### Chat (non-streaming)
+
+```ts
+const response = await client.agents.chat({
+  agent: "agent-id",
+  messages: [{ role: "user", content: "Hello!" }],
+  userId: "user-123",
+  sessionId: "session-456",          // auto-created if omitted
+  provider: "gemini",                 // gemini | zhipu | volcengine | openrouter | custom
+  model: "gemini-3.1-flash-lite-preview",
+});
+console.log(response.content);
+console.log(`Tokens: ${response.usage?.totalTokens}`);
+```
+
+### Chat (streaming)
+
+```ts
+for await (const event of client.agents.chatStream({
+  agent: "agent-id",
+  messages: [{ role: "user", content: "Tell me a story" }],
+})) {
+  const delta = event.choices?.[0]?.delta?.content ?? "";
+  process.stdout.write(delta);
+}
+```
+
+Streams return an `AsyncGenerator<ChatStreamEvent>`. Each event carries a delta in `choices[0].delta.content`, plus optional `usage` on the final frame.
+
+### Sync vs async memory recall (`memoryMode`)
+
+Supplementary memory recall can run **synchronously** (blocks context build until recall completes — every fact lands in the current turn) or **asynchronously** (races a deadline — slow hits spill to the next turn for lower first-token latency). Default is `sync`.
+
+```ts
+const response = await client.agents.chat({
+  agent: "agent-id",
+  messages: [{ role: "user", content: "Do you remember my favorite food?" }],
+  userId: "user-123",
+  toolCapabilities: {
+    memoryMode: "async",   // or "sync" (default)
+    knowledgeBase: true,
+    webSearch: true,
+    rememberName: true,
+  },
+});
+```
+
+### Advanced chat options
+
+```ts
+await client.agents.chat({
+  agent: "agent-id",
+  messages: [...],
+  userId: "user-123",
+  userDisplayName: "Alex",
+  instanceId: "instance-789",          // parallel branch
+  sessionId: "session-456",
+  provider: "gemini",
+  model: "gemini-3.1-flash-lite-preview",
+  language: "en",
+  timezone: "America/New_York",
+  compiledSystemPrompt: "You are a helpful assistant.",
+  toolCapabilities: { memoryMode: "sync", webSearch: true },
+  toolDefinitions: [
+    {
+      name: "get_weather",
+      description: "Get current weather",
+      parameters: { type: "object", properties: { city: { type: "string" } } },
+    },
+  ],
+  maxTurns: 10,
+  skipContextBuild: false,
+  gameContext: { custom_fields: { /* ... */ } },
+  skillLevels: { negotiation: 5 },
+});
+```
+
+### Provider constants
+
+```ts
+import { Sonzai, providers } from "@sonzai-labs/agents";
+
+await client.agents.chat({
+  agent: "agent-id",
+  messages: [...],
+  provider: providers.GEMINI,
+  model: providers.models.gemini.FLASH_LITE,
+});
+```
+
+### Agent CRUD
+
+```ts
+const agent = await client.agents.create({
+  name: "Luna",
+  gender: "female",
+  bio: "A thoughtful AI companion",
+  personalityPrompt: "You are warm and empathetic",
+  big5: { openness: 0.85, conscientiousness: 0.6 },
+  toolCapabilities: { web_search: true, remember_name: true },
+});
+
+await client.agents.get(agent.agentId);
+await client.agents.update(agent.agentId, { name: "New Name" });
+await client.agents.list({ pageSize: 20, search: "luna" });
+await client.agents.delete(agent.agentId);
+```
+
+### Memory
+
+```ts
+// Tree
+const memory = await client.agents.memory.list("agent-id", {
+  userId: "user-123",
+  includeContents: true,
+  limit: 100,
+});
+for (const node of memory.nodes) {
+  console.log(`${node.title}: ${node.summary} (importance: ${node.importance})`);
+}
+
+// Semantic search (cosine embeddings when userId is set, BM25 otherwise)
+const results = await client.agents.memory.search("agent-id", {
+  query: "favorite food",
+  userId: "user-123",
+  mode: "semantic",  // or "bm25"
+  limit: 20,
+});
+
+// Timeline
+const timeline = await client.agents.memory.timeline("agent-id", {
+  userId: "user-123",
+  start: "2026-01-01",
+  end: "2026-03-01",
+});
+
+// Fact CRUD
+const fact = await client.agents.memory.createFact("agent-id", {
+  content: "Likes pizza",
+  factType: "preference",
+  importance: 0.8,
+  userId: "user-123",
+});
+await client.agents.memory.updateFact("agent-id", fact.factId, { importance: 0.9 });
+await client.agents.memory.getFactHistory("agent-id", fact.factId);
+await client.agents.memory.deleteFact("agent-id", fact.factId);
+
+// Seed / reset
+await client.agents.memory.seed("agent-id", {
+  userId: "user-123",
+  memories: [{ atomic_text: "User is a chess enthusiast", fact_type: "interest" }],
+});
+await client.agents.memory.reset("agent-id", { userId: "user-123" });
+
+// Paginated fact listing
+const facts = await client.agents.memory.listFacts("agent-id", { limit: 50, offset: 0 });
+```
+
+### Personality
+
+```ts
+const profile = await client.agents.personality.get("agent-id");
+console.log(profile.profile.name);
+console.log(profile.profile.big5.openness.score);
+console.log(profile.profile.dimensions.warmth);
+
+// Recent shifts and per-user overlays
+const shifts = await client.agents.personality.recentShifts("agent-id");
+const overlay = await client.agents.personality.getOverlay("agent-id", { userId: "user-123" });
+```
+
+### Sessions & instances
+
+```ts
+await client.agents.sessions.start("agent-id", {
+  userId: "user-123",
+  sessionId: "session-456",
+});
+await client.agents.sessions.end("agent-id", {
+  userId: "user-123",
+  sessionId: "session-456",
+  totalMessages: 10,
+  durationSeconds: 300,
+});
+
+// Parallel agent instances
+const instance = await client.agents.instances.create("agent-id", { name: "Beta" });
+await client.agents.instances.reset("agent-id", instance.instance_id);
+await client.agents.instances.delete("agent-id", instance.instance_id);
+```
+
+### Context engine state
+
+```ts
+await client.agents.getMood("agent-id", { userId: "user-123" });
+await client.agents.getRelationships("agent-id");
+await client.agents.getHabits("agent-id");
+await client.agents.getGoals("agent-id");
+await client.agents.getInterests("agent-id");
+await client.agents.getDiary("agent-id");
+await client.agents.getUsers("agent-id");
+await client.agents.getBreakthroughs("agent-id");
+await client.agents.getTimeMachine("agent-id", "2026-01-15T00:00:00Z");
+```
+
+### Notifications
+
+```ts
+const pending = await client.agents.notifications.list("agent-id", {
+  status: "pending",
+  userId: "user-123",
+  limit: 20,
+});
+for (const n of pending.notifications) {
+  console.log(`[${n.check_type}] ${n.generated_message}`);
+}
+
+await client.agents.notifications.consume("agent-id", pending.notifications[0].message_id);
+await client.agents.notifications.history("agent-id", { limit: 50 });
+```
+
+### Custom states
+
+```ts
+const state = await client.agents.customStates.create("agent-id", {
+  key: "player_level",
+  value: { level: 15, xp: 2400 },
+  scope: "user",          // or "global"
+  contentType: "json",
+  userId: "user-123",
+});
+
+await client.agents.customStates.upsert("agent-id", {
+  key: "player_level",
+  value: { level: 16 },
+  scope: "user",
+  userId: "user-123",
+});
+
+await client.agents.customStates.getByKey("agent-id", {
+  key: "player_level", scope: "user", userId: "user-123",
+});
+await client.agents.customStates.deleteByKey("agent-id", {
+  key: "player_level", scope: "user", userId: "user-123",
+});
+await client.agents.customStates.list("agent-id", { scope: "global", limit: 50 });
+```
+
+### Knowledge base
+
+```ts
+// Documents
+await client.knowledge.uploadDocument("project-id", "document.pdf", fileData);
+const docs = await client.knowledge.listDocuments("project-id", 10);
+await client.knowledge.getDocument("project-id", "doc-id");
+await client.knowledge.deleteDocument("project-id", "doc-id");
+
+// Structured facts
+await client.knowledge.insertFacts("project-id", {
+  entities: [...],
+  relationships: [...],
+});
+
+// Graph nodes
+const nodes = await client.knowledge.listNodes("project-id", { type: "Person", limit: 100, offset: 0 });
+await client.knowledge.getNode("project-id", "node-id");
+await client.knowledge.deleteNode("project-id", "node-id");
+
+// Semantic search
+const results = await client.knowledge.search("project-id", {
+  query: "what is the user's favorite food?",
+  limit: 10,
+});
+for (const r of results.results) {
+  console.log(`[${r.score.toFixed(2)}] ${r.label} (${r.type})`);
+}
+```
+
+### Voice (TTS / STT / live)
+
+```ts
+// Text-to-Speech
+const tts = await client.agents.voice.tts("agent-id", {
+  text: "Hello, how are you?",
+  voiceName: "Kore",
+  language: "en-US",
+});
+const audioBytes = Buffer.from(tts.audio, "base64");
+
+// Speech-to-Text
+const stt = await client.agents.voice.stt("agent-id", {
+  audio: pcmBuffer.toString("base64"),
+  audioFormat: "pcm",
+  language: "en-US",
+});
+console.log(stt.transcript);
+
+// Live bidirectional voice (WebSocket, Gemini Live)
+const token = await client.agents.voice.getToken("agent-id", {
+  voiceName: "Kore",
+  language: "en-US",
+  userId: "user-123",
+});
+const stream = await client.agents.voice.stream(token);
+
+stream.sendText("Hello!");
+// or: stream.sendAudio(pcm16kHzMonoBytes);
+
+for await (const event of stream) {
+  if (event.type === "input_transcript") console.log("User:", event.text);
+  if (event.type === "output_transcript") console.log("Agent:", event.text);
+  if (event.type === "audio") playPCM(event.audio);   // 24 kHz PCM
+  if (event.type === "session_ended") break;
+}
+
+stream.close();
+```
+
+### Evaluation & simulation
+
+```ts
+// One-off evaluation
+const result = await client.agents.evaluate("agent-id", {
+  messages: [
+    { role: "user", content: "I'm feeling sad today" },
+    { role: "assistant", content: "I'm sorry to hear that..." },
+  ],
+  templateId: "template-uuid",
+});
+console.log(result.score, result.feedback);
+
+// Streaming simulation
+for await (const event of client.agents.simulate("agent-id", {
+  userPersona: { name: "Alex", background: "College student" },
+  config: { max_sessions: 3, max_turns_per_session: 10 },
+})) {
+  console.log(`[${event.type}] ${event.message}`);
+}
+
+// Fire-and-forget — returns RunRef, reconnect later
+const ref = await client.agents.simulateAsync("agent-id", {
+  userPersona: { name: "Alex" },
+  config: { max_sessions: 2 },
+});
+for await (const event of client.evalRuns.streamEvents(ref.run_id, 0)) {
+  console.log(`[${event.type}] ${event.message}`);
+}
+
+// Combined simulation + evaluation
+for await (const event of client.agents.runEval("agent-id", {
+  templateId: "template-uuid",
+  userPersona: { name: "Alex" },
+  simulationConfig: { max_sessions: 2 },
+})) {
+  console.log(`[${event.type}] ${event.message}`);
+}
+
+// Re-evaluate an existing run with a different template
+for await (const event of client.agents.evalOnly("agent-id", {
+  templateId: "new-template-uuid",
+  sourceRunId: "existing-run-uuid",
+})) {
+  console.log(`[${event.type}] ${event.message}`);
+}
+
+// Templates & runs
+await client.evalTemplates.list();
+const template = await client.evalTemplates.create({
+  name: "Empathy Check",
+  scoringRubric: "...",
+  categories: [
+    { name: "Awareness", weight: 0.5, criteria: "..." },
+    { name: "Response",  weight: 0.5, criteria: "..." },
+  ],
+});
+await client.evalTemplates.update(template.id, { name: "v2" });
+await client.evalTemplates.delete(template.id);
+
+await client.evalRuns.list({ agentId: "agent-id", limit: 20, offset: 0 });
+await client.evalRuns.get("run-id");
+await client.evalRuns.delete("run-id");
+```
+
+### Webhooks
+
+```ts
+// Register / update
+const resp = await client.webhooks.register("agent.message.created", {
+  webhookUrl: "https://example.com/hook",
+  authHeader: "Bearer your-secret",   // optional; added to delivery requests
+});
+console.log("signing secret:", resp.signing_secret);
+
+// Inspect
+await client.webhooks.list();
+await client.webhooks.listDeliveryAttempts("agent.message.created");
+
+// Rotate & delete
+await client.webhooks.rotateSecret("agent.message.created");
+await client.webhooks.delete("agent.message.created");
+
+// Project-scoped variants
+await client.webhooks.registerForProject("project-id", "agent.created", { webhookUrl });
+await client.webhooks.listForProject("project-id");
+await client.webhooks.deleteForProject("project-id", "agent.created");
+```
+
+Verify incoming webhooks on your endpoint with HMAC-SHA256 over the raw body using the `signing_secret` you received at registration:
+
+```ts
+import { createHmac, timingSafeEqual } from "node:crypto";
+
+function verify(payload: Buffer, header: string, secret: string) {
+  const expected = createHmac("sha256", secret).update(payload).digest("hex");
+  const a = Buffer.from(expected, "hex");
+  const b = Buffer.from(header, "hex");
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+```
+
+### Platform models & analytics
+
+```ts
+const { providers, default_model } = await client.listModels();
+
+await client.analytics.usage({ start: "2026-01-01", end: "2026-03-01" });
+await client.analytics.costs({ projectId: "project-id" });
+await client.analytics.realtime();
+
+await client.workbench.advanceTime("agent-id", { hours: 24 });
+```
+
+## Error handling
 
 ```ts
 import {
   Sonzai,
-  AuthenticationError,
-  NotFoundError,
-  BadRequestError,
-  RateLimitError,
-  SonzaiError,
+  SonzaiError,           // base class
+  AuthenticationError,    // 401
+  PermissionDeniedError,  // 403
+  NotFoundError,          // 404
+  BadRequestError,        // 400
+  RateLimitError,         // 429 — has `retryAfter?: number` (ms)
+  InternalServerError,    // 5xx
+  APIError,               // generic, has `statusCode: number`
+  StreamError,            // SSE / WebSocket streaming
 } from "@sonzai-labs/agents";
 
 try {
-  const res = await client.agents.chat("agent-id", { messages: [...] });
+  const res = await client.agents.chat({ agent: "agent-id", messages: [...] });
 } catch (err) {
   if (err instanceof AuthenticationError) {
     console.log("Invalid API key");
   } else if (err instanceof NotFoundError) {
     console.log("Agent not found");
   } else if (err instanceof RateLimitError) {
-    console.log("Rate limit exceeded");
+    console.log(`Rate limited, retry after ${err.retryAfter}ms`);
   } else if (err instanceof SonzaiError) {
     console.log(`API error: ${err.message}`);
   }
 }
 ```
 
-## Runtime Compatibility
+## Pagination
+
+Two patterns are used depending on the endpoint:
+
+```ts
+// Cursor-based (agents list)
+const page1 = await client.agents.list({ pageSize: 20 });
+const page2 = await client.agents.list({ pageSize: 20, cursor: page1.next_cursor });
+
+// Offset-based (most list endpoints)
+const runs  = await client.evalRuns.list({ agentId: "agent-id", limit: 50, offset: 0 });
+const facts = await client.agents.memory.listFacts("agent-id", { limit: 50, offset: 50 });
+```
+
+## Types
+
+All request and response types are exported from the root entry point:
+
+```ts
+import type {
+  SonzaiConfig,
+  ChatMessage, ChatOptions, ChatResponse, ChatStreamEvent, ChatUsage,
+  MemoryNode, AtomicFact, MemoryResponse,
+  PersonalityProfile, Big5, PersonalityDimensions,
+  SimulationEvent, EvalTemplate, EvalRun,
+  // ...and many more
+} from "@sonzai-labs/agents";
+```
+
+Most types are regenerated from the committed OpenAPI spec; a few SDK-specific options (`SonzaiConfig`, `ChatOptions`, streaming events) are hand-written.
+
+## Runtime compatibility
 
 | Runtime | Version | Status |
 |---------|---------|--------|
-| Node.js | >= 18   | Full support |
-| Bun     | >= 1.0  | Full support |
-| Deno    | >= 1.28 | Full support |
+| Node.js | ≥ 18    | Full support |
+| Bun     | ≥ 1.0   | Full support |
+| Deno    | ≥ 1.28  | Full support |
 
-The SDK uses only the standard Web API (`fetch`, `ReadableStream`, `TextDecoder`, `URL`, `AbortController`) with no runtime-specific dependencies.
+The SDK uses only the standard Web API (`fetch`, `ReadableStream`, `TextDecoder`, `URL`, `AbortController`) with no runtime-specific dependencies. Package ships both ESM (`dist/index.js`) and CJS (`dist/index.cjs`) builds with matching type definitions.
 
 ## Staying in sync with the production API
 
@@ -408,23 +611,16 @@ checks for drift; `npm install` / `bun install` auto-enables it via the
 ## Development
 
 ```bash
-# Clone
 git clone https://github.com/sonz-ai/sonzai-typescript.git
 cd sonzai-typescript
 
-# Install (bun or npm)
-bun install
+bun install                 # or: npm install
 
-# Run tests
-bun test         # or: npx vitest run
-
-# Type check
-npx tsc --noEmit
-
-# Build
-bun run build    # or: npx tsup
+bun test                    # or: npx vitest run
+npx tsc --noEmit            # type check
+bun run build               # or: npx tsup
 ```
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License — see [LICENSE](LICENSE) for details.
