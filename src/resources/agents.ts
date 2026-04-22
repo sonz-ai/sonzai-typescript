@@ -302,6 +302,10 @@ export class Agents {
       intent: options.intent,
       delay_hours: options.delayHours,
     };
+    if (options.scheduled_at != null) body.scheduled_at = options.scheduled_at;
+    if (options.occasion != null) body.occasion = options.occasion;
+    if (options.interest_topic != null) body.interest_topic = options.interest_topic;
+    if (options.event_description != null) body.event_description = options.event_description;
 
     return this.http.post<ScheduledWakeup>(
       `/api/v1/agents/${agentId}/wakeups`,

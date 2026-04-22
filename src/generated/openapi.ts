@@ -6363,6 +6363,7 @@ export interface components {
             /** Format: date-time */
             created_at: string;
             description?: string;
+            display_name?: string;
             entity_type: string;
             fields: components["schemas"]["KBSchemaField"][] | null;
             project_id: string;

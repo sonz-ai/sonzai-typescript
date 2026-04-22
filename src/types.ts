@@ -197,6 +197,7 @@ export interface MemorySearchOptions {
   query: string;
   instanceId?: string;
   limit?: number;
+  user_id?: string;
 }
 
 export interface MemoryTimelineOptions {
@@ -1679,6 +1680,10 @@ export interface ScheduleWakeupOptions {
   checkType: string;
   intent: string;
   delayHours: number;
+  scheduled_at?: string;
+  occasion?: string;
+  interest_topic?: string;
+  event_description?: string;
 }
 
 // ScheduledWakeup is now re-exported from ./generated/aliases.js (as WakeupEntry)
@@ -2111,6 +2116,7 @@ export interface CreateSchemaOptions {
   entity_type: string;
   fields: KBSchemaField[];
   description?: string;
+  display_name?: string;
   similarity_config?: KBSimilarityConfig;
 }
 
@@ -2307,6 +2313,7 @@ export interface InventoryUpdateOptions {
   kb_node_id?: string;
   properties?: Record<string, unknown>;
   project_id?: string;
+  label?: string;
 }
 
 // KBResolutionInfo is now re-exported from ./generated/aliases.js (as KbResolutionInfo)
@@ -2316,6 +2323,7 @@ export interface InventoryUpdateOptions {
 export interface InventoryUpdateResponse {
   status: string;
   fact_id?: string;
+  inventory_item_id?: string;
   kb_resolution?: KBResolutionInfo;
   candidates?: KBCandidate[];
   error?: string;
@@ -2342,6 +2350,7 @@ export interface InventoryQueryOptions {
 
 export interface InventoryItem {
   fact_id: string;
+  inventory_item_id?: string;
   item_label: string;
   kb_node_id?: string;
   user_properties: Record<string, unknown>;
@@ -2367,6 +2376,7 @@ export interface InventoryBatchItem {
   description?: string;
   kb_node_id?: string;
   properties?: Record<string, unknown>;
+  label?: string;
 }
 
 export interface InventoryBatchImportOptions {
@@ -2440,6 +2450,7 @@ export interface KBBulkUpdateEntry {
 export interface KBBulkUpdateOptions {
   source?: string;
   updates: KBBulkUpdateEntry[];
+  upsert?: boolean;
 }
 
 // KBBulkUpdateResponse is now re-exported from ./generated/aliases.js (as KbBulkUpdateOutputBody)

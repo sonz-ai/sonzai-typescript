@@ -51,6 +51,7 @@ export class Memory {
         q: options.query,
         instance_id: options.instanceId,
         limit: options.limit,
+        user_id: options.user_id,
       },
     );
   }
