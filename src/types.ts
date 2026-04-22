@@ -311,6 +311,8 @@ export interface SessionEndOptions {
   messages?: ChatMessage[];
   userDisplayName?: string;
   userTimezone?: string;
+  /** When true, run CE pipeline synchronously before responding. Useful for test harnesses that query memory immediately after session end. */
+  wait?: boolean;
 }
 
 export interface SessionResponse {

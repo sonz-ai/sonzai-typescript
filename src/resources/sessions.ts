@@ -45,6 +45,7 @@ export class Sessions {
     if (options.messages) body.messages = options.messages;
     if (options.userDisplayName) body.user_display_name = options.userDisplayName;
     if (options.userTimezone) body.user_timezone = options.userTimezone;
+    if (options.wait != null) body.wait = options.wait;
 
     return this.http.post<SessionResponse>(
       `/api/v1/agents/${agentId}/sessions/end`,
