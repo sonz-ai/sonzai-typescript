@@ -130,21 +130,23 @@ Streams return an `AsyncGenerator<ChatStreamEvent>`. Each event carries a delta 
 
 Supplementary memory recall can run **synchronously** (blocks context build until recall completes — every fact lands in the current turn) or **asynchronously** (races a deadline — slow hits spill to the next turn for lower first-token latency). Default is `sync`.
 
-`memoryMode` is an agent-wide capability — set it once with `updateCapabilities` and every subsequent chat uses that mode until you change it:
+`memoryMode` is an agent-wide capability. You can set it at creation time or flip it later with `updateCapabilities`:
 
 ```ts
-// Switch to async for lower first-token latency
+// At creation
+await client.agents.create({
+  name: "Luna",
+  toolCapabilities: { memory_mode: "async" },
+});
+
+// Or flip an existing agent
 const caps = await client.agents.updateCapabilities("agent-id", {
   memoryMode: "async",   // or "sync"
 });
-console.log(caps.memoryMode);
 
 // Read the current mode
 const current = await client.agents.getCapabilities("agent-id");
 console.log(current.memoryMode);
-
-// Switch back to sync
-await client.agents.updateCapabilities("agent-id", { memoryMode: "sync" });
 ```
 
 `updateCapabilities` is PATCH-style — omitted fields are left unchanged. To skip the context engine entirely on a single chat (e.g. test paths), set `skipContextBuild: true` in the chat options.
@@ -201,7 +203,15 @@ const agent = await client.agents.create({
   bio: "A thoughtful AI companion",
   personalityPrompt: "You are warm and empathetic",
   big5: { openness: 0.85, conscientiousness: 0.6 },
-  toolCapabilities: { web_search: true, remember_name: true },
+  // Tool capabilities are configurable at creation time:
+  toolCapabilities: {
+    web_search: true,
+    remember_name: true,
+    image_generation: false,
+    inventory: false,
+    knowledge_base: true,     // enable project-scoped KB search
+    memory_mode: "async",      // "sync" (default) or "async"
+  },
 });
 
 await client.agents.get(agent.agentId);

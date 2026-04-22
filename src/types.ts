@@ -1117,6 +1117,15 @@ export interface AgentToolCapabilities {
   remember_name: boolean;
   image_generation: boolean;
   inventory: boolean;
+  /** Enable the knowledge_search tool (reads from the agent's project-scoped KB). */
+  knowledge_base?: boolean;
+  /**
+   * Supplementary memory recall timing. `"sync"` (default) blocks context
+   * build until recall returns so facts land in the current turn. `"async"`
+   * lets the recall race a deadline — slow hits spill to the next turn for
+   * lower first-token latency.
+   */
+  memory_mode?: "sync" | "async";
 }
 
 export interface SeedMemory {
