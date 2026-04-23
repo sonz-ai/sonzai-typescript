@@ -719,6 +719,18 @@ export interface EnrichedContextResponse {
   loaded_facts?: ContextLoadedFact[];
   long_term_summaries?: ContextLongTermSummary[];
 
+  /**
+   * Raw messages buffered by `/process` for the current session.
+   * Chronological order (oldest first). Empty when the buffer is cold or
+   * `/process` hasn't been called yet this session.
+   *
+   * Closes the latency gap between a fact being said this turn and that
+   * fact becoming searchable via the consolidated fact pipeline. The
+   * OpenClaw plugin renders this as a "Recent Context" section so the
+   * agent can recall same-session statements before extraction completes.
+   */
+  recent_turns?: RecentTurn[];
+
   // Layer 6b: Proactive
   proactive_memories?: ContextProactiveMemory[];
 
@@ -731,6 +743,16 @@ export interface EnrichedContextResponse {
 
   // Forward-compatible
   [key: string]: unknown;
+}
+
+/**
+ * A raw message from the current session, buffered by /process and
+ * exposed via /context.recent_turns. Chronological order.
+ */
+export interface RecentTurn {
+  role: string;        // "user" | "assistant" | "system"
+  content: string;     // raw message content as the SDK consumer sent it
+  timestamp: string;   // RFC3339 UTC, set by backend on Push
 }
 
 /**

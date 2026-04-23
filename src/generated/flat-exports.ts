@@ -226,6 +226,7 @@ export type ProjectNotificationsListOutputBody = components["schemas"]["ProjectN
 export type ProjectServiceCharge = components["schemas"]["ProjectServiceCharge"];
 export type PropertySource = components["schemas"]["PropertySource"];
 export type RecentShiftsResponse = components["schemas"]["RecentShiftsResponse"];
+export type RecentTurn = components["schemas"]["RecentTurn"];
 export type RedeemVoucherResponse = components["schemas"]["RedeemVoucherResponse"];
 export type RegenerateAvatarInputBody = components["schemas"]["RegenerateAvatarInputBody"];
 export type GenerateAvatarResponse = components["schemas"]["RegenerateAvatarOutputBody"];
