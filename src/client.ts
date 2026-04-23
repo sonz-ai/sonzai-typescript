@@ -1,6 +1,7 @@
 import { HTTPClient } from "./http.js";
 import { Agents } from "./resources/agents.js";
 import { Analytics } from "./resources/analytics.js";
+import { Composio } from "./resources/composio.js";
 import { CustomLLM } from "./resources/custom-llm.js";
 import { EvalRuns } from "./resources/eval-runs.js";
 import { EvalTemplates } from "./resources/eval-templates.js";
@@ -127,6 +128,12 @@ export class Sonzai {
   /** User persona management (create, update, delete user personas). */
   readonly userPersonas: UserPersonas;
   /**
+   * Composio per-agent connected SaaS accounts (Gmail, Calendar, Slack,
+   * GitHub, Linear, Notion, Drive). Connections + audit + available
+   * actions. Gated on the `Composio` agent capability server-side.
+   */
+  readonly composio: Composio;
+  /**
    * Project-scoped skill library + per-agent enablement. Skills are
    * markdown playbooks the agent loads on demand via sonzai_load_skill.
    */
@@ -168,6 +175,7 @@ export class Sonzai {
     this.projectNotifications = new ProjectNotifications(this.http);
     this.projects = new Projects(this.http);
     this.userPersonas = new UserPersonas(this.http);
+    this.composio = new Composio(this.http);
     this.skills = new Skills(this.http);
     this.wisdom = new Wisdom(this.http);
     this.workbench = new Workbench(this.http);

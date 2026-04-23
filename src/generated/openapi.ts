@@ -264,6 +264,110 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/agents/{agentId}/composio/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Composio action audit entries for an agent
+         * @description Returns redacted Composio action log entries scoped to the agent. Supports RFC3339 `from`/`to` (defaults to the last 24h), a `status` filter (`ok` | `error` | `rate_limited`), and `limit` (default 100, max 500). Status filtering happens in-memory after the underlying store returns rows.
+         */
+        get: operations["listComposioAudit"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/composio/available_actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Composio actions available to an agent
+         * @description For each app the agent is connected to, returns the curated action set with each action's schema. Upstream ActionCache failures for a single app are logged and skipped — the endpoint still returns 200 with the remaining apps.
+         */
+        get: operations["listComposioAvailableActions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/composio/connections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Composio connections for an agent
+         * @description Returns every Composio connected account bound to the agent. Empty list when none are connected.
+         */
+        get: operations["listComposioConnections"];
+        put?: never;
+        /**
+         * Initiate a Composio OAuth flow for an agent
+         * @description Calls Composio to start an OAuth flow for the given app, binding it to the agent as the entity_id. Returns the redirect URL the user must visit and the pending connected_account_id. The connection is not persisted until the callback endpoint is called.
+         */
+        post: operations["initiateComposioConnect"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/composio/connections/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finalize a Composio OAuth flow
+         * @description Persists the Composio connected account after the OAuth flow completes. Typically called by the dashboard once Composio has redirected the user back with a finalized connected_account_id.
+         */
+        post: operations["composioConnectCallback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/composio/connections/{app}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Disconnect a Composio app for an agent
+         * @description Revokes the Composio connected account upstream, then removes the local row. Returns 404 when no connection exists for the agent+app pair.
+         */
+        delete: operations["deleteComposioConnection"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/agents/{agentId}/constellation": {
         parameters: {
             query?: never;
@@ -4254,6 +4358,22 @@ export interface components {
              */
             acknowledged: number;
         };
+        ActionLogEntry: {
+            action_name: string;
+            agent_id: string;
+            composio_app: string;
+            composio_request_id?: string;
+            /** Format: int64 */
+            duration_ms: number;
+            error_code?: string;
+            /** Format: date-time */
+            recorded_at: string;
+            request_params_redacted: string;
+            response_summary: string;
+            status: string;
+            turn_id: string;
+            user_id: string;
+        };
         ActiveCharacterSummary: {
             /**
              * Format: uri
@@ -4598,6 +4718,18 @@ export interface components {
             to_id: string;
             to_type: string;
         };
+        AvailableAction: {
+            description: string;
+            name: string;
+            parameters?: {
+                [key: string]: unknown;
+            };
+        };
+        AvailableActionsApp: {
+            actions: components["schemas"]["AvailableAction"][] | null;
+            app: string;
+            connected_account_label?: string;
+        };
         BatchGetPersonalitiesInputBody: {
             /**
              * Format: uri
@@ -4905,6 +5037,40 @@ export interface components {
             is_label?: boolean;
             property: string;
             type?: string;
+        };
+        ComposioConnectCallbackInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ComposioConnectCallbackInputBody.json
+             */
+            readonly $schema?: string;
+            account_label?: string;
+            app: string;
+            connected_account_id: string;
+            connected_by_user_id?: string;
+        };
+        ComposioConnectCallbackOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ComposioConnectCallbackOutputBody.json
+             */
+            readonly $schema?: string;
+            connection?: components["schemas"]["Connection"];
+            ok: boolean;
+        };
+        Connection: {
+            account_label: string;
+            agent_id: string;
+            app: string;
+            connected_account_id: string;
+            /** Format: date-time */
+            connected_at: string;
+            connected_by_user_id: string;
+            /** Format: date-time */
+            last_verified_at?: string;
+            scope: string;
         };
         ConstellationResponse: {
             /**
@@ -6593,6 +6759,26 @@ export interface components {
             /** Format: int64 */
             warmth_score: number;
         };
+        InitiateComposioConnectInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/InitiateComposioConnectInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Composio app slug (e.g. gmail, slack, github) */
+            app: string;
+        };
+        InitiateComposioConnectOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/InitiateComposioConnectOutputBody.json
+             */
+            readonly $schema?: string;
+            connected_account_id: string;
+            redirect_url: string;
+        };
         InsertEdgeDetail: {
             edge_id: string;
             from_node: string;
@@ -7538,6 +7724,33 @@ export interface components {
             facts: components["schemas"]["StoredFact"][] | null;
             /** Format: int64 */
             total: number;
+        };
+        ListComposioAuditOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListComposioAuditOutputBody.json
+             */
+            readonly $schema?: string;
+            entries: components["schemas"]["ActionLogEntry"][] | null;
+        };
+        ListComposioAvailableActionsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListComposioAvailableActionsOutputBody.json
+             */
+            readonly $schema?: string;
+            apps: components["schemas"]["AvailableActionsApp"][] | null;
+        };
+        ListComposioConnectionsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListComposioConnectionsOutputBody.json
+             */
+            readonly $schema?: string;
+            connections: components["schemas"]["Connection"][] | null;
         };
         ListCustomStatesOutputBody: {
             /**
@@ -11121,6 +11334,215 @@ export interface operations {
                 content: {
                     "text/event-stream": components["schemas"]["ChatSSEChunk"];
                 };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listComposioAudit: {
+        parameters: {
+            query?: {
+                /** @description RFC3339 start timestamp (inclusive). Defaults to 24h before 'to'. */
+                from?: string;
+                /** @description RFC3339 end timestamp (inclusive). Defaults to now. */
+                to?: string;
+                /** @description Optional status filter: ok | error | rate_limited */
+                status?: string;
+                /** @description Maximum entries to return (default 100, max 500) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListComposioAuditOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listComposioAvailableActions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListComposioAvailableActionsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listComposioConnections: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListComposioConnectionsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    initiateComposioConnect: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InitiateComposioConnectInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InitiateComposioConnectOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    composioConnectCallback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ComposioConnectCallbackInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComposioConnectCallbackOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteComposioConnection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+                /** @description Composio app slug */
+                app: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Error */
             default: {
