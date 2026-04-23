@@ -648,7 +648,7 @@ export interface ProcessOptions {
   messages: ChatMessage[];
   /** LLM provider for extraction (e.g. "gemini", "openai", "openrouter"). Falls back to platform default. */
   provider?: string;
-  /** LLM model for extraction (e.g. "gemini-2.5-flash", "gpt-4o-mini"). Falls back to platform default. */
+  /** LLM model for extraction (e.g. "gemini-3-flash", "gpt-4o-mini"). Falls back to platform default. */
   model?: string;
 }
 
