@@ -233,11 +233,10 @@ for (const node of memory.nodes) {
   console.log(`${node.title}: ${node.summary} (importance: ${node.importance})`);
 }
 
-// Semantic search (cosine embeddings when userId is set, BM25 otherwise)
+// Semantic search (cosine embeddings when user_id is set, BM25 otherwise)
 const results = await client.agents.memory.search("agent-id", {
   query: "favorite food",
-  userId: "user-123",
-  mode: "semantic",  // or "bm25"
+  user_id: "user-123",
   limit: 20,
 });
 
@@ -259,6 +258,20 @@ await client.agents.memory.updateFact("agent-id", fact.factId, { importance: 0.9
 await client.agents.memory.getFactHistory("agent-id", fact.factId);
 await client.agents.memory.deleteFact("agent-id", fact.factId);
 
+// Wisdom (agent-global) facts
+await client.agents.memory.getWisdomAudit("agent-id", fact.factId);
+await client.agents.memory.deleteWisdomFact("agent-id", fact.factId);
+
+// Bulk create up to 1000 pre-formed facts in a single request.
+// source_type="manual" — no LLM extraction.
+await client.agents.memory.bulkCreateFacts("agent-id", {
+  userId: "user-123",
+  facts: [
+    { content: "prefers espresso" },
+    { content: "based in Singapore", factType: "location" },
+  ],
+});
+
 // Seed / reset
 await client.agents.memory.seed("agent-id", {
   userId: "user-123",
@@ -278,9 +291,13 @@ console.log(profile.profile.name);
 console.log(profile.profile.big5.openness.score);
 console.log(profile.profile.dimensions.warmth);
 
-// Recent shifts and per-user overlays
-const shifts = await client.agents.personality.recentShifts("agent-id");
-const overlay = await client.agents.personality.getOverlay("agent-id", { userId: "user-123" });
+// Recent shifts and significant moments
+const shifts = await client.agents.personality.getRecentShifts("agent-id");
+const moments = await client.agents.personality.getSignificantMoments("agent-id", { limit: 10 });
+
+// Per-user overlays (how the agent perceives a specific user)
+const overlays = await client.agents.personality.listUserOverlays("agent-id");
+const overlay = await client.agents.personality.getUserOverlay("agent-id", "user-123");
 ```
 
 ### Sessions & instances
@@ -298,6 +315,7 @@ await client.agents.sessions.end("agent-id", {
 });
 
 // Parallel agent instances
+const instances = await client.agents.instances.list("agent-id");
 const instance = await client.agents.instances.create("agent-id", { name: "Beta" });
 await client.agents.instances.reset("agent-id", instance.instance_id);
 await client.agents.instances.delete("agent-id", instance.instance_id);
@@ -306,6 +324,18 @@ await client.agents.instances.delete("agent-id", instance.instance_id);
 ### Context engine state
 
 ```ts
+// Single-call enriched context — fact retrieval runs query-conditioned
+// (two-pass: entity-filtered + raw-text vector), and recent_turns surfaces
+// this session's raw messages before consolidation has run.
+const ctx = await client.agents.getContext("agent-id", {
+  userId: "user-123",
+  query: "what did we discuss earlier about espresso?",
+});
+for (const turn of ctx.recent_turns ?? []) {
+  console.log(`[${turn.timestamp}] ${turn.role}: ${turn.content}`);
+}
+
+// Individual layer accessors (the single getContext call above pulls all of these)
 await client.agents.getMood("agent-id", { userId: "user-123" });
 await client.agents.getRelationships("agent-id");
 await client.agents.getHabits("agent-id");
