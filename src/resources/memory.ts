@@ -1,6 +1,8 @@
 import type { HTTPClient } from "../http.js";
 import type {
   AtomicFact,
+  BulkCreateFactsOptions,
+  BulkCreateFactsResponse,
   CreateFactOptions,
   DeleteWisdomResponse,
   FactHistoryResponse,
@@ -139,6 +141,36 @@ export class Memory {
     return this.http.post<AtomicFact>(
       `/api/v1/agents/${agentId}/memory/facts`,
       body,
+    );
+  }
+
+  /** Bulk create up to 1000 pre-formed facts in one request. No LLM extraction. */
+  async bulkCreateFacts(
+    agentId: string,
+    options: BulkCreateFactsOptions,
+  ): Promise<BulkCreateFactsResponse> {
+    const body: Record<string, unknown> = {
+      facts: options.facts.map((f) => {
+        const item: Record<string, unknown> = { content: f.content };
+        if (f.userId) item.user_id = f.userId;
+        if (f.factType) item.fact_type = f.factType;
+        if (f.importance != null) item.importance = f.importance;
+        if (f.confidence != null) item.confidence = f.confidence;
+        if (f.entities) item.entities = f.entities;
+        if (f.nodeId) item.node_id = f.nodeId;
+        if (f.metadata) item.metadata = f.metadata;
+        return item;
+      }),
+    };
+    if (options.userId) body.user_id = options.userId;
+
+    const query: Record<string, string | undefined> = {};
+    if (options.instanceId) query.instance_id = options.instanceId;
+
+    return this.http.post<BulkCreateFactsResponse>(
+      `/api/v1/agents/${agentId}/memory/facts/bulk`,
+      body,
+      query,
     );
   }
 

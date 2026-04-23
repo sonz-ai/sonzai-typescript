@@ -1306,6 +1306,28 @@ export interface UpdateFactOptions {
   metadata?: Record<string, unknown>;
 }
 
+export interface BulkFactItem {
+  content: string;
+  userId?: string;
+  factType?: string;
+  importance?: number;
+  confidence?: number;
+  entities?: string[];
+  nodeId?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface BulkCreateFactsOptions {
+  facts: BulkFactItem[];
+  userId?: string;
+  instanceId?: string;
+}
+
+export interface BulkCreateFactsResponse {
+  facts_created: number;
+  facts: AtomicFact[];
+}
+
 export interface MemoryResetOptions {
   userId: string;
   instanceId?: string;

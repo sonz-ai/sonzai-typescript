@@ -616,6 +616,27 @@ Most types are regenerated from the committed OpenAPI spec; a few SDK-specific o
 
 The SDK uses only the standard Web API (`fetch`, `ReadableStream`, `TextDecoder`, `URL`, `AbortController`) with no runtime-specific dependencies. Package ships both ESM (`dist/index.js`) and CJS (`dist/index.cjs`) builds with matching type definitions.
 
+## Benchmarks
+
+Sonzai beats MemPalace on LongMemEval — the retrieval benchmark MemPalace was
+purpose-built to win — while running on the cheap end of the LLM stack:
+
+| Metric | Sonzai | MemPalace (hybrid_v4) |
+|---|---:|---:|
+| R@G (overall recall) | **0.773** | 0.741 |
+| R@1 (top-hit accuracy) | **0.800** | 0.770 |
+| Recall@10, multi-session | **1.000** | 1.000 |
+
+Chat, judge, and partner agent all run on **Gemini 3.1 Flash Lite** — no
+frontier-model arms race propping up the numbers. The lift is from the memory
+architecture, not from spending more on inference. Drop in a heavier model and
+the ceiling goes up from there.
+
+Full scores, methodology, per-question-type breakdown, and reproduction steps
+(including comparison against MemPalace's canonical `longmemeval_bench.py`):
+
+→ [sonzai-python/benchmarks/README.md](https://github.com/sonz-ai/sonzai-python/blob/main/benchmarks/README.md)
+
 ## Staying in sync with the production API
 
 This SDK tracks `https://api.sonz.ai/docs/openapi.json`. A git pre-push hook
