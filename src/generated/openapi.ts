@@ -1508,6 +1508,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/agents/{agentId}/skills/enabled": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List skills enabled for an agent
+         * @description Returns the list of skill names the agent currently has enabled. Empty list when none are enabled.
+         */
+        get: operations["listEnabledSkills"];
+        put?: never;
+        /**
+         * Toggle a skill's enabled flag for an agent
+         * @description Idempotent toggle of the per-agent skill-enable flag. Body carries the skill_name and target boolean.
+         */
+        post: operations["toggleEnabledSkill"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/skills/enabled/{skillName}/load-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read the per-agent load counter for a skill
+         * @description Returns the monotonically-increasing count of successful load_skill invocations by this agent on this skill. Absent = 0.
+         */
+        get: operations["getSkillLoadCount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/agents/{agentId}/status": {
         parameters: {
             query?: never;
@@ -2065,6 +2109,158 @@ export interface paths {
          */
         post: operations["scheduleWakeup"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/wisdom/attributed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List attributed wisdom for an agent
+         * @description Returns every attributed wisdom fact stored on the agent-global partition, capped at 200 entries. Use the by-entity endpoint when scoped reads are needed.
+         */
+        get: operations["listAttributedWisdom"];
+        put?: never;
+        /**
+         * Create or upsert an attributed wisdom fact
+         * @description Writes an attributed wisdom fact to the agent-global partition. The writer enforces the privacy floor and, when configured, a semantic validator. The `source` field is always forced to `developer_api` — callers cannot spoof provenance. Writing the same (entity_type, entity_id, category) triple again overwrites the prior value (LWW).
+         */
+        post: operations["createAttributedWisdom"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/wisdom/attributed/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bulk import attributed wisdom facts (JSON or CSV)
+         * @description Accepts a JSON array or a CSV string (with a fixed header row) and writes every row through the attributed-wisdom Writer. Privacy floor and semantic validator apply per row. Rejected rows are reported in the `rejected` array; body-level errors (malformed data, unknown format) return 400. Source is pinned to `import` on every row. Supports `dry_run: true` to preview validation without persisting.
+         */
+        post: operations["importAttributedWisdom"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/wisdom/attributed/{entityType}/{entityId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List attributed wisdom for one entity
+         * @description Returns the attributed wisdom facts filed under the given (entity_type, entity_id) pair. Empty list when no facts exist.
+         */
+        get: operations["listAttributedWisdomByEntity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/wisdom/attributed/{entityType}/{entityId}/{category}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Replace the value of an attributed wisdom fact
+         * @description Writes (LWW) the value at the given (entity_type, entity_id, category) triple. The path identifiers are authoritative; the body supplies the new value + optional metadata. Privacy floor applies.
+         */
+        put: operations["replaceAttributedWisdom"];
+        post?: never;
+        /**
+         * Delete an attributed wisdom fact (idempotent)
+         * @description Removes the attributed wisdom fact at the given triple. Idempotent: absent rows return 204 without error.
+         */
+        delete: operations["deleteAttributedWisdom"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/wisdom/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List attributed wisdom disclosure audit entries
+         * @description Returns the agent's disclosure audit rows in the requested time window (RFC3339 `from` / `to`, default last 24h). Limit defaults to 100, hard-capped at 500. Each entry records one attributed fact feeding one turn's context — compliance replay + tenant-side audit use this endpoint.
+         */
+        get: operations["listAttributedWisdomAudit"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/wisdom/relations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List attributed wisdom relations for an agent
+         * @description Returns every directed edge between attributed entities on the agent-global partition. Empty array when none exist.
+         */
+        get: operations["listAttributedWisdomRelations"];
+        put?: never;
+        /**
+         * Create an attributed wisdom relation
+         * @description Writes a directed edge between two attributed entities. The `source` field is always forced to `developer_api`. Returns the relation with the repo-assigned ID.
+         */
+        post: operations["createAttributedWisdomRelation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/wisdom/relations/{relationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete an attributed wisdom relation (idempotent)
+         * @description Removes the relation with the given ID. Idempotent: absent rows return 204 without error.
+         */
+        delete: operations["deleteAttributedWisdomRelation"];
         options?: never;
         head?: never;
         patch?: never;
@@ -3250,6 +3446,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/projects/{projectId}/skills": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List skills in a project library
+         * @description Returns every skill registered under the project. Empty list when none exist.
+         */
+        get: operations["listProjectSkills"];
+        put?: never;
+        /**
+         * Create or upsert a skill in a project library
+         * @description Creates a new skill, or bumps the version of an existing one at the same name. Author is hard-pinned to developer.
+         */
+        post: operations["createProjectSkill"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/skills/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read a skill from a project library
+         * @description Returns the full skill (metadata + markdown body) for the given name within the project.
+         */
+        get: operations["getProjectSkill"];
+        /**
+         * Update a skill in a project library
+         * @description Partial update of description, when_to_use, and content. Version bumps on every write. Returns 404 when the skill doesn't exist — use POST to create.
+         */
+        put: operations["updateProjectSkill"];
+        post?: never;
+        /**
+         * Remove a skill from a project library
+         * @description Deletes the skill row. Returns 404 when the skill doesn't exist.
+         */
+        delete: operations["deleteProjectSkill"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/projects/{projectId}/webhooks": {
         parameters: {
             query?: never;
@@ -4076,6 +4324,8 @@ export interface components {
              * @example /api/v1/schemas/AgentCapabilities.json
              */
             readonly $schema?: string;
+            autoLearnSkills?: boolean;
+            composio?: boolean;
             customTools?: components["schemas"]["CustomToolDefinition"][] | null;
             imageGeneration: boolean;
             /** Format: date-time */
@@ -4090,6 +4340,7 @@ export interface components {
             musicUnlockedAt?: string;
             pendingCapabilities?: components["schemas"]["PendingCapability"][] | null;
             rememberName?: boolean;
+            skills?: boolean;
             videoGeneration: boolean;
             /** Format: date-time */
             videoUnlockedAt?: string;
@@ -4100,6 +4351,8 @@ export interface components {
             /** Format: date-time */
             voiceUnlockedAt?: string;
             webSearch?: boolean;
+            wisdom?: boolean;
+            wisdomPublicSharing?: boolean;
         };
         AgentDetailResponse: {
             /**
@@ -4314,6 +4567,36 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
             user_id?: string;
+        };
+        AttributedFact: {
+            category: string;
+            /** Format: double */
+            confidence?: number;
+            entity_display_name?: string;
+            entity_id: string;
+            entity_type: string;
+            /** Format: date-time */
+            expires_at?: string;
+            /** Format: date-time */
+            observed_at: string;
+            source: string;
+            source_ref?: string;
+            value: string;
+        };
+        AttributedRelation: {
+            edge_type: string;
+            from_id: string;
+            from_type: string;
+            id?: string;
+            metadata?: {
+                [key: string]: string;
+            };
+            /** Format: date-time */
+            observed_at: string;
+            source: string;
+            source_ref?: string;
+            to_id: string;
+            to_type: string;
         };
         BatchGetPersonalitiesInputBody: {
             /**
@@ -5260,6 +5543,63 @@ export interface components {
             /** @description Conversational style keywords */
             style?: string;
         };
+        CreateWisdomAttributedBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CreateWisdomAttributedBody.json
+             */
+            readonly $schema?: string;
+            category: string;
+            /** Format: double */
+            confidence?: number;
+            entity_display_name?: string;
+            entity_id: string;
+            entity_type: string;
+            /** Format: date-time */
+            expires_at?: string;
+            /** Format: date-time */
+            observed_at?: string;
+            source_ref?: string;
+            value: string;
+        };
+        CreateWisdomAttributedOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CreateWisdomAttributedOutputBody.json
+             */
+            readonly $schema?: string;
+            fact: components["schemas"]["AttributedFact"];
+        };
+        CreateWisdomRelationBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CreateWisdomRelationBody.json
+             */
+            readonly $schema?: string;
+            edge_type: string;
+            from_id: string;
+            from_type: string;
+            metadata?: {
+                [key: string]: string;
+            };
+            /** Format: date-time */
+            observed_at?: string;
+            source_ref?: string;
+            to_id: string;
+            to_type: string;
+        };
+        CreateWisdomRelationOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CreateWisdomRelationOutputBody.json
+             */
+            readonly $schema?: string;
+            relation: components["schemas"]["AttributedRelation"];
+        };
         CustomLLMConfigResponse: {
             /**
              * Format: uri
@@ -5495,6 +5835,19 @@ export interface components {
             fact_id?: string;
             inventory_item_id?: string;
             status: string;
+        };
+        DisclosureEntry: {
+            agent_id: string;
+            category: string;
+            decision: string;
+            decision_why?: string;
+            entity_id: string;
+            entity_type: string;
+            fact: components["schemas"]["AttributedFact"];
+            /** Format: date-time */
+            recorded_at: string;
+            turn_id: string;
+            user_id?: string;
         };
         Edge: {
             AgentID: string;
@@ -6098,6 +6451,17 @@ export interface components {
             default_provider: string;
             /** @description Available provider/model combinations */
             providers: components["schemas"]["AgentModelsModelEntry"][] | null;
+        };
+        GetSkillLoadCountOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/GetSkillLoadCountOutputBody.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            count: number;
+            skill_name: string;
         };
         GetToolSchemasOutputBody: {
             /**
@@ -7205,6 +7569,15 @@ export interface components {
             /** @description List of delivery attempts */
             attempts: components["schemas"]["WebhookDeliveryAttempt"][] | null;
         };
+        ListEnabledSkillsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListEnabledSkillsOutputBody.json
+             */
+            readonly $schema?: string;
+            skills: string[] | null;
+        };
         ListEvalRunsOutputBody: {
             /**
              * Format: uri
@@ -7282,6 +7655,15 @@ export interface components {
             /** @description List of agent instances */
             instances: components["schemas"]["AgentInstance"][] | null;
         };
+        ListProjectSkillsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListProjectSkillsOutputBody.json
+             */
+            readonly $schema?: string;
+            skills: components["schemas"]["Skill"][] | null;
+        };
         ListSchedulesOutputBody: {
             /**
              * Format: uri
@@ -7319,6 +7701,44 @@ export interface components {
             readonly $schema?: string;
             /** @description List of registered webhooks */
             webhooks: components["schemas"]["Webhook"][] | null;
+        };
+        ListWisdomAttributedOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListWisdomAttributedOutputBody.json
+             */
+            readonly $schema?: string;
+            facts: components["schemas"]["AttributedFact"][] | null;
+        };
+        ListWisdomAuditOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListWisdomAuditOutputBody.json
+             */
+            readonly $schema?: string;
+            entries: components["schemas"]["DisclosureEntry"][] | null;
+        };
+        ListWisdomRelationsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListWisdomRelationsOutputBody.json
+             */
+            readonly $schema?: string;
+            relations: components["schemas"]["AttributedRelation"][] | null;
+        };
+        LoadSkillInputBody: {
+            /** @description Session the skill is being loaded into (used for next-turn cache keying) */
+            session_id: string;
+            /** @description Skill to load */
+            skill_name: string;
+        };
+        LoadSkillOutputBody: {
+            content: string;
+            name: string;
+            when_to_use?: string;
         };
         MeResponse: {
             /**
@@ -7977,6 +8397,22 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        ProjectSkillBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ProjectSkillBody.json
+             */
+            readonly $schema?: string;
+            /** @description Full markdown playbook body */
+            content: string;
+            /** @description Short summary used in the skills index */
+            description: string;
+            /** @description Skill name (stable identifier within the project) */
+            name: string;
+            /** @description Optional trigger hint rendered alongside the description */
+            when_to_use?: string;
+        };
         PropertySource: {
             doc_id: string;
             /** Format: date-time */
@@ -8059,6 +8495,32 @@ export interface components {
              */
             readonly $schema?: string;
             relationships: components["schemas"]["RelationshipEntry"][] | null;
+        };
+        ReplaceWisdomAttributedInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ReplaceWisdomAttributedInputBody.json
+             */
+            readonly $schema?: string;
+            /** Format: double */
+            confidence?: number;
+            entity_display_name?: string;
+            /** Format: date-time */
+            expires_at?: string;
+            /** Format: date-time */
+            observed_at?: string;
+            source_ref?: string;
+            value: string;
+        };
+        ReplaceWisdomAttributedOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ReplaceWisdomAttributedOutputBody.json
+             */
+            readonly $schema?: string;
+            fact: components["schemas"]["AttributedFact"];
         };
         ResetInstanceOutputBody: {
             /**
@@ -8462,6 +8924,29 @@ export interface components {
             run_id: string;
             /** @description Initial run status (always "running") */
             status: string;
+        };
+        Skill: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/Skill.json
+             */
+            readonly $schema?: string;
+            author: string;
+            author_agent_id?: string;
+            author_user_id?: string;
+            content: string;
+            /** Format: date-time */
+            created_at: string;
+            description: string;
+            name: string;
+            project_id: string;
+            tenant_id: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** Format: int64 */
+            version: number;
+            when_to_use?: string;
         };
         SpeechToTextInputBody: {
             /**
@@ -8890,6 +9375,28 @@ export interface components {
             last_fact_at: string;
             session_id: string;
         };
+        ToggleEnabledSkillInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ToggleEnabledSkillInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Target state — true = enabled, false = disabled */
+            enabled: boolean;
+            /** @description Skill name to toggle */
+            skill_name: string;
+        };
+        ToggleEnabledSkillOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ToggleEnabledSkillOutputBody.json
+             */
+            readonly $schema?: string;
+            enabled: boolean;
+            skill_name: string;
+        };
         ToolSchemaEntry: {
             /** @description What the tool does */
             description: string;
@@ -9295,6 +9802,20 @@ export interface components {
             /** @description New project name */
             name?: string;
         };
+        UpdateProjectSkillInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/UpdateProjectSkillInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Updated markdown body; unchanged if omitted */
+            content?: string;
+            /** @description Updated description; unchanged if omitted */
+            description?: string;
+            /** @description Updated trigger hint; unchanged if omitted */
+            when_to_use?: string;
+        };
         UpdateUserMetadataHumaOutputBody: {
             /**
              * Format: uri
@@ -9653,6 +10174,60 @@ export interface components {
             /** Format: int64 */
             source_user_count: number;
             target_path?: string;
+        };
+        WisdomDisclosureHookInputBody: {
+            /**
+             * @description Decision type; defaults to "disclosed" when empty
+             * @enum {string}
+             */
+            decision?: "disclosed" | "redacted";
+            /** @description Attributed facts that fed this turn's context; empty is a no-op */
+            facts: components["schemas"]["AttributedFact"][] | null;
+            /** @description Discretion-clause verdict or capability-gate explanation */
+            reason?: string;
+            /** @description Turn ID — outer cluster key for the audit partition */
+            turn_id: string;
+            /** @description User who drove the turn, if applicable */
+            user_id?: string;
+        };
+        WisdomDisclosureHookOutputBody: {
+            /** Format: int64 */
+            recorded: number;
+        };
+        WisdomImportInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/WisdomImportInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description JSON array or CSV string (verbatim). Column order for CSV: entity_type,entity_id,category,value,confidence,entity_display_name,source_ref */
+            data: string;
+            /** @description When true, validate each row but do not persist; response carries accept/reject counts as normal. */
+            dry_run?: boolean;
+            /**
+             * @description Payload encoding
+             * @enum {string}
+             */
+            format: "json" | "csv";
+        };
+        WisdomImportReject: {
+            reason: string;
+            /** Format: int64 */
+            row: number;
+        };
+        WisdomImportResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/WisdomImportResponse.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            accepted: number;
+            rejected: components["schemas"]["WisdomImportReject"][] | null;
+            /** Format: int64 */
+            total: number;
         };
         WorkbenchAdvanceTimeJobBody: {
             /**
@@ -13357,6 +13932,108 @@ export interface operations {
             };
         };
     };
+    listEnabledSkills: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded name the enabled set belongs to */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListEnabledSkillsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    toggleEnabledSkill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded name the enabled set belongs to */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ToggleEnabledSkillInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ToggleEnabledSkillOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getSkillLoadCount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded name the counter belongs to */
+                agentId: string;
+                /** @description Skill name to read the counter for */
+                skillName: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GetSkillLoadCountOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     setAgentStatus: {
         parameters: {
             query?: never;
@@ -14882,6 +15559,353 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ScheduleWakeupOutputBody"];
                 };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listAttributedWisdom: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListWisdomAttributedOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    createAttributedWisdom: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateWisdomAttributedBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateWisdomAttributedOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    importAttributedWisdom: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WisdomImportInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WisdomImportResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listAttributedWisdomByEntity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+                /** @description Attributed entity type (e.g. person, place, org) */
+                entityType: string;
+                /** @description Attributed entity ID */
+                entityId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListWisdomAttributedOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    replaceAttributedWisdom: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+                entityType: string;
+                entityId: string;
+                category: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReplaceWisdomAttributedInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReplaceWisdomAttributedOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteAttributedWisdom: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agentId: string;
+                entityType: string;
+                entityId: string;
+                category: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listAttributedWisdomAudit: {
+        parameters: {
+            query?: {
+                /** @description RFC3339 start timestamp (inclusive). Defaults to 24h before 'to'. */
+                from?: string;
+                /** @description RFC3339 end timestamp (inclusive). Defaults to now. */
+                to?: string;
+                /** @description Maximum entries to return (default 100, max 500) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListWisdomAuditOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listAttributedWisdomRelations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListWisdomRelationsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    createAttributedWisdomRelation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateWisdomRelationBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateWisdomRelationOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteAttributedWisdomRelation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agentId: string;
+                relationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Error */
             default: {
@@ -17437,6 +18461,178 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AcknowledgeAllProjectNotificationsOutputBody"];
                 };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listProjectSkills: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID the skills belong to */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListProjectSkillsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    createProjectSkill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID the skill belongs to */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectSkillBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Skill"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getProjectSkill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID the skill belongs to */
+                projectId: string;
+                /** @description Skill name within the project */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Skill"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    updateProjectSkill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID the skill belongs to */
+                projectId: string;
+                /** @description Skill name within the project */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProjectSkillInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Skill"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteProjectSkill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID the skill belongs to */
+                projectId: string;
+                /** @description Skill name within the project */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Error */
             default: {

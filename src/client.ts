@@ -9,9 +9,11 @@ import { AccountConfig } from "./resources/account-config.js";
 import { ProjectConfig } from "./resources/project-config.js";
 import { ProjectNotifications } from "./resources/project-notifications.js";
 import { Projects } from "./resources/projects.js";
+import { Skills } from "./resources/skills.js";
 import { UserPersonas } from "./resources/user-personas.js";
 import { Voices } from "./resources/voice.js";
 import { Webhooks } from "./resources/webhooks.js";
+import { Wisdom } from "./resources/wisdom.js";
 import { Workbench } from "./resources/workbench.js";
 import type { PlatformModelsResponse, SonzaiConfig } from "./types.js";
 
@@ -124,6 +126,17 @@ export class Sonzai {
   readonly projects: Projects;
   /** User persona management (create, update, delete user personas). */
   readonly userPersonas: UserPersonas;
+  /**
+   * Project-scoped skill library + per-agent enablement. Skills are
+   * markdown playbooks the agent loads on demand via sonzai_load_skill.
+   */
+  readonly skills: Skills;
+  /**
+   * Attributed wisdom — person/entity-attributed facts, attributed
+   * relations, disclosure audit, and bulk import. Gated on the
+   * WisdomPublicSharing agent capability.
+   */
+  readonly wisdom: Wisdom;
   /** Workbench (time-machine / harness) operations for benchmarks and dev workflows. */
   readonly workbench: Workbench;
 
@@ -155,6 +168,8 @@ export class Sonzai {
     this.projectNotifications = new ProjectNotifications(this.http);
     this.projects = new Projects(this.http);
     this.userPersonas = new UserPersonas(this.http);
+    this.skills = new Skills(this.http);
+    this.wisdom = new Wisdom(this.http);
     this.workbench = new Workbench(this.http);
   }
 
