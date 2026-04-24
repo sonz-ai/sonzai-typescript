@@ -315,6 +315,11 @@ export interface SessionEndOptions {
   userTimezone?: string;
   /** When true, run CE pipeline synchronously before responding. Useful for test harnesses that query memory immediately after session end. */
   wait?: boolean;
+  /** Caps how long end() will poll the /sessions/end/status/{pid} endpoint
+   *  before giving up with a timeout error. Only consulted when the server
+   *  is in ENABLE_ASYNC_SESSION_END=true mode (returns a processing_id).
+   *  Default: 900000 ms (15 minutes). */
+  pollTimeoutMs?: number;
 }
 
 export interface SessionResponse {
