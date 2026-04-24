@@ -61,7 +61,7 @@ export interface paths {
         };
         /**
          * List agents
-         * @description Returns agents for the caller's tenant, optionally filtered by project. Supports cursor-based pagination (page_size+cursor) and legacy offset-based pagination (limit+offset).
+         * @description Returns agents scoped to a project. When project_id is not supplied, the scope is resolved from auth: API-key auth lists the key's project; Clerk auth lists the tenant's Default project. Supports cursor-based pagination (page_size+cursor) and legacy offset-based pagination (limit+offset).
          */
         get: operations["listAgents"];
         put?: never;
