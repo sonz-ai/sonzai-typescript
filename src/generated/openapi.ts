@@ -2370,6 +2370,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/analytics/composio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Composio plugin usage analytics
+         * @description Returns Composio tool call counts and costs grouped by app (gmail, slack, github, etc.) over the requested window (default 30 days). Optional agent_id filter.
+         */
+        get: operations["analyticsComposioUsage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/analytics/cost": {
         parameters: {
             query?: never;
@@ -5038,6 +5058,13 @@ export interface components {
             property: string;
             type?: string;
         };
+        ComposioAppUsage: {
+            app: string;
+            /** Format: int64 */
+            calls: number;
+            /** Format: double */
+            cost_usd: number;
+        };
         ComposioConnectCallbackInputBody: {
             /**
              * Format: uri
@@ -5059,6 +5086,27 @@ export interface components {
             readonly $schema?: string;
             connection?: components["schemas"]["Connection"];
             ok: boolean;
+        };
+        ComposioUsageResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ComposioUsageResponse.json
+             */
+            readonly $schema?: string;
+            by_app: components["schemas"]["ComposioAppUsage"][] | null;
+            period: components["schemas"]["ComposioUsageResponsePeriodStruct"];
+            summary: components["schemas"]["ComposioUsageResponseSummaryStruct"];
+        };
+        ComposioUsageResponsePeriodStruct: {
+            end: string;
+            start: string;
+        };
+        ComposioUsageResponseSummaryStruct: {
+            /** Format: int64 */
+            total_calls: number;
+            /** Format: double */
+            total_cost_usd: number;
         };
         Connection: {
             account_label: string;
@@ -16328,6 +16376,42 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    analyticsComposioUsage: {
+        parameters: {
+            query?: {
+                /** @description Start date YYYY-MM-DD (defaults to 30 days ago) */
+                start?: string;
+                /** @description End date YYYY-MM-DD (defaults to today) */
+                end?: string;
+                /** @description Optional agent UUID filter */
+                agent_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComposioUsageResponse"];
+                };
             };
             /** @description Error */
             default: {
