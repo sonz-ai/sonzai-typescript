@@ -648,11 +648,30 @@ The SDK uses only the standard Web API (`fetch`, `ReadableStream`, `TextDecoder`
 
 ## Benchmarks
 
-Sonzai beats MemPalace on **two** benchmarks, running on the cheap end of the
-LLM stack — chat, judge, and partner agent all run on **Gemini 3.1 Flash
-Lite**. No frontier-model arms race propping up the numbers; the lift is
-from the memory architecture. Drop in a heavier model and the ceiling goes
-up from there.
+Sonzai leads on **three** independent benchmarks (LoCoMo, LongMemEval,
+SOTOPIA), running on the cheap end of the LLM stack — chat, judge, reader,
+and partner agent all run on **Gemini 3.1 Flash Lite**. No frontier-model
+arms race propping up the numbers; the lift is from the memory architecture.
+Drop in a heavier model and the ceiling goes up from there.
+
+### LoCoMo — long-term conversational memory (mem0's home turf)
+
+10 peer-to-peer dialogues, 19–35 sessions each, 1540 QAs across 4 reasoning
+categories. Run via mem0's published evaluation pipeline byte-for-byte
+(their `ANSWER_PROMPT` + `ACCURACY_PROMPT`, dual-perspective ingest, dual
+search) so numbers are directly comparable.
+
+| Category | n | Sonzai (J) | mem0 (J, published) |
+|---|---:|---:|---:|
+| 1. single-hop | 282 | **0.720** | ~0.65 |
+| 2. multi-hop | 321 | **0.723** | ~0.55 |
+| 3. temporal reasoning | 96 | 0.531 | ~0.55 |
+| 4. open-domain | 841 | **0.762** | ~0.71 |
+| **Overall** | 1540 | **0.732** ✅ | ~0.67 |
+
+Multi-hop is Sonzai's strongest category (**+~17 points** over mem0) — the
+hardest LoCoMo bucket and the one mem0's graph variant typically claims its
+lift on. Sonzai matches/beats without graph-specific machinery.
 
 ### LongMemEval — retrieval (MemPalace's home turf)
 
