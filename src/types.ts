@@ -1143,7 +1143,8 @@ export interface AgentToolCapabilities {
   web_search: boolean;
   remember_name: boolean;
   image_generation: boolean;
-  inventory: boolean;
+  /** Inventory aggregate-compute tools (sonzai_inventory + sonzai_inventory_update). Server default ON; pass false to disable. */
+  inventory?: boolean;
   /** Enable the knowledge_search tool (reads from the agent's project-scoped KB). */
   knowledge_base?: boolean;
   /**
@@ -1164,7 +1165,8 @@ export interface SeedMemory {
 
 export interface AgentFeatureCapabilities {
   image_generation: boolean;
-  inventory: boolean;
+  /** Inventory aggregate-compute tools (count/sum/avg). Server default ON; pass false to disable. */
+  inventory?: boolean;
 }
 
 export interface CreateAgentOptions {
