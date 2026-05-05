@@ -62,6 +62,22 @@ export interface ChatStreamEvent {
   error_message?: string;
   error_code?: string;
   is_token_error?: boolean;
+
+  /**
+   * iter-140u-1 progressive elaboration. Populated on type=phase
+   * frames. Values: planning | tool_call | composing | verifying |
+   * complete. Lets clients show progress while the model is silent
+   * (LLM warmup, tool calls, post-stream verification). Naive
+   * consumers can ignore phase events — they carry no `choices` or
+   * `content`.
+   */
+  phase?: string;
+
+  /**
+   * Tool name on phase=tool_call frames (e.g. "sonzai_inventory",
+   * "memory_search"). Empty on other phase values.
+   */
+  tool?: string;
 }
 
 export interface ChatResponse {

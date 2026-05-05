@@ -5038,9 +5038,13 @@ export interface components {
              * @description 0-based agentic turn index (message_boundary frames only)
              */
             message_index?: number;
+            /** @description Lifecycle stage on type=phase frames (planning|tool_call|composing|verifying|complete) */
+            phase?: string;
             /** @description Side effects produced during this turn (terminal chunks only) */
             side_effects?: unknown;
-            /** @description Event type discriminator (context_ready | side_effects | message_boundary). Absent on delta and complete frames. */
+            /** @description Tool name on type=phase frames where phase=tool_call */
+            tool?: string;
+            /** @description Event type discriminator (context_ready | side_effects | message_boundary | phase). Absent on delta and complete frames. */
             type?: string;
             /** @description True when a continuation token was used to skip a full context rebuild (context_ready frame only) */
             used_fast_path?: boolean;
