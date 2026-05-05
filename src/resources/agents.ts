@@ -14,6 +14,8 @@ import type {
   AgentListOptions,
   AgentListResponse,
   BreakthroughsResponse,
+  ChatAsyncResponse,
+  ChatAsyncResult,
   ChatOptions,
   ChatResponse,
   ChatStreamEvent,
@@ -239,6 +241,100 @@ export class Agents {
     )) {
       yield event as ChatStreamEvent;
     }
+  }
+
+  // -- Chat (async / processing_id polling, iter-140u-2) --
+
+  /**
+   * Queue a chat request for background processing. Returns
+   * `{processingId, status: "queued"}` immediately. Use this when
+   * the chat may run longer than your network can keep an SSE
+   * stream open (Cloudflare/LB ~100s).
+   *
+   * Poll the result via `pollChatResult(...)` or use
+   * `chatAsyncBlocking(...)` for a convenience helper that polls
+   * until terminal.
+   */
+  async chatAsync(options: ChatOptions): Promise<ChatAsyncResponse> {
+    requireNonEmpty(options.agent, "agentId");
+    const body = this.buildChatBody(options);
+    const raw = await this.http.post<{ processing_id: string; status: string }>(
+      `/api/v1/agents/${options.agent}/chat/async`,
+      body,
+    );
+    return { processingId: raw.processing_id, status: raw.status };
+  }
+
+  /**
+   * Fetch the current state of an async chat task. Recommended
+   * polling cadence: 1s with exponential backoff up to 5s. Stop
+   * when `status` is `complete` or `failed`.
+   */
+  async pollChatResult(agentId: string, processingId: string): Promise<ChatAsyncResult> {
+    requireNonEmpty(agentId, "agentId");
+    requireNonEmpty(processingId, "processingId");
+    const raw = await this.http.get<{
+      status: string;
+      response?: string;
+      phase?: string;
+      tool?: string;
+      side_effects?: unknown;
+      error?: string;
+      created_at: string;
+      updated_at: string;
+    }>(`/api/v1/agents/${agentId}/chat/result/${processingId}`);
+    return {
+      status: raw.status,
+      response: raw.response,
+      phase: raw.phase,
+      tool: raw.tool,
+      sideEffects: raw.side_effects,
+      error: raw.error,
+      createdAt: raw.created_at,
+      updatedAt: raw.updated_at,
+    };
+  }
+
+  /**
+   * Convenience: queue async chat and poll until terminal. Backoff
+   * starts at `pollIntervalMs` (default 1000), doubles each
+   * iteration up to `maxPollIntervalMs` (default 5000). Total wait
+   * bounded by `timeoutMs` (default 600_000 — matches the server's
+   * CE_AGENT_CHAT_DEADLINE_MS).
+   *
+   * Cancelling locally (AbortSignal not yet wired) does NOT cancel
+   * the server-side task — that's the async pattern's invariant.
+   * Callers can re-poll the same processingId later.
+   */
+  async chatAsyncBlocking(
+    options: ChatOptions,
+    pollOptions: {
+      pollIntervalMs?: number;
+      maxPollIntervalMs?: number;
+      timeoutMs?: number;
+    } = {},
+  ): Promise<ChatAsyncResult> {
+    const pollIntervalMs = pollOptions.pollIntervalMs ?? 1000;
+    const maxPollIntervalMs = pollOptions.maxPollIntervalMs ?? 5000;
+    const timeoutMs = pollOptions.timeoutMs ?? 600_000;
+
+    const queued = await this.chatAsync(options);
+    const deadline = Date.now() + timeoutMs;
+    let delay = pollIntervalMs;
+    while (Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      const result = await this.pollChatResult(options.agent, queued.processingId);
+      if (result.status === "complete" || result.status === "failed") {
+        return result;
+      }
+      if (delay < maxPollIntervalMs) {
+        delay = Math.min(delay * 2, maxPollIntervalMs);
+      }
+    }
+    throw new Error(
+      `chatAsyncBlocking exceeded timeout (${timeoutMs}ms); ` +
+        `processingId=${queued.processingId} can still be polled directly.`,
+    );
   }
 
   // -- Dialogue --

@@ -86,6 +86,40 @@ export interface ChatResponse {
   usage?: ChatUsage;
 }
 
+/**
+ * iter-140u-2: immediate 202 Accepted return shape for
+ * `POST /agents/{id}/chat/async`. The caller stores `processingId`
+ * and polls `pollChatResult(...)` (or uses `chatAsyncBlocking`).
+ */
+export interface ChatAsyncResponse {
+  processingId: string;
+  status: string;
+}
+
+/**
+ * iter-140u-2: JSON shape returned by
+ * `GET /agents/{id}/chat/result/{processingId}`.
+ *
+ * - status: queued | running | complete | failed
+ * - response: accumulated assistant text (partial mid-flight, final
+ *   on complete; on a deadline-aborted complete this is the
+ *   best-effort partial answer)
+ * - phase: latest progressive-elaboration phase (iter-140u-1)
+ * - tool: latest tool name on phase=tool_call (sticky)
+ * - sideEffects: terminal-chunk side-effects payload
+ * - error: populated only on status=failed
+ */
+export interface ChatAsyncResult {
+  status: string;
+  response?: string;
+  phase?: string;
+  tool?: string;
+  sideEffects?: unknown;
+  error?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ExternalToolCall {
   id: string;
   name: string;
