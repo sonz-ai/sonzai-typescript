@@ -241,7 +241,11 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Patch agent capabilities
+         * @description Patches the agent's capability flags (web search, remember name, image generation, knowledge base, inventory).
+         */
+        patch: operations["patchCapabilities"];
         trace?: never;
     };
     "/agents/{agentId}/chat": {
@@ -258,6 +262,46 @@ export interface paths {
          * @description Sends a message to an agent and receives a streaming response via Server-Sent Events (SSE). The response uses the OpenAI-compatible streaming format: each SSE frame contains a `data: <JSON>` line whose shape is described by `ChatSSEChunk`. The stream terminates with `data: [DONE]`. Response headers include `X-Session-ID` with the session identifier.
          */
         post: operations["chatWithAgent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/chat/async": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Queue an asynchronous chat request
+         * @description Same body shape as `/chat`. Returns 202 Accepted with a `processing_id` immediately and runs the agent in the background. Poll `GET /agents/{agentId}/chat/result/{processing_id}` to fetch progress and the final answer. Designed for chats whose duration may exceed network timeouts (Cloudflare/LB ~100s) — the SDK keeps no streaming connection open.
+         */
+        post: operations["asyncChat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/chat/result/{processingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Poll an async chat result
+         * @description Returns the current state of an async chat task. Poll until `status` is `complete` or `failed`. Recommended interval: 1s with exponential backoff up to 5s. Tasks linger 24h after completion and 10 min after failure.
+         */
+        get: operations["asyncChatResult"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2490,6 +2534,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/workbench/checkpoint-evaluate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run checkpoint evaluation
+         * @description Workbench checkpoint evaluation at fixed sessions
+         */
+        post: operations["checkpointEvaluate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/eval-runs": {
         parameters: {
             query?: never;
@@ -3351,7 +3415,11 @@ export interface paths {
          */
         get: operations["kbListNodes"];
         put?: never;
-        post?: never;
+        /**
+         * Agent: create a knowledge base node
+         * @description Creates a new KB node on behalf of an agent. The X-Agent-Id header is stamped onto every PropertySource.Source as 'agent:<id>'. Used by the knowledge_create tool when the agent has the knowledgeBaseWrite capability enabled.
+         */
+        post: operations["kbAgentCreateNode"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3377,6 +3445,30 @@ export interface paths {
          * @description Soft-deletes a node (sets is_active=false) and removes it from the BM25 search index.
          */
         delete: operations["kbDeleteNode"];
+        options?: never;
+        head?: never;
+        /**
+         * Agent: update a knowledge base node with per-property CAS
+         * @description Updates properties of an existing KB node on behalf of an agent. Body must include {current, new} pairs for every property being changed. Returns 409 stale_value if any current does not match the stored value. Used by the knowledge_update tool.
+         */
+        patch: operations["kbAgentUpdateNode"];
+        trace?: never;
+    };
+    "/projects/{projectId}/knowledge/nodes/{nodeId}/agent-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Agent: soft-delete a knowledge base node with label CAS
+         * @description Soft-deletes a KB node (sets is_active=false) on behalf of an agent. Body must include expected_label matching the stored label, as a light read-then-write check. Returns 409 stale_value on mismatch. Used by the knowledge_delete tool.
+         */
+        post: operations["kbAgentDeleteNode"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -3502,6 +3594,135 @@ export interface paths {
          * @description Returns aggregate counts for documents, nodes, edges, and extraction tokens.
          */
         get: operations["kbGetStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/mcp/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List MCP catalog entries
+         * @description Returns all active (non-deleted) MCP server registrations for the given project, with health status joined in.
+         */
+        get: operations["listMCPCatalog"];
+        put?: never;
+        /**
+         * Create MCP catalog entry
+         * @description Registers a new MCP server for the project. Auth secrets are stored in Secret Manager; only sm:// refs are persisted.
+         */
+        post: operations["createMCPCatalogEntry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/mcp/catalog/probe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Probe MCP config (pre-create)
+         * @description Validates and probes an MCP server URL without persisting anything. Auth secrets are passed in-band and never stored.
+         */
+        post: operations["probeMCPConfig"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/mcp/catalog/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get MCP catalog entry */
+        get: operations["getMCPCatalogEntry"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete MCP catalog entry
+         * @description Soft-deletes a catalog entry. Fails with 409 if any agents reference it unless force=true.
+         */
+        delete: operations["deleteMCPCatalogEntry"];
+        options?: never;
+        head?: never;
+        /**
+         * Update MCP catalog entry
+         * @description Partially updates a catalog entry. Any provided auth secret field rotates the underlying Secret Manager version.
+         */
+        patch: operations["updateMCPCatalogEntry"];
+        trace?: never;
+    };
+    "/projects/{projectId}/mcp/catalog/{id}/probe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Probe MCP catalog entry
+         * @description Probes an existing MCP catalog entry by resolving its stored secret and calling tools/list.
+         */
+        post: operations["probeMCPCatalogEntry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/mcp/catalog/{id}/tools": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List tools for MCP catalog entry
+         * @description Fetches the tools/list from the MCP server registered under this catalog entry.
+         */
+        get: operations["listMCPCatalogTools"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/mcp/catalog/{id}/usages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List agents referencing MCP catalog entry
+         * @description Returns the agent IDs within the project that have this catalog entry configured.
+         */
+        get: operations["listMCPCatalogUsages"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3700,6 +3921,26 @@ export interface paths {
          * @description Generates a new HMAC signing secret for the given webhook. The old secret is immediately invalidated.
          */
         post: operations["rotateWebhookSigningSecret"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sessions/end/status/{processingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Poll async session-end processing status
+         * @description Returns the lifecycle state of an async session-end job (enqueued via POST /sessions/end when ENABLE_ASYNC_SESSION_END=true). Callers should poll with exponential backoff until state is "done" or "failed". Redis is a hot cache (1h TTL); CockroachDB is the durable source of truth (30d retention).
+         */
+        get: operations["getSessionEndStatus"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -4474,6 +4715,8 @@ export interface components {
             knowledgeBase?: boolean;
             knowledgeBaseProjectId?: string;
             knowledgeBaseScopeMode?: string;
+            knowledgeBaseWrite?: boolean;
+            mcp_enabled?: string[] | null;
             memoryMode?: string;
             musicGeneration: boolean;
             /** Format: date-time */
@@ -4493,6 +4736,31 @@ export interface components {
             webSearch?: boolean;
             wisdom?: boolean;
             wisdomPublicSharing?: boolean;
+        };
+        AgentCreateRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/AgentCreateRequest.json
+             */
+            readonly $schema?: string;
+            /** Format: double */
+            confidence?: number;
+            label: string;
+            node_type: string;
+            properties: {
+                [key: string]: unknown;
+            };
+        };
+        AgentDeleteRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/AgentDeleteRequest.json
+             */
+            readonly $schema?: string;
+            expected_label: string;
+            reason?: string;
         };
         AgentDetailResponse: {
             /**
@@ -4515,6 +4783,7 @@ export interface components {
             is_active: boolean;
             /** Format: date-time */
             last_seen_at?: string;
+            mcp_enabled?: string[] | null;
             name?: string;
             owner_display_name?: string;
             owner_email?: string;
@@ -4571,6 +4840,7 @@ export interface components {
             is_active: boolean;
             /** Format: date-time */
             last_seen_at?: string;
+            mcp_enabled?: string[] | null;
             name?: string;
             owner_display_name?: string;
             owner_email?: string;
@@ -4647,6 +4917,48 @@ export interface components {
             daily: components["schemas"]["DailyStatsEntry"][] | null;
             overview: components["schemas"]["AnalyticsOverview"];
         };
+        AsyncChatResultOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/AsyncChatResultOutputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: date-time
+             * @description When the task was queued
+             */
+            created_at: string;
+            /** @description Error message on status=failed */
+            error?: string;
+            /** @description Latest progressive-elaboration phase (planning|tool_call|composing|verifying|complete) */
+            phase?: string;
+            /** @description Accumulated assistant message (partial while running, final on complete) */
+            response?: string;
+            /** @description Side effects payload (terminal chunk only) */
+            side_effects?: unknown;
+            /** @description queued | running | complete | failed */
+            status: string;
+            /** @description Latest tool name on phase=tool_call frames */
+            tool?: string;
+            /**
+             * Format: date-time
+             * @description When the state last changed
+             */
+            updated_at: string;
+        };
+        AsyncChatStartOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/AsyncChatStartOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Opaque ID to poll via /chat/result/{processing_id} */
+            processing_id: string;
+            /** @description Initial status — always 'queued' on success */
+            status: string;
+        };
         AtomicFact: {
             /**
              * Format: uri
@@ -4656,9 +4968,11 @@ export interface components {
             readonly $schema?: string;
             agent_framing?: string;
             agent_id: string;
+            assertion?: boolean;
             atomic_text: string;
             /** Format: double */
             character_salience?: number;
+            chunk_id?: string;
             cluster_id?: string;
             /** Format: double */
             confidence: number;
@@ -4678,6 +4992,8 @@ export interface components {
             /** Format: double */
             importance?: number;
             inferred_entities?: string[] | null;
+            item_type?: string;
+            kind?: string;
             /** Format: date-time */
             last_confirmed: string;
             /** Format: date-time */
@@ -4691,14 +5007,19 @@ export interface components {
             miss_count?: number;
             node_id: string;
             polarity_group_id?: string;
+            priority?: string;
+            /** Format: double */
+            quantity?: number;
             /** Format: double */
             relationship_relevance?: number;
             /** Format: double */
             retention_strength: number;
+            scope_hint?: string;
             sentiment?: string;
             session_id?: string;
             source_id?: string;
             source_type?: string;
+            subject_relation?: string;
             supersedes_id?: string;
             temporal_relevance?: string;
             /** Format: date-time */
@@ -4707,6 +5028,10 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
             user_id?: string;
+            /** Format: date-time */
+            valid_from?: string;
+            /** Format: date-time */
+            valid_until?: string;
         };
         AttributedFact: {
             category: string;
@@ -4992,6 +5317,10 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        CASPair: {
+            current: unknown;
+            new: unknown;
+        };
         CachedModelsPayload: {
             /**
              * Format: uri
@@ -5056,6 +5385,23 @@ export interface components {
         ChatSSEDelta: {
             /** @description Incremental content token */
             content?: string;
+        };
+        CheckpointEvalRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CheckpointEvalRequest.json
+             */
+            readonly $schema?: string;
+            /** @description Workbench instance ID */
+            instanceId: string;
+            /** @description Judge model name */
+            judgeModel: string;
+            /**
+             * Format: int64
+             * @description Session index for checkpoint
+             */
+            sessionIndex: number;
         };
         ColumnMappingSpec: {
             is_label?: boolean;
@@ -5429,7 +5775,8 @@ export interface components {
         };
         CreateAgentBodyCapabilitiesStruct: {
             image_generation: boolean;
-            inventory: boolean;
+            /** @description Inventory aggregate-compute tools (count/sum/avg). Server default ON; pass false to disable. */
+            inventory?: boolean;
         };
         CreateAgentBodyDimensionsStruct: {
             /** Format: double */
@@ -5461,9 +5808,12 @@ export interface components {
         };
         CreateAgentBodyToolCapabilitiesStruct: {
             image_generation: boolean;
-            inventory: boolean;
+            /** @description Inventory aggregate-compute tools (sonzai_inventory + sonzai_inventory_update). Server default ON; pass false to disable. */
+            inventory?: boolean;
             /** @description Enable the knowledge_search tool (reads from the agent's project-scoped KB). */
             knowledge_base?: boolean;
+            /** @description IDs of project MCP catalog entries this agent uses */
+            mcp_enabled?: string[] | null;
             /**
              * @description Supplementary memory recall timing. 'sync' (default) blocks context build until recall returns so facts land in the current turn. 'async' lets the recall race a deadline — slow hits spill to the next turn for lower first-response latency.
              * @enum {string}
@@ -6135,8 +6485,18 @@ export interface components {
              * @example /api/v1/schemas/EndSessionOutputBody.json
              */
             readonly $schema?: string;
+            /** @description Echo of the resolved agent_id. */
+            agent_id?: string;
             /** @description Whether processing continues asynchronously */
             async: boolean;
+            /** @description RFC3339 timestamp the worker saw the enqueue. */
+            enqueued_at?: string;
+            /** @description Set when the server is in async=true mode. Poll /sessions/end/status/{processing_id} for completion. */
+            processing_id?: string;
+            /** @description Echo of the session_id — convenience for SDK pollers. */
+            session_id?: string;
+            /** @description Set when processing_id is set. Relative URL the caller should GET to poll state. */
+            status_url?: string;
             /** @description Whether the session end was accepted */
             success: boolean;
         };
@@ -7283,6 +7643,36 @@ export interface components {
             value: number;
             window: string;
         };
+        KbAgentCreateNodeOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbAgentCreateNodeOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The created node */
+            node: components["schemas"]["KBNode"];
+        };
+        KbAgentDeleteNodeOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbAgentDeleteNodeOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description True on successful soft-delete */
+            ok: boolean;
+        };
+        KbAgentUpdateNodeOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbAgentUpdateNodeOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The updated node */
+            node: components["schemas"]["KBNode"];
+        };
         KbBulkUpdateInputBody: {
             /**
              * Format: uri
@@ -7920,6 +8310,16 @@ export interface components {
             /** @description List of agent instances */
             instances: components["schemas"]["AgentInstance"][] | null;
         };
+        ListMCPCatalogOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListMCPCatalogOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Catalog entries */
+            entries: components["schemas"]["MCPCatalogEntry"][] | null;
+        };
         ListProjectSkillsOutputBody: {
             /**
              * Format: uri
@@ -8004,6 +8404,119 @@ export interface components {
             content: string;
             name: string;
             when_to_use?: string;
+        };
+        MCPCatalogAuth: {
+            /** @description sm:// reference (read only) */
+            readonly bearer_secret_ref?: string;
+            /** @description Bearer token (write only) */
+            bearer_token?: string;
+            /** @description Custom header name when kind=header */
+            header_name?: string;
+            /** @description sm:// reference (read only) */
+            readonly header_secret_ref?: string;
+            /** @description Header value (write only) */
+            header_value?: string;
+            /**
+             * @description Auth discriminator
+             * @enum {string}
+             */
+            kind: "none" | "bearer" | "header" | "oauth";
+        };
+        MCPCatalogCreateBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/MCPCatalogCreateBody.json
+             */
+            readonly $schema?: string;
+            auth: components["schemas"]["MCPCatalogAuth"];
+            description?: string;
+            name: string;
+            /** @enum {string} */
+            transport: "streamable-http" | "sse";
+            /**
+             * Format: uri
+             * @description Must be HTTPS
+             */
+            url: string;
+        };
+        MCPCatalogEntry: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/MCPCatalogEntry.json
+             */
+            readonly $schema?: string;
+            auth: components["schemas"]["MCPCatalogAuth"];
+            created_at: string;
+            description: string;
+            health: components["schemas"]["MCPHealthDTO"];
+            id: string;
+            name: string;
+            transport: string;
+            updated_at: string;
+            url: string;
+        };
+        MCPCatalogToolsResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/MCPCatalogToolsResponse.json
+             */
+            readonly $schema?: string;
+            tools: components["schemas"]["MCPToolDTO"][] | null;
+        };
+        MCPCatalogUpdateBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/MCPCatalogUpdateBody.json
+             */
+            readonly $schema?: string;
+            auth?: components["schemas"]["MCPCatalogAuth"];
+            description?: string;
+            name?: string;
+            transport?: string;
+            url?: string;
+        };
+        MCPCatalogUsagesResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/MCPCatalogUsagesResponse.json
+             */
+            readonly $schema?: string;
+            agent_ids: string[] | null;
+        };
+        MCPHealthDTO: {
+            /** Format: int64 */
+            failures_1h: number;
+            last_auth_rejected_at?: string;
+            last_error?: string;
+            last_error_at?: string;
+            last_ok_at?: string;
+            status: string;
+        };
+        MCPProbeResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/MCPProbeResponseBody.json
+             */
+            readonly $schema?: string;
+            error?: string;
+            /** Format: int64 */
+            latency_ms: number;
+            ok: boolean;
+            /** Format: int64 */
+            tool_count: number;
+        };
+        MCPToolDTO: {
+            description?: string;
+            input_schema?: {
+                [key: string]: unknown;
+            };
+            name: string;
         };
         MeResponse: {
             /**
@@ -8682,6 +9195,7 @@ export interface components {
             doc_id: string;
             /** Format: date-time */
             eff_date: string;
+            source?: string;
         };
         RecentShiftsResponse: {
             /**
@@ -9038,6 +9552,33 @@ export interface components {
             /** Format: int64 */
             time_gap_hours: number;
             turns: components["schemas"]["Turn"][] | null;
+        };
+        SessionEndStatusOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/SessionEndStatusOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Echo of the resolved agent_id. */
+            agent_id: string;
+            /**
+             * Format: int64
+             * @description 1-based attempt counter (bumps on JetStream redeliveries).
+             */
+            attempt?: number;
+            /** @description RFC3339 timestamp the handler saw the enqueue. */
+            enqueued_at: string;
+            /** @description Populated on state=failed with the dispatch or terminal reason. */
+            error?: string;
+            /** @description Present on terminal states (done/failed). */
+            finished_at?: string;
+            /** @description Echo of the session_id so callers can correlate. */
+            session_id: string;
+            /** @description Present once the worker has picked the message up. */
+            started_at?: string;
+            /** @description One of: pending | processing | done | failed. */
+            state: string;
         };
         SessionMessage: {
             /** @description Message content */
@@ -9839,6 +10380,10 @@ export interface components {
             inventory?: boolean;
             /** @description Enable/disable knowledge base search */
             knowledgeBase?: boolean;
+            /** @description Enable/disable knowledge base write tools (knowledge_create/_update/_delete). Requires knowledgeBase to be enabled. */
+            knowledgeBaseWrite?: boolean;
+            /** @description IDs of project MCP catalog entries this agent uses */
+            mcpEnabled?: string[] | null;
             /**
              * @description Supplementary memory recall timing. 'sync' (default) blocks context build until recall returns so facts land in the current turn. 'async' lets the recall race a deadline — slow hits spill to the next turn for lower first-response latency.
              * @enum {string}
@@ -10030,6 +10575,18 @@ export interface components {
             email?: string;
             phone?: string;
             title?: string;
+        };
+        UpdatePayload: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/UpdatePayload.json
+             */
+            readonly $schema?: string;
+            label?: components["schemas"]["CASPair"];
+            properties: {
+                [key: string]: components["schemas"]["CASPair"];
+            };
         };
         UpdatePersonalityBody: {
             /**
@@ -11313,6 +11870,42 @@ export interface operations {
             };
         };
     };
+    patchCapabilities: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCapabilitiesInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentCapabilities"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     chatWithAgent: {
         parameters: {
             query?: never;
@@ -11385,6 +11978,123 @@ export interface operations {
                 };
                 content: {
                     "text/event-stream": components["schemas"]["ChatSSEChunk"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    asyncChat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        /** @description Chat request payload */
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Session cookie for AI service affinity */
+                    ai_service_cookie?: string;
+                    /** @description Capability flags enabled for this request */
+                    capabilities?: string[];
+                    /** @description Pre-compiled system prompt */
+                    compiled_system_prompt?: string;
+                    /** @description Token for multi-turn continuation */
+                    continuation_token?: string;
+                    /** @description Optional caller-specific game context (custom_fields, game_state_json) */
+                    game_context?: Record<string, never>;
+                    /** @description Optional agent instance identifier */
+                    instance_id?: string;
+                    /** @description Interaction role (owner or non_owner) */
+                    interaction_role?: string;
+                    /** @description Language code (e.g. en, ja, zh) */
+                    language?: string;
+                    /** @description Maximum agentic turns */
+                    max_turns?: number;
+                    /** @description Conversation messages */
+                    messages: {
+                        /** @description Message content */
+                        content: string;
+                        /** @description Message role (user, assistant, system) */
+                        role: string;
+                    }[];
+                    /** @description LLM model override (playground) */
+                    model?: string;
+                    /** @description LLM provider override (playground) */
+                    provider?: string;
+                    /** @description Request type (chat, narrate, etc.) */
+                    request_type?: string;
+                    /** @description Session identifier (auto-created if empty) */
+                    session_id?: string;
+                    /** @description Per-skill level overrides keyed by skill name */
+                    skill_levels?: Record<string, never>;
+                    /** @description Skip context engine build */
+                    skip_context_build?: boolean;
+                    /** @description User IANA timezone (e.g. America/New_York) */
+                    timezone?: string;
+                    /** @description Tool capability toggles (web_search, remember_name, image_generation) */
+                    tool_capabilities?: Record<string, never>;
+                    /** @description Session-level custom tool definitions */
+                    tool_definitions?: unknown[];
+                    /** @description Optional display name for the user */
+                    user_display_name?: string;
+                    /** @description ID of the user chatting */
+                    user_id?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AsyncChatStartOutputBody"];
+                };
+            };
+            /** @description Task accepted; poll the result endpoint. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    asyncChatResult: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+                /** @description Processing ID returned by POST /chat/async */
+                processingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AsyncChatResultOutputBody"];
                 };
             };
             /** @description Error */
@@ -14262,7 +14972,10 @@ export interface operations {
     };
     endSession: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Force the legacy synchronous inline path regardless of the server's ENABLE_ASYNC_SESSION_END setting. Used by benchmarks that must read memory immediately after session-end. */
+                force_sync?: boolean;
+            };
             header?: never;
             path: {
                 /** @description Agent UUID or URL-encoded agent name */
@@ -15054,8 +15767,16 @@ export interface operations {
                 limit?: string;
                 /** @description Set to 'true' to only return facts with metadata */
                 has_metadata?: string;
+                /** @description Filter by top-level fact kind (inventory / role / event / preference / relationship / identity / general). Coarsest filter — apply before finer item_type / subject_relation filters. */
+                "metadata.kind"?: string;
                 /** @description Filter by metadata.item_type value */
                 "metadata.item_type"?: string;
+                /** @description Filter by metadata.subject_relation (owns / leads / participates / experienced / interested / wants / mentions). Lets the caller scope to 'projects I led' vs 'projects I mentioned'. */
+                "metadata.subject_relation"?: string;
+                /** @description Filter by metadata.temporal_relevance (ongoing / past / future / recurring / one_time). Lets the caller scope to current vs historical state. */
+                "metadata.temporal_relevance"?: string;
+                /** @description Filter by metadata.sentiment (positive / negative / neutral / mixed). */
+                "metadata.sentiment"?: string;
             };
             header?: never;
             path: {
@@ -16584,6 +17305,37 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["UsageResponse"];
                 };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    checkpointEvaluate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckpointEvalRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Error */
             default: {
@@ -18330,7 +19082,10 @@ export interface operations {
     };
     kbUploadDocument: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description If true, replace existing document with identical content */
+                force_replace?: boolean;
+            };
             header?: never;
             path: {
                 /** @description Project UUID */
@@ -18338,9 +19093,8 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
-                "application/octet-stream": string;
                 "multipart/form-data": unknown;
             };
         };
@@ -18510,6 +19264,45 @@ export interface operations {
             };
         };
     };
+    kbAgentCreateNode: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description ID of the agent making the call (stamped onto PropertySource.Source) */
+                "X-Agent-Id"?: string;
+            };
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgentCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbAgentCreateNodeOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     kbGetNode: {
         parameters: {
             query?: {
@@ -18567,6 +19360,88 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbAgentUpdateNode: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description ID of the agent making the call (stamped onto PropertySource.Source on each changed property) */
+                "X-Agent-Id"?: string;
+            };
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Node UUID */
+                nodeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePayload"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbAgentUpdateNodeOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbAgentDeleteNode: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description ID of the agent making the call (logged for audit) */
+                "X-Agent-Id"?: string;
+            };
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Node UUID */
+                nodeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgentDeleteRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbAgentDeleteNodeOutputBody"];
+                };
             };
             /** @description Error */
             default: {
@@ -18858,6 +19733,319 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["KbGetStatsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listMCPCatalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListMCPCatalogOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    createMCPCatalogEntry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MCPCatalogCreateBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MCPCatalogEntry"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    probeMCPConfig: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MCPCatalogCreateBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MCPProbeResponseBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getMCPCatalogEntry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog entry UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MCPCatalogEntry"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteMCPCatalogEntry: {
+        parameters: {
+            query?: {
+                /** @description Delete even if referenced by agents */
+                force?: boolean;
+            };
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog entry UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    updateMCPCatalogEntry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog entry UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MCPCatalogUpdateBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MCPCatalogEntry"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    probeMCPCatalogEntry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog entry UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MCPProbeResponseBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listMCPCatalogTools: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog entry UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MCPCatalogToolsResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listMCPCatalogUsages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog entry UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MCPCatalogUsagesResponse"];
                 };
             };
             /** @description Error */
@@ -19317,6 +20505,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RotateSigningSecretOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getSessionEndStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID returned by POST /sessions/end when the server is in async=true mode. */
+                processingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionEndStatusOutputBody"];
                 };
             };
             /** @description Error */
