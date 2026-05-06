@@ -4,7 +4,6 @@ import type {
   SessionEndOptions,
   SessionHandleStartOptions,
   SessionResponse,
-  SessionStartOptions,
   ToolDefinition,
   TurnOptions,
   TurnResponse,
@@ -43,11 +42,23 @@ interface SessionEndStatusBody {
 export class Sessions {
   constructor(private readonly http: HTTPClient) {}
 
-  /** Start a chat session. */
+  /**
+   * Start a chat session and return an ergonomic `Session` handle.
+   *
+   * The handle binds `agentId`/`userId`/`sessionId` (and optional
+   * `provider`/`model` defaults) so subsequent `.context()`/`.turn()`/
+   * `.end()` calls on the handle don't need to repeat them. This
+   * matches the Python SDK shape used in the public docs.
+   *
+   * Backward compat: the returned `Session` exposes a `success`
+   * property that mirrors the legacy `{success: boolean}` response,
+   * so existing callers doing
+   * `const r = await sessions.start(...); r.success` still work.
+   */
   async start(
     agentId: string,
-    options: SessionStartOptions,
-  ): Promise<SessionResponse> {
+    options: SessionHandleStartOptions,
+  ): Promise<Session> {
     const body: Record<string, unknown> = {
       user_id: options.userId,
       session_id: options.sessionId,
@@ -58,10 +69,30 @@ export class Sessions {
     if (options.toolDefinitions)
       body.tool_definitions = options.toolDefinitions;
 
-    return this.http.post<SessionResponse>(
+    const startResponse = await this.http.post<SessionResponse>(
       `/api/v1/agents/${agentId}/sessions/start`,
       body,
     );
+    return new Session(this.http, this, {
+      agentId,
+      userId: options.userId,
+      sessionId: options.sessionId,
+      instanceId: options.instanceId,
+      provider: options.provider,
+      model: options.model,
+      startResponse,
+    });
+  }
+
+  /**
+   * @deprecated Use `start()` — it now returns a `Session` handle.
+   * Kept as an alias for callers that adopted the prior name.
+   */
+  async startSession(
+    agentId: string,
+    options: SessionHandleStartOptions,
+  ): Promise<Session> {
+    return this.start(agentId, options);
   }
 
   /** End a chat session.
@@ -184,27 +215,4 @@ export class Sessions {
     );
   }
 
-  /**
-   * Open a session and return a handwritten `Session` handle that
-   * binds agentId/userId/sessionId (and optional provider/model
-   * defaults) so callers don't repeat them on every turn.
-   *
-   * Distinct from `start()` which preserves the legacy
-   * `{success: boolean}` return shape — both work and existing
-   * callers don't break.
-   */
-  async startSession(
-    agentId: string,
-    options: SessionHandleStartOptions,
-  ): Promise<Session> {
-    await this.start(agentId, options);
-    return new Session(this.http, this, {
-      agentId,
-      userId: options.userId,
-      sessionId: options.sessionId,
-      instanceId: options.instanceId,
-      provider: options.provider,
-      model: options.model,
-    });
-  }
 }

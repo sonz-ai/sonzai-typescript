@@ -16,7 +16,7 @@ function client() {
 }
 
 describe("Session handle", () => {
-  it("startSession returns a Session bound to agent/user/session ids", async () => {
+  it("start() returns a Session bound to agent/user/session ids", async () => {
     server.use(
       http.post(
         `${BASE_URL}/api/v1/agents/agent-1/sessions/start`,
@@ -24,7 +24,7 @@ describe("Session handle", () => {
       ),
     );
     const sdk = client();
-    const session = await sdk.agents.sessions.startSession("agent-1", {
+    const session = await sdk.agents.sessions.start("agent-1", {
       userId: "u1",
       sessionId: "s1",
       provider: "gemini",
@@ -55,7 +55,7 @@ describe("Session handle", () => {
       }),
     );
     const sdk = client();
-    const session = await sdk.agents.sessions.startSession("agent-1", {
+    const session = await sdk.agents.sessions.start("agent-1", {
       userId: "u1",
       sessionId: "s1",
     });
@@ -94,7 +94,7 @@ describe("Session handle", () => {
       ),
     );
     const sdk = client();
-    const session = await sdk.agents.sessions.startSession("agent-1", {
+    const session = await sdk.agents.sessions.start("agent-1", {
       userId: "u1",
       sessionId: "s1",
       provider: "gemini",
@@ -136,7 +136,7 @@ describe("Session handle", () => {
       ),
     );
     const sdk = client();
-    const session = await sdk.agents.sessions.startSession("agent-1", {
+    const session = await sdk.agents.sessions.start("agent-1", {
       userId: "u1",
       sessionId: "s1",
       provider: "gemini",
@@ -175,7 +175,7 @@ describe("Session handle", () => {
       ),
     );
     const sdk = client();
-    const session = await sdk.agents.sessions.startSession("agent-1", {
+    const session = await sdk.agents.sessions.start("agent-1", {
       userId: "u1",
       sessionId: "s1",
     });
@@ -208,7 +208,7 @@ describe("Session handle", () => {
       ),
     );
     const sdk = client();
-    const session = await sdk.agents.sessions.startSession("agent-1", {
+    const session = await sdk.agents.sessions.start("agent-1", {
       userId: "u1",
       sessionId: "s1",
     });
@@ -217,7 +217,7 @@ describe("Session handle", () => {
     expect(endHits).toBe(1);
   });
 
-  it("legacy sessions.start() still returns SessionResponse (backward compat)", async () => {
+  it("sessions.start() returns a Session whose .success mirrors the legacy SessionResponse (backward compat)", async () => {
     server.use(
       http.post(
         `${BASE_URL}/api/v1/agents/agent-1/sessions/start`,
@@ -229,8 +229,11 @@ describe("Session handle", () => {
       userId: "u1",
       sessionId: "s1",
     });
-    // Existing shape preserved — { success: true }, no Session handle.
-    expect(res).toEqual({ success: true });
+    // Old shape callers reading `.success` still work.
+    expect(res.success).toBe(true);
+    // New shape: also a usable Session handle.
+    expect(res).toBeInstanceOf(Session);
+    expect(res.agentId).toBe("agent-1");
   });
 
   it("session.status() polls /agents/{id}/turns/{eid}/status", async () => {
@@ -249,7 +252,7 @@ describe("Session handle", () => {
       ),
     );
     const sdk = client();
-    const session = await sdk.agents.sessions.startSession("agent-1", {
+    const session = await sdk.agents.sessions.start("agent-1", {
       userId: "u1",
       sessionId: "s1",
     });

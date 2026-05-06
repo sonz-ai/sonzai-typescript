@@ -26,14 +26,21 @@ import type { Sessions } from "./sessions.js";
  * Per-call `provider`/`model` on .turn() override the session-level
  * defaults; if neither is set the server-side resolver picks the
  * tenant default (e.g. gemini-3.1-flash-lite-preview).
+ *
+ * Backward compat: `success` mirrors the legacy `SessionResponse`
+ * shape so existing callers doing
+ * `const r = await sessions.start(...); r.success` keep working
+ * after `sessions.start()` was changed to return a Session handle.
  */
-export class Session {
+export class Session implements SessionResponse {
   readonly agentId: string;
   readonly userId: string;
   readonly sessionId: string;
   readonly instanceId?: string;
   readonly provider?: string;
   readonly model?: string;
+  /** Mirrors the `/sessions/start` response body for backward compat. */
+  readonly success: boolean;
 
   constructor(
     private readonly http: HTTPClient,
@@ -45,6 +52,7 @@ export class Session {
       instanceId?: string;
       provider?: string;
       model?: string;
+      startResponse?: SessionResponse;
     },
   ) {
     this.agentId = args.agentId;
@@ -53,6 +61,7 @@ export class Session {
     this.instanceId = args.instanceId;
     this.provider = args.provider;
     this.model = args.model;
+    this.success = args.startResponse?.success ?? true;
   }
 
   /**
