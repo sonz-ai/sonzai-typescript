@@ -1636,6 +1636,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/agents/{agentId}/sessions/{sessionId}/turn": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit a conversation turn
+         * @description Standalone-memory realtime API entry point. Runs sync mood-only extraction inline and publishes the rest of the post-processing (facts, personality, habits, etc.) as a deferred work item. Returns the extraction_id for status polling. Sessions are not auto-created — call POST /agents/{agentId}/sessions/start first when you need session-level tool definitions or provider/model defaults; otherwise /turn operates against the path-supplied session_id directly.
+         */
+        post: operations["submitTurn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/agents/{agentId}/simulate": {
         parameters: {
             query?: never;
@@ -1827,6 +1847,26 @@ export interface paths {
          * @description Removes a developer-defined custom tool. Sonzai platform tools (prefixed sonzai_) cannot be deleted.
          */
         delete: operations["deleteCustomTool"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/turns/{extractionId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Poll deferred-turn processing status
+         * @description Returns the lifecycle state of a deferred-turn job. Callers should poll with exponential backoff until state is "done" or "failed". The CRDB row is the source of truth.
+         */
+        get: operations["getTurnStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -5528,6 +5568,8 @@ export interface components {
             serviceUsd: number;
         };
         CostBreakdownEntry: {
+            /** Format: int64 */
+            cacheTokens: number;
             /** Format: double */
             costUsd: number;
             /** Format: int64 */
@@ -5550,6 +5592,8 @@ export interface components {
             byModel: components["schemas"]["CostBreakdownEntry"][] | null;
             byOperation: components["schemas"]["CostBreakdownEntry"][] | null;
             period: components["schemas"]["CostBreakdownResponsePeriodStruct"];
+            /** Format: int64 */
+            totalCacheTokens: number;
             /** Format: double */
             totalCostUsd: number;
             /** Format: int64 */
@@ -5570,6 +5614,8 @@ export interface components {
         CostByProject: {
             /** Format: int64 */
             agentCount: number;
+            /** Format: int64 */
+            cacheTokens: number;
             /** Format: double */
             costUsd: number;
             /** Format: int64 */
@@ -5600,6 +5646,8 @@ export interface components {
             trafficSource: string;
         };
         CostDailyEntry: {
+            /** Format: int64 */
+            cacheTokens: number;
             /** Format: double */
             costUsd: number;
             date: string;
@@ -5647,6 +5695,8 @@ export interface components {
             tokenCostUsd: number;
             /** Format: double */
             tokenPricePer1KUsd: number;
+            /** Format: int64 */
+            totalCacheTokens: number;
             /** Format: double */
             totalCostUsd: number;
             /** Format: int64 */
@@ -6462,6 +6512,10 @@ export interface components {
             instance_id?: string;
             /** @description Full conversation for memory extraction */
             messages?: components["schemas"]["SessionMessage"][] | null;
+            /** @description Optional per-call model override (e.g., "claude-haiku-4-5"). Ignored unless paired with provider. */
+            model?: string;
+            /** @description Optional per-call provider override (e.g., "anthropic"). When both provider and model are set, this takes precedence over the session-level default registered at /sessions/start. */
+            provider?: string;
             /** @description Session identifier to end */
             session_id: string;
             /**
@@ -9086,8 +9140,10 @@ export interface components {
             userId: string;
         };
         ProcessMessage: {
-            content: string;
+            content?: string;
             role: string;
+            tool_call_id?: string;
+            tool_calls?: components["schemas"]["ProcessToolCall"][] | null;
         };
         ProcessResponse: {
             /**
@@ -9098,6 +9154,7 @@ export interface components {
             readonly $schema?: string;
             /** Format: int64 */
             facts_extracted: number;
+            session_id: string;
             side_effects: components["schemas"]["ProcessSideEffectsSummary"];
             success: boolean;
         };
@@ -9108,6 +9165,15 @@ export interface components {
             interests_detected: number;
             mood_updated: boolean;
             personality_updated: boolean;
+        };
+        ProcessToolCall: {
+            function: components["schemas"]["ProcessToolCallFunction"];
+            id: string;
+            type: string;
+        };
+        ProcessToolCallFunction: {
+            arguments: string;
+            name: string;
         };
         Project: {
             /**
@@ -9581,10 +9647,27 @@ export interface components {
             state: string;
         };
         SessionMessage: {
-            /** @description Message content */
-            content: string;
-            /** @description Message role (user or assistant) */
+            /** @description Message content; null for assistant messages that only call tools */
+            content?: string;
+            /** @description Message role (user, assistant, tool, system) */
             role: string;
+            /** @description Set when role=tool to link the result to its assistant tool_calls entry */
+            tool_call_id?: string;
+            /** @description Set when an assistant message invokes tools */
+            tool_calls?: components["schemas"]["SessionToolCall"][] | null;
+        };
+        SessionToolCall: {
+            function: components["schemas"]["SessionToolCallFunction"];
+            /** @description Tool call identifier; matches tool_call_id on the corresponding tool result message */
+            id: string;
+            /** @description Tool call type, e.g. "function" */
+            type: string;
+        };
+        SessionToolCallFunction: {
+            /** @description JSON-encoded function arguments */
+            arguments: string;
+            /** @description Function name */
+            name: string;
         };
         SessionToolDef: {
             /** @description Human-readable tool description */
@@ -9777,6 +9860,10 @@ export interface components {
             readonly $schema?: string;
             /** @description Optional agent instance identifier */
             instance_id?: string;
+            /** @description Optional session-level default model paired with provider. */
+            model?: string;
+            /** @description Optional session-level default provider for caller-overridable post-processing tasks (fact extraction, mood analysis, etc.). Per-call /sessions/end requests can override this; both provider and model must be set together to take effect. */
+            provider?: string;
             /** @description Unique session identifier */
             session_id: string;
             /** @description OpenAI-compatible tool definitions for this session */
@@ -10286,6 +10373,115 @@ export interface components {
         };
         Turn: {
             user_message: string;
+        };
+        TurnFetchNextContext: {
+            /** @description Optional language code (e.g. en, ja). */
+            language?: string;
+            /** @description Optional supplementary memory-search query used by the context builder. */
+            query?: string;
+            /** @description Optional IANA timezone. */
+            timezone?: string;
+        };
+        TurnMessage: {
+            /** @description Message content; null for assistant messages that only call tools */
+            content?: string;
+            /** @description Message role (user, assistant, tool, system) */
+            role: string;
+            /** @description Set when role=tool to link the result to its assistant tool_calls entry */
+            tool_call_id?: string;
+            /** @description Set when an assistant message invokes tools */
+            tool_calls?: components["schemas"]["TurnToolCall"][] | null;
+        };
+        TurnMood: {
+            /**
+             * Format: double
+             * @description Proposed affiliation delta from this turn
+             */
+            affiliation: number;
+            /**
+             * Format: double
+             * @description Proposed arousal delta from this turn
+             */
+            arousal: number;
+            /** @description Free-text rationale from the analyzer */
+            reason?: string;
+            /**
+             * Format: double
+             * @description Proposed tension delta from this turn
+             */
+            tension: number;
+            /** @description Mood trigger type (e.g. emotional_response) */
+            trigger_type?: string;
+            /**
+             * Format: double
+             * @description Proposed valence delta from this turn
+             */
+            valence: number;
+        };
+        TurnRequestBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/TurnRequestBody.json
+             */
+            readonly $schema?: string;
+            /** @description When set, /turn fetches an enriched context (same shape as GET /context) and includes it in the response under next_context. */
+            fetchNextContext?: components["schemas"]["TurnFetchNextContext"];
+            /** @description Optional agent instance scope */
+            instanceId?: string;
+            /** @description New-turn messages (just the latest exchange — not the full history). Tool messages allowed. */
+            messages: components["schemas"]["TurnMessage"][] | null;
+            /** @description Per-call caller-supplied LLM model paired with provider. */
+            model?: string;
+            /** @description Per-call caller-supplied LLM provider (e.g. anthropic). Both provider and model must be set together to take effect. */
+            provider?: string;
+            /** @description Optional user display name; threaded through to per-turn extraction */
+            userDisplayName?: string;
+            /** @description ID of the user submitting the turn */
+            userId: string;
+            /** @description Optional IANA timezone (e.g. America/Los_Angeles); threaded through to per-turn extraction */
+            userTimezone?: string;
+        };
+        TurnResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/TurnResponseBody.json
+             */
+            readonly $schema?: string;
+            /** @description Idempotency key for the deferred pipeline. Use it to poll GET /agents/{agentId}/turns/{extractionId}/status. */
+            extraction_id: string;
+            /** @description State of the deferred work item at response time. "queued" right after submit; the worker transitions through running → done|failed. */
+            extraction_status: string;
+            /** @description Sync mood-only extraction. nil when the analyzer didn't produce a mood update or wasn't wired. */
+            mood?: components["schemas"]["TurnMood"];
+            /** @description Enriched agent context. Only present when fetchNextContext was supplied on the request. */
+            next_context?: unknown;
+            /** @description Always true on a 200; failures surface as non-200 error responses. */
+            success: boolean;
+        };
+        TurnStatusOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/TurnStatusOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Populated on state=failed. */
+            error?: string;
+            /** @description Echo of the extraction_id. */
+            extraction_id: string;
+            /** @description queued | running | done | failed */
+            state: string;
+        };
+        TurnToolCall: {
+            function: components["schemas"]["TurnToolCallFunction"];
+            id: string;
+            type: string;
+        };
+        TurnToolCallFunction: {
+            arguments: string;
+            name: string;
         };
         UpcomingScheduleOutputBody: {
             /**
@@ -11951,12 +12147,16 @@ export interface operations {
                     provider?: string;
                     /** @description Request type (chat, narrate, etc.) */
                     request_type?: string;
+                    /** @description Route retrieval through the full agentic pipeline (multi-query expansion + reranker + sufficiency loop) synchronously. Use when correctness matters more than TTFC: benchmarks (LongMemEval), dashboard debugging, tools where partial recall is worse than slow recall. Chat hot path defaults to the simpler single-shot planner. */
+                    retrieval_sync?: boolean;
                     /** @description Session identifier (auto-created if empty) */
                     session_id?: string;
                     /** @description Per-skill level overrides keyed by skill name */
                     skill_levels?: Record<string, never>;
                     /** @description Skip context engine build */
                     skip_context_build?: boolean;
+                    /** @description Skip the Platform's Redis session message cache (read AND write) for this turn. Set true when the caller is the authoritative source of conversation history (e.g., orchestrator-owned ScyllaDB transcript). Without this, caller-supplied history is double-loaded against the Platform's cache. */
+                    skip_server_history_cache?: boolean;
                     /** @description User IANA timezone (e.g. America/New_York) */
                     timezone?: string;
                     /** @description Tool capability toggles (web_search, remember_name, image_generation) */
@@ -12036,12 +12236,16 @@ export interface operations {
                     provider?: string;
                     /** @description Request type (chat, narrate, etc.) */
                     request_type?: string;
+                    /** @description Route retrieval through the full agentic pipeline (multi-query expansion + reranker + sufficiency loop) synchronously. Use when correctness matters more than TTFC: benchmarks (LongMemEval), dashboard debugging, tools where partial recall is worse than slow recall. Chat hot path defaults to the simpler single-shot planner. */
+                    retrieval_sync?: boolean;
                     /** @description Session identifier (auto-created if empty) */
                     session_id?: string;
                     /** @description Per-skill level overrides keyed by skill name */
                     skill_levels?: Record<string, never>;
                     /** @description Skip context engine build */
                     skip_context_build?: boolean;
+                    /** @description Skip the Platform's Redis session message cache (read AND write) for this turn. Set true when the caller is the authoritative source of conversation history (e.g., orchestrator-owned ScyllaDB transcript). Without this, caller-supplied history is double-loaded against the Platform's cache. */
+                    skip_server_history_cache?: boolean;
                     /** @description User IANA timezone (e.g. America/New_York) */
                     timezone?: string;
                     /** @description Tool capability toggles (web_search, remember_name, image_generation) */
@@ -14718,12 +14922,16 @@ export interface operations {
                     provider?: string;
                     /** @description Request type (chat, narrate, etc.) */
                     request_type?: string;
+                    /** @description Route retrieval through the full agentic pipeline (multi-query expansion + reranker + sufficiency loop) synchronously. Use when correctness matters more than TTFC: benchmarks (LongMemEval), dashboard debugging, tools where partial recall is worse than slow recall. Chat hot path defaults to the simpler single-shot planner. */
+                    retrieval_sync?: boolean;
                     /** @description Session identifier (auto-created if empty) */
                     session_id?: string;
                     /** @description Per-skill level overrides keyed by skill name */
                     skill_levels?: Record<string, never>;
                     /** @description Skip context engine build */
                     skip_context_build?: boolean;
+                    /** @description Skip the Platform's Redis session message cache (read AND write) for this turn. Set true when the caller is the authoritative source of conversation history (e.g., orchestrator-owned ScyllaDB transcript). Without this, caller-supplied history is double-loaded against the Platform's cache. */
+                    skip_server_history_cache?: boolean;
                     /** @description User IANA timezone (e.g. America/New_York) */
                     timezone?: string;
                     /** @description Tool capability toggles (web_search, remember_name, image_generation) */
@@ -15070,6 +15278,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SetSessionToolsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    submitTurn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+                /** @description Session identifier */
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TurnRequestBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TurnResponseBody"];
                 };
             };
             /** @description Error */
@@ -15524,6 +15770,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DeleteCustomToolOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getTurnStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+                /** @description Extraction ID returned by POST /turn */
+                extractionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TurnStatusOutputBody"];
                 };
             };
             /** @description Error */

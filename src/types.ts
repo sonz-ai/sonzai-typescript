@@ -377,6 +377,90 @@ export interface SessionResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Turn (realtime API: POST /agents/{id}/sessions/{sid}/turn)
+// ---------------------------------------------------------------------------
+
+export interface TurnToolCallFunction {
+  name: string;
+  arguments: string;
+}
+
+export interface TurnToolCall {
+  id: string;
+  type: string;
+  function: TurnToolCallFunction;
+}
+
+export interface TurnMessage {
+  role: string;
+  content?: string;
+  tool_call_id?: string;
+  tool_calls?: TurnToolCall[];
+}
+
+export interface TurnFetchNextContext {
+  /** Optional supplementary memory-search query used by the context builder. */
+  query?: string;
+  /** Optional language code (e.g. en, ja). */
+  language?: string;
+  /** Optional IANA timezone. */
+  timezone?: string;
+}
+
+export interface TurnMoodDelta {
+  valence: number;
+  arousal: number;
+  tension: number;
+  affiliation: number;
+  trigger_type?: string;
+  reason?: string;
+}
+
+export interface TurnOptions {
+  /** New-turn messages (just the latest exchange — not the full history). Tool messages allowed. */
+  messages: TurnMessage[];
+  /** Override per-call user_id; falls back to the Session's userId when omitted. */
+  userId?: string;
+  userDisplayName?: string;
+  userTimezone?: string;
+  instanceId?: string;
+  /** Per-call provider override; falls back to session-level default, then server-side resolver. */
+  provider?: string;
+  /** Per-call model override; falls back to session-level default, then server-side resolver. */
+  model?: string;
+  /** When set, /turn fetches enriched context and returns it under next_context. */
+  fetchNextContext?: TurnFetchNextContext;
+}
+
+export interface TurnResponse {
+  success: boolean;
+  /** Idempotency key for the deferred pipeline. Poll via GET /agents/{id}/turns/{extractionId}/status. */
+  extraction_id: string;
+  /** "queued" right after submit; the worker transitions through running → done|failed. */
+  extraction_status: string;
+  /** Sync mood-only extraction. Absent when the analyzer didn't produce a mood update. */
+  mood?: TurnMoodDelta;
+  /** Enriched agent context. Present only when fetchNextContext was supplied on the request. */
+  next_context?: unknown;
+}
+
+export interface TurnStatusResponse {
+  extraction_id: string;
+  /** queued | running | done | failed */
+  state: string;
+  error?: string;
+}
+
+/** Options for opening a Session handle. Adds optional provider/model
+ *  defaults applied to every turn() / end() unless overridden per-call. */
+export interface SessionHandleStartOptions extends SessionStartOptions {
+  /** Default LLM provider used for /turn calls in this session. Per-call provider on .turn() overrides. */
+  provider?: string;
+  /** Default LLM model used for /turn calls in this session. Per-call model on .turn() overrides. */
+  model?: string;
+}
+
+// ---------------------------------------------------------------------------
 // Instances
 // ---------------------------------------------------------------------------
 

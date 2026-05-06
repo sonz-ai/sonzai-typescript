@@ -1,6 +1,7 @@
 export { Sonzai } from "./client.js";
 export * as providers from "./providers.js";
 export { VoiceStreamInstance } from "./resources/voice.js";
+export { Session } from "./resources/session-handle.js";
 export type { ScheduleUpcomingOptions } from "./resources/schedules.js";
 
 // Errors
@@ -78,6 +79,16 @@ export type {
   SessionStartOptions,
   SessionEndOptions,
   SessionResponse,
+  SessionHandleStartOptions,
+  // Turn (realtime API)
+  TurnMessage,
+  TurnToolCall,
+  TurnToolCallFunction,
+  TurnFetchNextContext,
+  TurnMoodDelta,
+  TurnOptions,
+  TurnResponse,
+  TurnStatusResponse,
   // Instances
   AgentInstance,
   InstanceListResponse,

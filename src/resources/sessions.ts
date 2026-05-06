@@ -2,10 +2,15 @@ import { SonzaiError } from "../errors.js";
 import type { HTTPClient } from "../http.js";
 import type {
   SessionEndOptions,
+  SessionHandleStartOptions,
   SessionResponse,
   SessionStartOptions,
   ToolDefinition,
+  TurnOptions,
+  TurnResponse,
+  TurnStatusResponse,
 } from "../types.js";
+import { Session } from "./session-handle.js";
 
 // Polling tunables for the async session-end path. Match the Python +
 // Go SDKs so all three behave identically under ENABLE_ASYNC_SESSION_END=true.
@@ -136,5 +141,70 @@ export class Sessions {
   /** Set the tools available for a specific session. */
   async setTools(agentId: string, sessionId: string, tools: ToolDefinition[]): Promise<SessionResponse> {
     return this.http.put<SessionResponse>(`/api/v1/agents/${agentId}/sessions/${sessionId}/tools`, tools as unknown as Record<string, unknown>);
+  }
+
+  /**
+   * Submit a single conversation turn (POST /agents/{agentId}/sessions/{sessionId}/turn).
+   * Returns the extraction_id and optional sync mood-only extraction.
+   * When `fetchNextContext` is set, the response also carries the
+   * enriched context for the next turn under `next_context`.
+   */
+  async submitTurn(
+    agentId: string,
+    sessionId: string,
+    options: TurnOptions,
+  ): Promise<TurnResponse> {
+    if (!options.userId) {
+      throw new Error("userId is required for submitTurn");
+    }
+    const body: Record<string, unknown> = {
+      userId: options.userId,
+      messages: options.messages,
+    };
+    if (options.instanceId) body.instanceId = options.instanceId;
+    if (options.userDisplayName) body.userDisplayName = options.userDisplayName;
+    if (options.userTimezone) body.userTimezone = options.userTimezone;
+    if (options.provider) body.provider = options.provider;
+    if (options.model) body.model = options.model;
+    if (options.fetchNextContext) body.fetchNextContext = options.fetchNextContext;
+
+    return this.http.post<TurnResponse>(
+      `/api/v1/agents/${agentId}/sessions/${sessionId}/turn`,
+      body,
+    );
+  }
+
+  /** Poll the deferred-extraction state for a previously-submitted turn. */
+  async getTurnStatus(
+    agentId: string,
+    extractionId: string,
+  ): Promise<TurnStatusResponse> {
+    return this.http.get<TurnStatusResponse>(
+      `/api/v1/agents/${agentId}/turns/${extractionId}/status`,
+    );
+  }
+
+  /**
+   * Open a session and return a handwritten `Session` handle that
+   * binds agentId/userId/sessionId (and optional provider/model
+   * defaults) so callers don't repeat them on every turn.
+   *
+   * Distinct from `start()` which preserves the legacy
+   * `{success: boolean}` return shape — both work and existing
+   * callers don't break.
+   */
+  async startSession(
+    agentId: string,
+    options: SessionHandleStartOptions,
+  ): Promise<Session> {
+    await this.start(agentId, options);
+    return new Session(this.http, this, {
+      agentId,
+      userId: options.userId,
+      sessionId: options.sessionId,
+      instanceId: options.instanceId,
+      provider: options.provider,
+      model: options.model,
+    });
   }
 }
