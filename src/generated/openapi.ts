@@ -4828,6 +4828,7 @@ export interface components {
             musicUnlockedAt?: string;
             pendingCapabilities?: components["schemas"]["PendingCapability"][] | null;
             rememberName?: boolean;
+            sharedMemory?: boolean;
             skills?: boolean;
             videoGeneration: boolean;
             /** Format: date-time */
@@ -4840,7 +4841,6 @@ export interface components {
             voiceUnlockedAt?: string;
             webSearch?: boolean;
             wisdom?: boolean;
-            wisdomPublicSharing?: boolean;
         };
         AgentCreateRequest: {
             /**
@@ -5966,11 +5966,22 @@ export interface components {
             humor_style: string;
         };
         CreateAgentBodyToolCapabilitiesStruct: {
+            /** @description Enable agent-authored skills (sonzai_create_skill / sonzai_update_skill). Requires skills. */
+            auto_learn_skills?: boolean;
+            /** @description Enable per-agent Composio SaaS integrations. */
+            composio?: boolean;
             image_generation: boolean;
             /** @description Inventory aggregate-compute tools (sonzai_inventory + sonzai_inventory_update). Server default ON; pass false to disable. */
             inventory?: boolean;
             /** @description Enable the knowledge_search tool (reads from the agent's project-scoped KB). */
             knowledge_base?: boolean;
+            /**
+             * @description How the agent reads across project and organization-global KB scopes.
+             * @enum {string}
+             */
+            knowledge_base_scope_mode?: "project_only" | "org_only" | "cascade" | "union";
+            /** @description Enable knowledge_create / knowledge_update / knowledge_delete tools. Requires knowledge_base. */
+            knowledge_base_write?: boolean;
             /** @description IDs of project MCP catalog entries this agent uses */
             mcp_enabled?: string[] | null;
             /**
@@ -5979,7 +5990,13 @@ export interface components {
              */
             memory_mode?: "sync" | "async";
             remember_name: boolean;
+            /** @description Enable person/entity-attributed memory shared across users of this agent (teams, parties, business context). Off by default. Requires wisdom. */
+            shared_memory?: boolean;
+            /** @description Enable project-library skill loading (sonzai_load_skill). Required precondition for auto_learn_skills. */
+            skills?: boolean;
             web_search: boolean;
+            /** @description Enable the base wisdom (de-attributed cross-user generalization) pipeline. Default ON for new agents — pass false to opt out. Required precondition for shared_memory. */
+            wisdom?: boolean;
         };
         CreateAgentGoal: {
             description: string;
@@ -6207,6 +6224,8 @@ export interface components {
              * @example /api/v1/schemas/CreateProjectInputBody.json
              */
             readonly $schema?: string;
+            /** @description When true, agents in this project default to autonomous KB editing (create/update/delete) unless their own knowledgeBaseWrite capability is set explicitly. null = not configured. */
+            default_agent_kb_write?: boolean;
             /** @description Environment (production / development / staging); defaults to production */
             environment?: string;
             /** @description Project name */
@@ -9306,8 +9325,10 @@ export interface components {
              * @example /api/v1/schemas/Project.json
              */
             readonly $schema?: string;
+            business_name: string;
             /** Format: date-time */
             created_at: string;
+            default_agent_kb_write?: boolean;
             environment: string;
             game_name: string;
             is_active: boolean;
@@ -10718,12 +10739,21 @@ export interface components {
              * @example /api/v1/schemas/UpdateCapabilitiesInputBody.json
              */
             readonly $schema?: string;
+            /** @description Enable/disable agent-authored skills (sonzai_create_skill / sonzai_update_skill tools). Requires skills to also be enabled — otherwise force-cleared to false. */
+            autoLearnSkills?: boolean;
+            /** @description Enable/disable per-agent Composio SaaS integrations (Gmail, Calendar, Slack, GitHub, Linear, etc.). Tools are declared dynamically based on which apps the admin has connected for the agent. */
+            composio?: boolean;
             /** @description Enable/disable image generation */
             imageGeneration?: boolean;
             /** @description Enable/disable inventory tracking */
             inventory?: boolean;
             /** @description Enable/disable knowledge base search */
             knowledgeBase?: boolean;
+            /**
+             * @description How the agent reads across project and organization-global KB scopes. project_only (default) reads only the agent's own project. cascade and union read both, with project winning collisions in cascade. org_only reads org-global only.
+             * @enum {string}
+             */
+            knowledgeBaseScopeMode?: "project_only" | "org_only" | "cascade" | "union";
             /** @description Enable/disable knowledge base write tools (knowledge_create/_update/_delete). Requires knowledgeBase to be enabled. */
             knowledgeBaseWrite?: boolean;
             /** @description IDs of project MCP catalog entries this agent uses */
@@ -10735,8 +10765,14 @@ export interface components {
             memoryMode?: "sync" | "async";
             /** @description Enable/disable remember name tool */
             rememberName?: boolean;
+            /** @description Enable/disable person/entity-attributed memory shared across users of this agent (teams, parties, business context). Off by default. Requires wisdom. */
+            sharedMemory?: boolean;
+            /** @description Enable/disable project-library skill loading. When on, the agent's prompt auto-includes the skills index and the sonzai_load_skill tool is registered. Required precondition for autoLearnSkills. */
+            skills?: boolean;
             /** @description Enable/disable web search tool */
             webSearch?: boolean;
+            /** @description Enable/disable the base wisdom (de-attributed cross-user generalization) pipeline. Default ON; pass false to disable. Required precondition for sharedMemory. */
+            wisdom?: boolean;
         };
         UpdateConstellationNodeInputBody: {
             /**
@@ -10961,9 +10997,13 @@ export interface components {
              * @example /api/v1/schemas/UpdateProjectInputBody.json
              */
             readonly $schema?: string;
+            /** @description Public-facing display name for this business / project. Replaces the legacy game_name field; either is accepted, business_name wins when both are set. */
+            business_name?: string;
+            /** @description Project-level default for autonomous KB editing by agents. true = agents default to on; false = explicitly disabled; null/omitted = leave unchanged. */
+            default_agent_kb_write?: boolean;
             /** @description Environment */
             environment?: string;
-            /** @description Display name shown in the game */
+            /** @description Deprecated alias for business_name. Use business_name for new code. */
             game_name?: string;
             /** @description New project name */
             name?: string;

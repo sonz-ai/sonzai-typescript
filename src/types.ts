@@ -2067,6 +2067,28 @@ export interface UpdateCapabilitiesOptions {
   imageGeneration?: boolean;
   inventory?: boolean;
   knowledgeBase?: boolean;
+  /** Allow the agent to add, update, and soft-delete KB entries (read-then-write CAS). Requires `knowledgeBase`. */
+  knowledgeBaseWrite?: boolean;
+  /**
+   * How the agent reads across project and organization-global KB scopes.
+   * - `project_only` (default): read only the agent's own project KB.
+   * - `cascade`: read both scopes; project wins on ID collisions.
+   * - `union`: read both scopes; first occurrence wins on collisions.
+   * - `org_only`: skip the project scope entirely; read only org-global.
+   */
+  knowledgeBaseScopeMode?: "project_only" | "org_only" | "cascade" | "union";
+  /** Per-agent Composio SaaS integrations (Gmail, GCal, Slack, GitHub, Linear, Notion, GDrive). */
+  composio?: boolean;
+  /** Base wisdom (cross-user generalization). Default ON for new agents — pass `false` to opt out. Required precondition for `sharedMemory`. */
+  wisdom?: boolean;
+  /** Person/entity-attributed memory shared across users of this agent (teams, parties, business context). Off by default; requires `wisdom`. */
+  sharedMemory?: boolean;
+  /** Project-library skill loading via `sonzai_load_skill`. Required precondition for `autoLearnSkills`. */
+  skills?: boolean;
+  /** Agent-authored skills (`sonzai_create_skill` / `sonzai_update_skill`). Requires `skills`. */
+  autoLearnSkills?: boolean;
+  /** IDs of project MCP catalog entries this agent uses. */
+  mcpEnabled?: string[];
   /**
    * Supplementary memory recall timing. `"sync"` (default) blocks context
    * build until recall returns so facts land in the current turn. `"async"`
