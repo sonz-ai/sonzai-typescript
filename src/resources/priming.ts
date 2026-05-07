@@ -107,4 +107,34 @@ export class Priming {
       params,
     );
   }
+
+  /**
+   * List per-user rows inside a single import job, with current status
+   * and any error. Use this to diagnose stuck or failed users during a
+   * large migration — `getImportStatus` only returns the job-level
+   * summary.
+   */
+  async listImportJobUsers(
+    agentId: string,
+    jobId: string,
+    limit?: number,
+  ): Promise<{
+    users: Array<{
+      user_id: string;
+      status: string;
+      message_count: number;
+      started_at?: string;
+      completed_at?: string;
+      error_message?: string;
+      duration_ms?: number;
+    }>;
+    count: number;
+  }> {
+    const params: Record<string, string> = {};
+    if (limit) params.limit = String(limit);
+    return this.http.get(
+      `/api/v1/agents/${agentId}/users/import/${encodeURIComponent(jobId)}/users`,
+      params,
+    );
+  }
 }
