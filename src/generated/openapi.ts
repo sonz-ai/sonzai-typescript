@@ -3967,6 +3967,71 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/projects/{project_id}/byok-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List BYOK keys for a project
+         * @description Returns configured BYOK providers for the project. Key material is never returned — only the prefix and health status.
+         */
+        get: operations["listBYOKKeys"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{project_id}/byok-keys/{provider}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Create or replace a BYOK key
+         * @description Stores an encrypted-at-rest BYOK key for a provider. Validates the key against the provider before saving; rejects invalid keys with 400 invalid_api_key.
+         */
+        put: operations["putBYOKKey"];
+        post?: never;
+        /**
+         * Delete a BYOK key
+         * @description Removes the stored key. Subsequent LLM calls fall back to standard pricing.
+         */
+        delete: operations["deleteBYOKKey"];
+        options?: never;
+        head?: never;
+        /** Enable or disable a BYOK key without rotating it */
+        patch: operations["setBYOKActive"];
+        trace?: never;
+    };
+    "/projects/{project_id}/byok-keys/{provider}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Re-test a stored BYOK key against the provider
+         * @description Issues a probe call to the provider with the stored key and updates health_status. Useful after a suspected key rotation upstream.
+         */
+        post: operations["testBYOKKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/sessions/end/status/{processingId}": {
         parameters: {
             query?: never;
@@ -5115,6 +5180,25 @@ export interface components {
             app: string;
             connected_account_label?: string;
         };
+        BYOKKeyResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/BYOKKeyResponse.json
+             */
+            readonly $schema?: string;
+            api_key_prefix: string;
+            health_status: string;
+            is_active: boolean;
+            /** Format: date-time */
+            last_health_check_at?: string;
+            last_health_error?: string;
+            /** Format: date-time */
+            last_used_at?: string;
+            provider: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
         BatchGetPersonalitiesInputBody: {
             /**
              * Format: uri
@@ -5605,6 +5689,16 @@ export interface components {
             end: string;
             start: string;
         };
+        CostByBillingMode: {
+            billingMode: string;
+            byokProvider?: string;
+            /** Format: double */
+            costUsd: number;
+            /** Format: int64 */
+            entryCount: number;
+            /** Format: int64 */
+            tokens: number;
+        };
         CostByCharacter: {
             agentId: string;
             agentName: string;
@@ -5645,6 +5739,19 @@ export interface components {
             tokens: number;
             trafficSource: string;
         };
+        CostDailyByMode: {
+            billingMode: string;
+            byokProvider?: string;
+            /** Format: double */
+            costUsd: number;
+            date: string;
+            /** Format: int64 */
+            inputTokens: number;
+            /** Format: int64 */
+            outputTokens: number;
+            /** Format: int64 */
+            totalTokens: number;
+        };
         CostDailyEntry: {
             /** Format: int64 */
             cacheTokens: number;
@@ -5669,11 +5776,13 @@ export interface components {
              * @example /api/v1/schemas/CostResponse.json
              */
             readonly $schema?: string;
+            byBillingMode?: components["schemas"]["CostByBillingMode"][] | null;
             byCharacter?: components["schemas"]["CostByCharacter"][] | null;
             byProject?: components["schemas"]["CostByProject"][] | null;
             byService?: components["schemas"]["CostByService"][] | null;
             byTrafficSource?: components["schemas"]["CostByTrafficSource"][] | null;
             daily: components["schemas"]["CostDailyEntry"][] | null;
+            dailyByMode?: components["schemas"]["CostDailyByMode"][] | null;
             period: components["schemas"]["CostResponsePeriodStruct"];
             summary: components["schemas"]["CostSummary"];
         };
@@ -8218,6 +8327,15 @@ export interface components {
             /** Format: int64 */
             total: number;
         };
+        ListBYOKKeysOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListBYOKKeysOutputBody.json
+             */
+            readonly $schema?: string;
+            keys: components["schemas"]["BYOKKeyResponse"][] | null;
+        };
         ListComposioAuditOutputBody: {
             /**
              * Format: uri
@@ -9269,6 +9387,16 @@ export interface components {
             eff_date: string;
             source?: string;
         };
+        PutBYOKKeyInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PutBYOKKeyInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Plaintext API key from the provider. Stored encrypted; never returned. */
+            api_key: string;
+        };
         RecentShiftsResponse: {
             /**
              * Format: uri
@@ -9717,6 +9845,15 @@ export interface components {
             agent_id: string;
             is_active: boolean;
             success: boolean;
+        };
+        SetBYOKActiveInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/SetBYOKActiveInputBody.json
+             */
+            readonly $schema?: string;
+            is_active: boolean;
         };
         SetCustomLLMConfigInputBody: {
             /**
@@ -20784,6 +20921,173 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RotateSigningSecretOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listBYOKKeys: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListBYOKKeysOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    putBYOKKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+                /** @description Provider name */
+                provider: "openai" | "gemini" | "xai" | "openrouter";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PutBYOKKeyInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BYOKKeyResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteBYOKKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+                provider: "openai" | "gemini" | "xai" | "openrouter";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    setBYOKActive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+                provider: "openai" | "gemini" | "xai" | "openrouter";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetBYOKActiveInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BYOKKeyResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    testBYOKKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+                provider: "openai" | "gemini" | "xai" | "openrouter";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BYOKKeyResponse"];
                 };
             };
             /** @description Error */
