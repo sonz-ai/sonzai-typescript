@@ -95,6 +95,40 @@ client.agents.inventory        // user inventory
 client.agents.schedules        // user-scoped recurring events
 ```
 
+## Bring Your Own Key (BYOK)
+
+BYOK lets you register your own LLM provider API keys with a project. Once set,
+upstream LLM calls for that project route through your key — token billing falls
+on your provider account, not Sonzai's. Keys are encrypted at rest server-side
+and are never returned by the API (only the key prefix and health metadata are
+exposed). Requires `read:byok` / `write:byok` scopes on the API key you use to
+call these endpoints.
+
+```ts
+// List all configured BYOK providers for a project
+const keys = await client.byok.list("project-id");
+for (const k of keys) {
+  console.log(`${k.provider}: ${k.health_status} (active: ${k.is_active})`);
+}
+
+// Store or replace a key (validates against the provider before saving)
+const key = await client.byok.set("project-id", "openai", "sk-...");
+console.log(`Stored prefix: ${key.api_key_prefix}`);
+
+// Enable or disable without rotating
+await client.byok.setActive("project-id", "openai", false);
+
+// Re-run the provider health check on a stored key
+const result = await client.byok.test("project-id", "gemini");
+console.log(result.health_status); // "healthy" | "invalid" | "unknown"
+
+// Remove a stored key (project falls back to platform billing)
+await client.byok.delete("project-id", "xai");
+```
+
+Supported providers: `"openai"` | `"gemini"` | `"xai"` | `"openrouter"`.
+REST path: `/api/v1/projects/{project_id}/byok-keys[/{provider}[/test]]`.
+
 ## Usage
 
 ### Chat (non-streaming)
