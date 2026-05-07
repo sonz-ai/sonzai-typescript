@@ -3,6 +3,7 @@ export * as providers from "./providers.js";
 export { VoiceStreamInstance } from "./resources/voice.js";
 export { Session } from "./resources/session-handle.js";
 export type { ScheduleUpcomingOptions } from "./resources/schedules.js";
+export type { BYOKProvider } from "./resources/byok.js";
 
 // Errors
 export {

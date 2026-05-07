@@ -1,6 +1,7 @@
 import { HTTPClient } from "./http.js";
 import { Agents } from "./resources/agents.js";
 import { Analytics } from "./resources/analytics.js";
+import { BYOK } from "./resources/byok.js";
 import { Composio } from "./resources/composio.js";
 import { CustomLLM } from "./resources/custom-llm.js";
 import { EvalRuns } from "./resources/eval-runs.js";
@@ -126,6 +127,8 @@ export class Sonzai {
   readonly accountConfig: AccountConfig;
   /** Project-scoped custom LLM provider configuration. */
   readonly customLLM: CustomLLM;
+  /** Project-scoped BYOK (bring-your-own-key) provider configuration. */
+  readonly byok: BYOK;
   /** Project-scoped notification polling for backends. */
   readonly projectNotifications: ProjectNotifications;
   /** Project management (create, update, delete projects and API keys). */
@@ -196,6 +199,7 @@ export class Sonzai {
     this.projectConfig = new ProjectConfig(this.http);
     this.accountConfig = new AccountConfig(this.http);
     this.customLLM = new CustomLLM(this.http);
+    this.byok = new BYOK(this.http);
     this.projectNotifications = new ProjectNotifications(this.http);
     this.projects = new Projects(this.http);
     this.userPersonas = new UserPersonas(this.http);
