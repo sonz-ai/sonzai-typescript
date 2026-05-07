@@ -967,9 +967,10 @@ export interface ModelsResponse {
 
 export interface ProcessResponse {
   success: boolean;
-  memories_created: number;
   facts_extracted: number;
   side_effects: ProcessSideEffectsSummary;
+  /** Session identifier echoed by the server (auto-generated when not provided in the request). */
+  session_id?: string;
 }
 
 // ---------------------------------------------------------------------------
