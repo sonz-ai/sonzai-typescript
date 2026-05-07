@@ -126,6 +126,50 @@ for await (const event of client.agents.chatStream({
 
 Streams return an `AsyncGenerator<ChatStreamEvent>`. Each event carries a delta in `choices[0].delta.content`, plus optional `usage` on the final frame.
 
+### Chat (async with polling)
+
+For chats that may run longer than your network can hold an SSE stream
+open (Cloudflare/LB cuts at ~100s), queue the request and poll for the
+result. Cancelling locally does **not** cancel the server-side task —
+re-poll the same `processingId` later if needed.
+
+```ts
+// Fire-and-forget — returns { processingId, status: "queued" } immediately.
+const queued = await client.agents.chatAsync({
+  agent: "agent-id",
+  messages: [{ role: "user", content: "Plan my week." }],
+  userId: "user-123",
+  sessionId: "session-456",
+  provider: "openai",
+  model: "gpt-4o",
+});
+
+// Manual poll loop — recommended backoff: 1s → 2s → 4s, capped at 5s.
+let delay = 1000;
+while (true) {
+  const result = await client.agents.pollChatResult("agent-id", queued.processingId);
+  // status: "queued" | "running" | "complete" | "failed"
+  // While running, `response` carries partial text and `phase`/`tool`
+  // reflect the latest progressive-elaboration event.
+  if (result.status === "complete" || result.status === "failed") {
+    console.log(result.response, result.sideEffects);
+    break;
+  }
+  await new Promise((r) => setTimeout(r, delay));
+  delay = Math.min(delay * 2, 5000);
+}
+
+// Convenience: queue + poll until terminal in one call.
+const result = await client.agents.chatAsyncBlocking(
+  {
+    agent: "agent-id",
+    messages: [{ role: "user", content: "Plan my week." }],
+    userId: "user-123",
+  },
+  { pollIntervalMs: 1000, maxPollIntervalMs: 5000, timeoutMs: 600_000 },
+);
+```
+
 ### Sync vs async memory recall (`memoryMode`)
 
 Supplementary memory recall can run **synchronously** (blocks context build until recall completes — every fact lands in the current turn) or **asynchronously** (races a deadline — slow hits spill to the next turn for lower first-token latency). Default is `sync`.
@@ -302,19 +346,73 @@ const overlay = await client.agents.personality.getUserOverlay("agent-id", "user
 
 ### Sessions & instances
 
+`sessions.start()` returns a `Session` handle that bundles the identity
+tuple (`agentId`, `userId`, `sessionId`, `instanceId`) plus session-level
+`provider`/`model` defaults. The handle drives the per-turn loop with one
+fresh enriched context per turn — so the LLM you call out to (OpenAI,
+Anthropic, Gemini, your own) sees up-to-date mood, recalled facts, and
+recent turns on every message.
+
 ```ts
-await client.agents.sessions.start("agent-id", {
+const session = await client.agents.sessions.start("agent-id", {
   userId: "user-123",
   sessionId: "session-456",
+  provider: "gemini",                              // session-level default
+  model: "gemini-3.1-flash-lite-preview",          // (per-turn overrides OK)
 });
+
+// Per-turn loop: fetch enriched context, hand it to your LLM, submit the turn.
+const ctx = await session.context({ query: "what's the user about to say?" });
+// ... build your prompt with `ctx`, call your LLM, get assistantReply ...
+
+const result = await session.turn({
+  messages: [
+    { role: "user", content: "what did we talk about last week?" },
+    { role: "assistant", content: assistantReply },
+  ],
+  // Prefetch the *next* enriched context in the same round-trip
+  // so the next user message renders without a second fetch.
+  fetchNextContext: { query: "anticipated next user message" },
+});
+console.log(result.mood);              // sync mood update (undefined if none)
+console.log(result.extraction_id);     // async fact-extraction job id
+console.log(result.next_context);      // populated when fetchNextContext is set
+
+// Poll deferred extraction (memory write-back) when you need to know it landed.
+let status = await session.status(result.extraction_id);
+while (status.state !== "done" && status.state !== "failed") {
+  await new Promise((r) => setTimeout(r, 500)); // then back off
+  status = await session.status(result.extraction_id);
+}
+
+// End the session. wait: true forces the CE pipeline to run synchronously
+// (use in benchmarks/tests that query memory immediately after).
+await session.end({ totalMessages: 10, durationSeconds: 300, wait: true });
+```
+
+Per-call `provider`/`model` on `session.turn(...)` and `session.end(...)`
+override the session defaults; omit them to fall through. `TurnMessage`
+carries `tool_call_id` and `tool_calls` for function-calling turns;
+plain `ChatMessage` (used by `chat` / `chatStream`) is text-only.
+
+#### Legacy void-style start/end
+
+`sessions.end("agent-id", { ... })` still works for callers that don't
+need the handle:
+
+```ts
 await client.agents.sessions.end("agent-id", {
   userId: "user-123",
   sessionId: "session-456",
   totalMessages: 10,
   durationSeconds: 300,
 });
+```
 
-// Parallel agent instances
+#### Instances
+
+```ts
+// Parallel agent instances for A/B testing or sandboxed forks
 const instances = await client.agents.instances.list("agent-id");
 const instance = await client.agents.instances.create("agent-id", { name: "Beta" });
 await client.agents.instances.reset("agent-id", instance.instance_id);
