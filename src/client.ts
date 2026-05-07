@@ -7,6 +7,7 @@ import { CustomLLM } from "./resources/custom-llm.js";
 import { EvalRuns } from "./resources/eval-runs.js";
 import { EvalTemplates } from "./resources/eval-templates.js";
 import { Knowledge } from "./resources/knowledge.js";
+import { MCPCatalog } from "./resources/mcp-catalog.js";
 import { AccountConfig } from "./resources/account-config.js";
 import { Org } from "./resources/org.js";
 import { ProjectConfig } from "./resources/project-config.js";
@@ -147,6 +148,12 @@ export class Sonzai {
   readonly org: Org;
   /** Storefront — agent marketplace publishing for the current tenant. */
   readonly storefront: Storefront;
+  /**
+   * MCP catalog — per-project registry of MCP servers. Each entry pairs
+   * a remote MCP URL with auth config; agents opt into specific entries
+   * via the `mcpEnabled` capability. Org-admin only on writes.
+   */
+  readonly mcpCatalog: MCPCatalog;
   /** Support tickets — create, comment on, and close support tickets. */
   readonly support: Support;
   /**
@@ -202,6 +209,7 @@ export class Sonzai {
     this.byok = new BYOK(this.http);
     this.projectNotifications = new ProjectNotifications(this.http);
     this.projects = new Projects(this.http);
+    this.mcpCatalog = new MCPCatalog(this.http);
     this.userPersonas = new UserPersonas(this.http);
     // schedules reuses the same instance held under this.agents.schedules
     // so both call sites share state and there's only one resource object.
