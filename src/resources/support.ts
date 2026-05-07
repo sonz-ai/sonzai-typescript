@@ -9,10 +9,10 @@ import type {
 } from "../generated/flat-exports.js";
 
 export interface SupportListOptions {
-  /** Page size, max 100. Default 100. */
-  limit?: number;
-  /** Offset for pagination. Default 0. */
-  offset?: number;
+  /** Page size, max 100. Default 20. */
+  pageSize?: number;
+  /** Opaque cursor from a previous response's `next_cursor`. */
+  cursor?: string;
   /** Optional status filter (e.g. `"open"`, `"resolved"`). */
   status?: string;
   /** Optional type filter (e.g. `"bug"`, `"feature_request"`, `"billing"`). */
@@ -42,11 +42,11 @@ export interface AddTicketCommentOptions {
 export class Support {
   constructor(private readonly http: HTTPClient) {}
 
-  /** List tickets in the caller's active tenant. Offset-paginated. */
+  /** List tickets in the caller's active tenant. Cursor-paginated. */
   async list(options: SupportListOptions = {}): Promise<TicketListResponse> {
     return this.http.get<TicketListResponse>("/api/v1/support/tickets", {
-      limit: options.limit,
-      offset: options.offset,
+      page_size: options.pageSize,
+      cursor: options.cursor,
       status: options.status,
       type: options.type,
     });

@@ -61,7 +61,7 @@ export interface paths {
         };
         /**
          * List agents
-         * @description Returns agents scoped to a project. When project_id is not supplied, the scope is resolved from auth: API-key auth lists the key's project; Clerk auth lists the tenant's Default project. Supports cursor-based pagination (page_size+cursor) and legacy offset-based pagination (limit+offset).
+         * @description Returns agents scoped to a project. When project_id is not supplied, the scope is resolved from auth: API-key auth lists the key's project; Clerk auth lists the tenant's Default project. Cursor-based pagination only (page_size + cursor).
          */
         get: operations["listAgents"];
         put?: never;
@@ -1881,7 +1881,7 @@ export interface paths {
         };
         /**
          * List users for an agent
-         * @description Returns all users associated with an agent, including mood and priming metadata. Supports pagination, sorting, and custom field filtering via `custom.<key>` query params.
+         * @description Returns users associated with an agent, including mood and priming metadata, ordered by user_id ASC. Cursor-based pagination only (page_size + cursor).
          */
         get: operations["listUsers"];
         put?: never;
@@ -2603,7 +2603,7 @@ export interface paths {
         };
         /**
          * List eval runs
-         * @description Returns eval runs for the authenticated tenant, optionally filtered by agent.
+         * @description Returns eval runs for the authenticated tenant, optionally filtered by agent. Cursor-based pagination only (page_size + cursor).
          */
         get: operations["listEvalRuns"];
         put?: never;
@@ -3019,7 +3019,7 @@ export interface paths {
         };
         /**
          * List projects
-         * @description Lists projects for the authenticated tenant. Auto-creates a default project when the tenant has none.
+         * @description Lists projects for the authenticated tenant, ordered newest-first. Auto-creates a default project when the tenant has none. Cursor-based pagination only (page_size + cursor).
          */
         get: operations["listProjects"];
         put?: never;
@@ -3451,7 +3451,7 @@ export interface paths {
         };
         /**
          * List knowledge base nodes
-         * @description Returns active nodes with support for property-level filtering, pagination, and sorting. Filter operators: eq (default), __neq, __gt, __gte, __lt, __lte, __in, __contains via query params like properties.field__gt=5.
+         * @description Returns active nodes with property-level filtering and sorting. Returns a single page (no cursor) because property filters and arbitrary sort_by require a full in-memory scan; raise `limit` to widen the window. Filter operators: eq (default), __neq, __gt, __gte, __lt, __lte, __in, __contains via query params like properties.field__gt=5.
          */
         get: operations["kbListNodes"];
         put?: never;
@@ -4104,7 +4104,7 @@ export interface paths {
         };
         /**
          * List my support tickets
-         * @description Returns tickets created by the authenticated user within their active tenant. Filter by `status` or `type`; paginate with `limit`/`offset`.
+         * @description Returns tickets created by the authenticated user within their active tenant. Filter by `status` or `type`. Cursor-based pagination only (page_size + cursor).
          */
         get: operations["listMyTickets"];
         put?: never;
@@ -8035,13 +8035,10 @@ export interface components {
              * @example /api/v1/schemas/KbListNodesOutputBody.json
              */
             readonly $schema?: string;
-            /** @description List of active nodes */
+            /** @description True when the underlying scan was truncated by limit */
+            has_more: boolean;
+            /** @description List of active nodes (single page; raise limit to widen the window) */
             nodes: components["schemas"]["KBNode"][] | null;
-            /**
-             * Format: int64
-             * @description Total active count (before pagination)
-             */
-            total: number;
         };
         KbListOrgNodesOutputBody: {
             /**
@@ -8268,16 +8265,6 @@ export interface components {
             /** @description Developer-defined custom tools */
             tools: components["schemas"]["CustomToolDefinition"][] | null;
         };
-        ListDeliveryAttemptsOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListDeliveryAttemptsOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description List of delivery attempts */
-            attempts: components["schemas"]["WebhookDeliveryAttempt"][] | null;
-        };
         ListEnabledSkillsOutputBody: {
             /**
              * Format: uri
@@ -8286,21 +8273,6 @@ export interface components {
              */
             readonly $schema?: string;
             skills: string[] | null;
-        };
-        ListEvalRunsOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListEvalRunsOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description List of eval runs */
-            runs: components["schemas"]["EvalRun"][] | null;
-            /**
-             * Format: int64
-             * @description Total number of matching runs
-             */
-            total_count: number;
         };
         ListEvalTemplatesOutputBody: {
             /**
@@ -8885,6 +8857,39 @@ export interface components {
             /** Format: int64 */
             total_count: number;
         };
+        PaginatedDeliveryAttemptsResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PaginatedDeliveryAttemptsResponse.json
+             */
+            readonly $schema?: string;
+            attempts: components["schemas"]["WebhookDeliveryAttempt"][] | null;
+            has_more: boolean;
+            next_cursor?: string;
+        };
+        PaginatedEvalRunsResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PaginatedEvalRunsResponse.json
+             */
+            readonly $schema?: string;
+            has_more: boolean;
+            next_cursor?: string;
+            runs: components["schemas"]["EvalRun"][] | null;
+        };
+        PaginatedProjectsResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PaginatedProjectsResponse.json
+             */
+            readonly $schema?: string;
+            has_more: boolean;
+            items: components["schemas"]["Project"][] | null;
+            next_cursor?: string;
+        };
         PatchScheduleInputBody: {
             /**
              * Format: uri
@@ -9141,7 +9146,8 @@ export interface components {
         };
         ProcessMessage: {
             content?: string;
-            role: string;
+            /** @enum {string} */
+            role: "user" | "assistant" | "tool" | "system";
             tool_call_id?: string;
             tool_calls?: components["schemas"]["ProcessToolCall"][] | null;
         };
@@ -9649,8 +9655,11 @@ export interface components {
         SessionMessage: {
             /** @description Message content; null for assistant messages that only call tools */
             content?: string;
-            /** @description Message role (user, assistant, tool, system) */
-            role: string;
+            /**
+             * @description Message role
+             * @enum {string}
+             */
+            role: "user" | "assistant" | "tool" | "system";
             /** @description Set when role=tool to link the result to its assistant tool_calls entry */
             tool_call_id?: string;
             /** @description Set when an assistant message invokes tools */
@@ -10206,9 +10215,8 @@ export interface components {
              */
             readonly $schema?: string;
             has_more: boolean;
+            next_cursor?: string;
             tickets: components["schemas"]["TicketSummary"][] | null;
-            /** Format: int64 */
-            total: number;
         };
         TicketSummary: {
             assigned_to_email?: string;
@@ -10385,8 +10393,11 @@ export interface components {
         TurnMessage: {
             /** @description Message content; null for assistant messages that only call tools */
             content?: string;
-            /** @description Message role (user, assistant, tool, system) */
-            role: string;
+            /**
+             * @description Message role
+             * @enum {string}
+             */
+            role: "user" | "assistant" | "tool" | "system";
             /** @description Set when role=tool to link the result to its assistant tool_calls entry */
             tool_call_id?: string;
             /** @description Set when an assistant message invokes tools */
@@ -11082,8 +11093,8 @@ export interface components {
              * @example /api/v1/schemas/UsersResponse.json
              */
             readonly $schema?: string;
-            /** Format: int64 */
-            total: number;
+            has_more: boolean;
+            next_cursor?: string;
             users: components["schemas"]["UserEntry"][] | null;
         };
         VoiceConfig: {
@@ -11654,7 +11665,7 @@ export interface operations {
     listAgents: {
         parameters: {
             query?: {
-                /** @description Items per page (cursor mode) */
+                /** @description Items per page (default 30) */
                 page_size?: number;
                 /** @description Pagination cursor (base64) */
                 cursor?: string;
@@ -11664,10 +11675,6 @@ export interface operations {
                 project_id?: string;
                 /** @description Set to 'true' to include total_count (expensive) */
                 include_count?: string;
-                /** @description Items per page (legacy offset mode) */
-                limit?: number;
-                /** @description Offset for legacy pagination */
-                offset?: number;
             };
             header?: never;
             path?: never;
@@ -15820,14 +15827,10 @@ export interface operations {
     listUsers: {
         parameters: {
             query?: {
-                /** @description Max users per page (default 100, max 500) */
-                limit?: number;
-                /** @description Pagination offset */
-                offset?: number;
-                /** @description Sort field (display_name, last_interaction, created_at, user_id, or custom.<key>) */
-                sort_by?: string;
-                /** @description Sort order: asc or desc */
-                sort_order?: string;
+                /** @description Items per page (default 100, max 500) */
+                page_size?: number;
+                /** @description Pagination cursor (base64). Pages are ordered by user_id ASC for O(1) traversal. */
+                cursor?: string;
             };
             header?: never;
             path: {
@@ -16108,9 +16111,7 @@ export interface operations {
                 group_by?: string;
                 /** @description Max items per page (default 1000, max 5000) */
                 limit?: number;
-                /** @description Pagination offset */
-                offset?: number;
-                /** @description Base64-encoded pagination cursor */
+                /** @description Base64-encoded pagination cursor (list mode without sort_by only) */
                 cursor?: string;
                 /** @description JSON-encoded metadata filters */
                 filters?: string;
@@ -17634,9 +17635,9 @@ export interface operations {
                 /** @description Filter by agent ID */
                 agent_id?: string;
                 /** @description Items per page (default 20) */
-                limit?: number;
-                /** @description Pagination offset */
-                offset?: number;
+                page_size?: number;
+                /** @description Pagination cursor (base64) */
+                cursor?: string;
             };
             header?: never;
             path?: never;
@@ -17650,7 +17651,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListEvalRunsOutputBody"];
+                    "application/json": components["schemas"]["PaginatedEvalRunsResponse"];
                 };
             };
             /** @description Error */
@@ -18393,10 +18394,10 @@ export interface operations {
     listProjects: {
         parameters: {
             query?: {
-                /** @description Items per page */
-                limit?: number;
-                /** @description Pagination offset */
-                offset?: number;
+                /** @description Items per page (default 50) */
+                page_size?: number;
+                /** @description Pagination cursor (base64) */
+                cursor?: string;
             };
             header?: never;
             path?: never;
@@ -18410,7 +18411,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Project"][] | null;
+                    "application/json": components["schemas"]["PaginatedProjectsResponse"];
                 };
             };
             /** @description Error */
@@ -19506,10 +19507,8 @@ export interface operations {
             query?: {
                 /** @description Filter by node type */
                 type?: string;
-                /** @description Max results */
+                /** @description Max results in single response */
                 limit?: number;
-                /** @description Pagination offset */
-                offset?: number;
                 /** @description Sort field (label, node_type, created_at, updated_at, version, or properties.*) */
                 sort_by?: string;
                 /** @description Sort direction: asc or desc */
@@ -20728,10 +20727,10 @@ export interface operations {
     listDeliveryAttempts: {
         parameters: {
             query?: {
-                /** @description Max results */
-                limit?: number;
-                /** @description Pagination offset */
-                offset?: number;
+                /** @description Items per page (default 50) */
+                page_size?: number;
+                /** @description Pagination cursor (base64) */
+                cursor?: string;
             };
             header?: never;
             path: {
@@ -20750,7 +20749,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListDeliveryAttemptsOutputBody"];
+                    "application/json": components["schemas"]["PaginatedDeliveryAttemptsResponse"];
                 };
             };
             /** @description Error */
@@ -21050,10 +21049,10 @@ export interface operations {
     listMyTickets: {
         parameters: {
             query?: {
-                /** @description Items per page */
-                limit?: number;
-                /** @description Pagination offset */
-                offset?: number;
+                /** @description Items per page (default 20) */
+                page_size?: number;
+                /** @description Pagination cursor (base64) */
+                cursor?: string;
                 /** @description Filter by status (open, in_progress, resolved, closed) */
                 status?: string;
                 /** @description Filter by type (support, bug, feature_request, billing, ...) */
@@ -21642,10 +21641,10 @@ export interface operations {
     listDeliveryAttemptsForTenant: {
         parameters: {
             query?: {
-                /** @description Max results */
-                limit?: number;
-                /** @description Pagination offset */
-                offset?: number;
+                /** @description Items per page (default 50) */
+                page_size?: number;
+                /** @description Pagination cursor (base64) */
+                cursor?: string;
             };
             header?: never;
             path: {
@@ -21662,7 +21661,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListDeliveryAttemptsOutputBody"];
+                    "application/json": components["schemas"]["PaginatedDeliveryAttemptsResponse"];
                 };
             };
             /** @description Error */

@@ -1,6 +1,11 @@
 // Re-export all spec-derived types so resource files can import from this module
 // without knowing about the generated layer.
 export type * from "./generated/flat-exports.js";
+// Cursor-paginated response aliases that aren't part of the raw flat-exports.
+export type {
+  EvalRunListResponse,
+  DeliveryAttemptsResponse,
+} from "./generated/aliases.js";
 
 // Import spec types used in hand-written interface bodies below.
 import type {
@@ -1244,8 +1249,8 @@ export interface EvalRun {
 
 export interface EvalRunListOptions {
   agentId?: string;
-  limit?: number;
-  offset?: number;
+  pageSize?: number;
+  cursor?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -2845,7 +2850,9 @@ export interface PlatformModelsResponse {
 // Project is now re-exported from ./generated/aliases.js
 
 export interface ProjectListResponse {
-  projects?: Project[] | null;
+  items: Project[];
+  next_cursor?: string;
+  has_more: boolean;
 }
 
 // ProjectAPIKey is now re-exported from ./generated/aliases.js

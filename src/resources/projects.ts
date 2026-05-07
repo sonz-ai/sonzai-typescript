@@ -14,11 +14,11 @@ import type {
 export class Projects {
   constructor(private readonly http: HTTPClient) {}
 
-  /** List all projects for the current tenant. */
-  list(options: { limit?: number; offset?: number } = {}): Promise<ProjectListResponse> {
+  /** List projects for the current tenant. Cursor-paginated. */
+  list(options: { pageSize?: number; cursor?: string } = {}): Promise<ProjectListResponse> {
     return this.http.get<ProjectListResponse>("/api/v1/projects", {
-      limit: options.limit,
-      offset: options.offset,
+      page_size: options.pageSize,
+      cursor: options.cursor,
     });
   }
 

@@ -10,12 +10,12 @@ import type {
 export class EvalRuns {
   constructor(private readonly http: HTTPClient) {}
 
-  /** List eval runs. */
+  /** List eval runs. Cursor-paginated. */
   async list(options: EvalRunListOptions = {}): Promise<EvalRunListResponse> {
     return this.http.get<EvalRunListResponse>("/api/v1/eval-runs", {
       agent_id: options.agentId,
-      limit: options.limit,
-      offset: options.offset,
+      page_size: options.pageSize,
+      cursor: options.cursor,
     });
   }
 
