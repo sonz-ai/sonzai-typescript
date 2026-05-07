@@ -7,10 +7,15 @@ import { EvalRuns } from "./resources/eval-runs.js";
 import { EvalTemplates } from "./resources/eval-templates.js";
 import { Knowledge } from "./resources/knowledge.js";
 import { AccountConfig } from "./resources/account-config.js";
+import { Org } from "./resources/org.js";
 import { ProjectConfig } from "./resources/project-config.js";
 import { ProjectNotifications } from "./resources/project-notifications.js";
 import { Projects } from "./resources/projects.js";
+import { Schedules } from "./resources/schedules.js";
 import { Skills } from "./resources/skills.js";
+import { Storefront } from "./resources/storefront.js";
+import { Support } from "./resources/support.js";
+import { Tenants } from "./resources/tenants.js";
 import { UserPersonas } from "./resources/user-personas.js";
 import { Voices } from "./resources/voice.js";
 import { Webhooks } from "./resources/webhooks.js";
@@ -128,6 +133,25 @@ export class Sonzai {
   /** User persona management (create, update, delete user personas). */
   readonly userPersonas: UserPersonas;
   /**
+   * Recurring per-user schedules. Top-level alias of `client.agents.schedules`
+   * — both reference the same resource for parity with the Python SDK.
+   */
+  readonly schedules: Schedules;
+  /**
+   * Organization-level billing, contracts, ledgers, vouchers, and pricing.
+   * Most app developers don't need this; admin/billing UIs do.
+   */
+  readonly org: Org;
+  /** Storefront — agent marketplace publishing for the current tenant. */
+  readonly storefront: Storefront;
+  /** Support tickets — create, comment on, and close support tickets. */
+  readonly support: Support;
+  /**
+   * Tenants — multi-tenant lookup and tenant-scoped organization
+   * knowledge graph access. Primarily for admin tools.
+   */
+  readonly tenants: Tenants;
+  /**
    * Composio per-agent connected SaaS accounts (Gmail, Calendar, Slack,
    * GitHub, Linear, Notion, Drive). Connections + audit + available
    * actions. Gated on the `Composio` agent capability server-side.
@@ -175,6 +199,13 @@ export class Sonzai {
     this.projectNotifications = new ProjectNotifications(this.http);
     this.projects = new Projects(this.http);
     this.userPersonas = new UserPersonas(this.http);
+    // schedules reuses the same instance held under this.agents.schedules
+    // so both call sites share state and there's only one resource object.
+    this.schedules = this.agents.schedules;
+    this.org = new Org(this.http);
+    this.storefront = new Storefront(this.http);
+    this.support = new Support(this.http);
+    this.tenants = new Tenants(this.http);
     this.composio = new Composio(this.http);
     this.skills = new Skills(this.http);
     this.wisdom = new Wisdom(this.http);
