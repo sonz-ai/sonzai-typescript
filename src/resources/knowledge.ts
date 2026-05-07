@@ -153,6 +153,78 @@ export class Knowledge {
     );
   }
 
+  // -- Agent-scoped writes (mirror knowledge_create / knowledge_update / knowledge_delete tools) --
+
+  /**
+   * Create a KB node on behalf of an agent. The agent ID is stamped onto every
+   * `PropertySource.source` as `agent:<agentId>` so the audit trail records
+   * which agent made the write. Mirrors the `knowledge_create` agent tool —
+   * useful when a tenant backend wants to replay or audit-test what the agent
+   * would issue mid-conversation.
+   *
+   * Requires the agent to have `knowledgeBase: true` and either
+   * `knowledgeBaseWrite: true` or the project's `default_agent_kb_write` set
+   * to true.
+   */
+  async agentCreateNode(
+    projectId: string,
+    agentId: string,
+    request: {
+      node_type: string;
+      label: string;
+      properties: Record<string, unknown>;
+      confidence?: number;
+    },
+  ): Promise<{ node: KBNodeDetailResponse["node"] }> {
+    return this.http.post(
+      `/api/v1/projects/${projectId}/knowledge/nodes`,
+      request as unknown as Record<string, unknown>,
+      undefined,
+      { "X-Agent-Id": agentId },
+    );
+  }
+
+  /**
+   * Patch an existing KB node on behalf of an agent. Only the fields you set
+   * are merged; everything else is left as-is. Same auth requirements as
+   * agentCreateNode.
+   */
+  async agentUpdateNode(
+    projectId: string,
+    nodeId: string,
+    agentId: string,
+    request: {
+      properties?: Record<string, unknown>;
+      label?: string;
+      confidence?: number;
+    },
+  ): Promise<{ node: KBNodeDetailResponse["node"] }> {
+    return this.http.patch(
+      `/api/v1/projects/${projectId}/knowledge/nodes/${nodeId}`,
+      request as unknown as Record<string, unknown>,
+      { "X-Agent-Id": agentId },
+    );
+  }
+
+  /**
+   * Soft-delete a KB node on behalf of an agent. Distinct from `deleteNode` —
+   * the agent variant goes through `/agent-delete`, stamps the audit trail
+   * with `agent:<agentId>`, and is the destination the `knowledge_delete`
+   * tool issues from the LLM side.
+   */
+  async agentDeleteNode(
+    projectId: string,
+    nodeId: string,
+    agentId: string,
+  ): Promise<{ success: boolean }> {
+    return this.http.post(
+      `/api/v1/projects/${projectId}/knowledge/nodes/${nodeId}/agent-delete`,
+      undefined,
+      undefined,
+      { "X-Agent-Id": agentId },
+    );
+  }
+
   // -- Search --
 
   /** BM25 search with 1-hop graph traversal. */

@@ -2886,12 +2886,29 @@ export interface ProjectAPIKeyListResponse {
 export interface CreateProjectOptions {
   name: string;
   environment?: string;
+  /**
+   * Project-level default for whether agents in this project may autonomously
+   * edit the knowledge base (knowledge_create / _update / _delete tools).
+   * OR-resolved with each agent's own `knowledgeBaseWrite` capability — agent
+   * flag true wins; only when off does this default apply. `null`/`undefined`
+   * = not configured (no default).
+   */
+  defaultAgentKbWrite?: boolean | null;
 }
 
 export interface UpdateProjectDetailsOptions {
   name?: string;
+  /**
+   * Display name surfaced in admin/storefront UIs. `gameName` is the legacy
+   * alias retained for backwards compatibility; new code should set
+   * `businessName`.
+   */
+  businessName?: string;
+  /** @deprecated Use `businessName`. */
   gameName?: string;
   environment?: string;
+  /** See `CreateProjectOptions.defaultAgentKbWrite`. */
+  defaultAgentKbWrite?: boolean | null;
 }
 
 export interface DeleteProjectResponse {

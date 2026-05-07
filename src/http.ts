@@ -44,11 +44,15 @@ export class HTTPClient {
     options?: {
       body?: Record<string, unknown>;
       params?: Record<string, string | number | boolean | undefined>;
+      headers?: Record<string, string>;
     },
   ): Promise<T> {
     const url = this.buildUrl(path, options?.params);
     const isIdempotent = method === "GET" || method === "DELETE";
     const maxAttempts = isIdempotent ? this.maxRetries + 1 : 1;
+    const mergedHeaders = options?.headers
+      ? { ...this.headers, ...options.headers }
+      : this.headers;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const controller = new AbortController();
@@ -57,7 +61,7 @@ export class HTTPClient {
       try {
         const response = await this.fetchFn(url, {
           method,
-          headers: this.headers,
+          headers: mergedHeaders,
           body: options?.body ? JSON.stringify(options.body) : undefined,
           signal: controller.signal,
         });
@@ -127,22 +131,25 @@ export class HTTPClient {
     path: string,
     body?: Record<string, unknown>,
     params?: Record<string, string | number | boolean | undefined>,
+    headers?: Record<string, string>,
   ): Promise<T> {
-    return this.request<T>("POST", path, { body, params });
+    return this.request<T>("POST", path, { body, params, headers });
   }
 
   async put<T = unknown>(
     path: string,
     body?: Record<string, unknown>,
+    headers?: Record<string, string>,
   ): Promise<T> {
-    return this.request<T>("PUT", path, { body });
+    return this.request<T>("PUT", path, { body, headers });
   }
 
   async patch<T = unknown>(
     path: string,
     body?: Record<string, unknown>,
+    headers?: Record<string, string>,
   ): Promise<T> {
-    return this.request<T>("PATCH", path, { body });
+    return this.request<T>("PATCH", path, { body, headers });
   }
 
   async delete<T = unknown>(

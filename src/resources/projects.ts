@@ -26,6 +26,9 @@ export class Projects {
   create(options: CreateProjectOptions): Promise<Project> {
     const body: Record<string, unknown> = { name: options.name };
     if (options.environment) body.environment = options.environment;
+    if (options.defaultAgentKbWrite !== undefined) {
+      body.default_agent_kb_write = options.defaultAgentKbWrite;
+    }
     return this.http.post<Project>("/api/v1/projects", body);
   }
 
@@ -38,8 +41,12 @@ export class Projects {
   update(projectId: string, options: UpdateProjectDetailsOptions): Promise<Project> {
     const body: Record<string, unknown> = {};
     if (options.name) body.name = options.name;
+    if (options.businessName) body.business_name = options.businessName;
     if (options.gameName) body.game_name = options.gameName;
     if (options.environment) body.environment = options.environment;
+    if (options.defaultAgentKbWrite !== undefined) {
+      body.default_agent_kb_write = options.defaultAgentKbWrite;
+    }
     return this.http.put<Project>(`/api/v1/projects/${projectId}`, body);
   }
 
