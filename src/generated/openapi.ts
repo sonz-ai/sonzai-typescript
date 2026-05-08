@@ -8840,6 +8840,14 @@ export interface components {
             tension: number;
             /** Format: date-time */
             updated_at: string;
+            /** Format: double */
+            user_baseline_affiliation: number;
+            /** Format: double */
+            user_baseline_arousal: number;
+            /** Format: double */
+            user_baseline_tension: number;
+            /** Format: double */
+            user_baseline_valence: number;
             user_id?: string;
             /** Format: double */
             valence: number;
