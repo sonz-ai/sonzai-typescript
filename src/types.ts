@@ -267,6 +267,13 @@ export interface MemoryTimelineOptions {
 // Personality
 // ---------------------------------------------------------------------------
 
+/**
+ * A single Big Five personality trait.
+ *
+ * `score` is on the 0-100 canonical scale that the platform stores natively.
+ * The API permissively accepts 0-1 fractional inputs on writes (auto-rescaled
+ * to 0-100), but reads always return 0-100.
+ */
 export interface Big5Trait {
   score: number;
   percentile: number;
@@ -1270,6 +1277,12 @@ export interface SDKPersonalityDimensions {
   volatility: number;
 }
 
+/**
+ * Raw Big5 personality scores for create/update payloads.
+ *
+ * Canonical scale is 0-100. Values <=1 are accepted permissively as 0-1
+ * fractions (e.g. 0.85 → 85) for backward compatibility with legacy clients.
+ */
 export interface Big5Scores {
   openness: number;
   conscientiousness: number;

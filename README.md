@@ -280,7 +280,9 @@ const agent = await client.agents.create({
   gender: "female",
   bio: "A thoughtful AI companion",
   personalityPrompt: "You are warm and empathetic",
-  big5: { openness: 0.85, conscientiousness: 0.6 },
+  // Big5 traits: 0-100 canonical scale. Values <=1 are also accepted as
+  // fractions (0.85 → 85) so existing code keeps working.
+  big5: { openness: 85, conscientiousness: 60 },
   // Tool capabilities are configurable at creation time:
   toolCapabilities: {
     web_search: true,
