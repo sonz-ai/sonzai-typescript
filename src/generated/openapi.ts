@@ -10968,6 +10968,34 @@ export interface components {
             phone?: string;
             title?: string;
         };
+        UpdateMoodInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/UpdateMoodInputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: double
+             * @description Affiliative warmth dimension (0-100)
+             */
+            affiliation: number;
+            /**
+             * Format: double
+             * @description Activation level dimension (0-100)
+             */
+            arousal: number;
+            /**
+             * Format: double
+             * @description Calm-tense dimension (0=tense, 100=calm)
+             */
+            tension: number;
+            /**
+             * Format: double
+             * @description Pleasure/displeasure dimension (0-100)
+             */
+            valence: number;
+        };
         UpdatePayload: {
             /**
              * Format: uri
@@ -11712,34 +11740,6 @@ export interface components {
             /** Format: double */
             next_event_hours: number;
             relationship?: components["schemas"]["WorkbenchStateRelation"];
-        };
-        UpdateMoodInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateMoodInputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * Format: double
-             * @description Affiliative warmth dimension (0-100)
-             */
-            affiliation: number;
-            /**
-             * Format: double
-             * @description Activation level dimension (0-100)
-             */
-            arousal: number;
-            /**
-             * Format: double
-             * @description Calm-tense dimension (0=tense, 100=calm)
-             */
-            tension: number;
-            /**
-             * Format: double
-             * @description Pleasure/displeasure dimension (0-100)
-             */
-            valence: number;
         };
     };
     responses: never;
