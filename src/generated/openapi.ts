@@ -1224,7 +1224,11 @@ export interface paths {
          * @description Returns the agent's current mood state. Optionally scoped to a specific user via `user_id` and `instance_id` query parameters.
          */
         get: operations["getMood"];
-        put?: never;
+        /**
+         * Override agent mood state
+         * @description Hard-sets the agent's current mood dimensions (valence, arousal, tension, affiliation) on a 0-100 scale. Used for explicit operator overrides — demo steering, admin tooling, integration tests. Subsequent turns continue to drift the mood normally (overrides are not pinned). When `user_id` is set, the override applies to that user's per-user mood; otherwise it applies to the agent-global mood.
+         */
+        put: operations["updateMood"];
         post?: never;
         delete?: never;
         options?: never;
@@ -5867,7 +5871,7 @@ export interface components {
             avatar_url?: string;
             /** @description Behavioral trait overrides */
             behaviors?: components["schemas"]["CreateAgentBodyBehaviorsStruct"];
-            /** @description Big Five personality scores (0-1) */
+            /** @description Big Five personality scores. Accepts either 0-100 (preferred) or 0-1 (fractional, legacy); auto-detected and normalized to 0-100 storage scale. */
             big5?: components["schemas"]["CreateAgentBodyBig5Struct"];
             /** @description Agent biography */
             bio?: string;
@@ -11709,6 +11713,34 @@ export interface components {
             next_event_hours: number;
             relationship?: components["schemas"]["WorkbenchStateRelation"];
         };
+        UpdateMoodInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateMoodInputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: double
+             * @description Affiliative warmth dimension (0-100)
+             */
+            affiliation: number;
+            /**
+             * Format: double
+             * @description Activation level dimension (0-100)
+             */
+            arousal: number;
+            /**
+             * Format: double
+             * @description Calm-tense dimension (0=tense, 100=calm)
+             */
+            tension: number;
+            /**
+             * Format: double
+             * @description Pleasure/displeasure dimension (0-100)
+             */
+            valence: number;
+        };
     };
     responses: never;
     parameters: never;
@@ -14049,7 +14081,7 @@ export interface operations {
                 /** @description Optional scope filter (e.g. 'wisdom') */
                 scope?: string;
                 /** @description Max nodes to return (default 50, max 200) */
-                limit?: string;
+                limit?: number;
                 /** @description Optional filter: only return nodes with this memory_type (e.g. 'factual', 'episodic', 'semantic', 'procedural', 'identity', 'temporal', 'relational'). When user_id is also set, routes to the indexed memory_tree_nodes_by_type table (O(1)); otherwise falls back to post-fetch filter. */
                 memory_type?: string;
             };
@@ -14392,7 +14424,7 @@ export interface operations {
                 /** @description Retrieval mode: 'semantic' (requires user_id), 'bm25', or 'auto' (default). 'auto' picks semantic when user_id is set and a vector index is wired. */
                 mode?: string;
                 /** @description Max results to return (default 20, max 100) */
-                limit?: string;
+                limit?: number;
                 /** @description Default 'true'. Set to 'false' to skip the SP4 per-turn verbatim KNN merge and return compressed fact hits only. */
                 include_verbatim?: string;
             };
@@ -14655,6 +14687,47 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MoodResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    updateMood: {
+        parameters: {
+            query?: {
+                /** @description Optional user ID to scope override to a single user's mood */
+                user_id?: string;
+                /** @description Optional instance ID (scoped with user_id) */
+                instance_id?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMoodInputBody"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
@@ -16232,7 +16305,7 @@ export interface operations {
                 /** @description Optional instance ID for scoping */
                 instance_id?: string;
                 /** @description Max facts to return (default 1000, max 5000) */
-                limit?: string;
+                limit?: number;
                 /** @description Set to 'true' to only return facts with metadata */
                 has_metadata?: string;
                 /** @description Filter by top-level fact kind (inventory / role / event / preference / relationship / identity / general). Coarsest filter — apply before finer item_type / subject_relation filters. */

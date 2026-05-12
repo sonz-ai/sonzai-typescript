@@ -387,6 +387,7 @@ export type UpdateGoalInputBody = components["schemas"]["UpdateGoalInputBody"];
 export type UpdateHabitInputBody = components["schemas"]["UpdateHabitInputBody"];
 export type UpdateInstanceInputBody = components["schemas"]["UpdateInstanceInputBody"];
 export type UpdateMetadataRequest = components["schemas"]["UpdateMetadataRequest"];
+export type UpdateMoodInputBody = components["schemas"]["UpdateMoodInputBody"];
 export type UpdatePayload = components["schemas"]["UpdatePayload"];
 export type UpdatePersonalityBody = components["schemas"]["UpdatePersonalityBody"];
 export type UpdatePersonalityOutputBody = components["schemas"]["UpdatePersonalityOutputBody"];
