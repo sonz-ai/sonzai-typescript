@@ -212,7 +212,9 @@ export interface MemoryTimelineOptions {
 // Personality
 // ---------------------------------------------------------------------------
 
+/** A single Big Five personality trait (0-100 scale). */
 export interface Big5Trait {
+  /** Trait score on 0-100 scale. */
   score: number;
   percentile: number;
   confidence?: number;
@@ -226,6 +228,7 @@ export interface Big5 {
   neuroticism: Big5Trait;
 }
 
+/** BFAS personality aspect scores (0-100 scale). */
 export interface PersonalityDimensions {
   intellect: number;
   aesthetic: number;
@@ -384,10 +387,15 @@ export interface ContextDataOptions {
   instanceId?: string;
 }
 
+/** Agent mood dimensions (0-100 scale). */
 export interface MoodState {
+  /** 0-100 */
   valence: number;
+  /** 0-100 */
   arousal: number;
+  /** 0-100 */
   tension: number;
+  /** 0-100 */
   affiliation: number;
   label?: string;
   /** @deprecated Use valence instead. */
@@ -851,22 +859,31 @@ export interface ExtractionFact {
   topic_tags: string[];
 }
 
+/** Personality trait delta applied to the 0-100 Big5 scale. */
 export interface ExtractionPersonalityDelta {
   trait: string;
+  /** Applied to 0-100 Big5 score. */
   delta: number;
   reason: string;
 }
 
+/** Personality dimension delta applied to the 0-100 BFAS scale. */
 export interface ExtractionDimensionDelta {
   dimension: string;
+  /** Applied to 0-100 BFAS dimension score. */
   delta: number;
   reason: string;
 }
 
+/** Mood delta (±35 max per turn on the 0-100 mood scale). */
 export interface ExtractionMoodDelta {
+  /** ±35 */
   happiness: number;
+  /** ±35 */
   energy: number;
+  /** ±35 */
   calmness: number;
+  /** ±35 */
   affection: number;
   reason: string;
 }
@@ -1117,6 +1134,7 @@ export interface EvalRunListOptions {
 // Agent CRUD
 // ---------------------------------------------------------------------------
 
+/** BFAS personality aspect scores for updates (0-100 scale). */
 export interface SDKPersonalityDimensions {
   intellect: number;
   aesthetic: number;
@@ -1130,11 +1148,17 @@ export interface SDKPersonalityDimensions {
   volatility: number;
 }
 
+/** Raw Big5 personality scores for updates (0-100 scale). */
 export interface Big5Scores {
+  /** 0-100 */
   openness: number;
+  /** 0-100 */
   conscientiousness: number;
+  /** 0-100 */
   extraversion: number;
+  /** 0-100 */
   agreeableness: number;
+  /** 0-100 */
   neuroticism: number;
   confidence?: number;
 }
