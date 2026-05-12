@@ -8840,8 +8840,6 @@ export interface components {
             last_decay_at: string;
             /** Format: date-time */
             last_interaction_at: string;
-            /** Format: date-time */
-            last_override_at?: string;
             /** Format: double */
             tension: number;
             /** Format: date-time */
