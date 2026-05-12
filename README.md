@@ -140,7 +140,7 @@ const response = await client.agents.chat({
   userId: "user-123",
   sessionId: "session-456",          // auto-created if omitted
   provider: "gemini",                 // gemini | zhipu | volcengine | openrouter | custom
-  model: "gemini-3.1-flash-lite-preview",
+  model: "gemini-3.1-flash-lite",
 });
 console.log(response.content);
 console.log(`Tokens: ${response.usage?.totalTokens}`);
@@ -240,7 +240,7 @@ await client.agents.chat({
   instanceId: "instance-789",          // parallel branch
   sessionId: "session-456",
   provider: "gemini",
-  model: "gemini-3.1-flash-lite-preview",
+  model: "gemini-3.1-flash-lite",
   language: "en",
   timezone: "America/New_York",
   compiledSystemPrompt: "You are a helpful assistant.",
@@ -394,7 +394,7 @@ const session = await client.agents.sessions.start("agent-id", {
   userId: "user-123",
   sessionId: "session-456",
   provider: "gemini",                              // session-level default
-  model: "gemini-3.1-flash-lite-preview",          // (per-turn overrides OK)
+  model: "gemini-3.1-flash-lite",          // (per-turn overrides OK)
 });
 
 // Per-turn loop: fetch enriched context, hand it to your LLM, submit the turn.

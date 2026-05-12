@@ -25,7 +25,7 @@ import type { Sessions } from "./sessions.js";
  *
  * Per-call `provider`/`model` on .turn() override the session-level
  * defaults; if neither is set the server-side resolver picks the
- * tenant default (e.g. gemini-3.1-flash-lite-preview).
+ * tenant default (e.g. gemini-3.1-flash-lite).
  *
  * Backward compat: `success` mirrors the legacy `SessionResponse`
  * shape so existing callers doing

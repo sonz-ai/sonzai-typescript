@@ -28,14 +28,14 @@ describe("Session handle", () => {
       userId: "u1",
       sessionId: "s1",
       provider: "gemini",
-      model: "gemini-3.1-flash-lite-preview",
+      model: "gemini-3.1-flash-lite",
     });
     expect(session).toBeInstanceOf(Session);
     expect(session.agentId).toBe("agent-1");
     expect(session.userId).toBe("u1");
     expect(session.sessionId).toBe("s1");
     expect(session.provider).toBe("gemini");
-    expect(session.model).toBe("gemini-3.1-flash-lite-preview");
+    expect(session.model).toBe("gemini-3.1-flash-lite");
   });
 
   it("session.context() forwards to GET /agents/{id}/context with bound ids", async () => {
@@ -98,7 +98,7 @@ describe("Session handle", () => {
       userId: "u1",
       sessionId: "s1",
       provider: "gemini",
-      model: "gemini-3.1-flash-lite-preview",
+      model: "gemini-3.1-flash-lite",
     });
     const result = await session.turn({
       messages: [
@@ -111,7 +111,7 @@ describe("Session handle", () => {
     expect(result.mood?.valence).toBeCloseTo(0.1);
     // Session-level provider/model flow into the request body.
     expect(capturedBody?.provider).toBe("gemini");
-    expect(capturedBody?.model).toBe("gemini-3.1-flash-lite-preview");
+    expect(capturedBody?.model).toBe("gemini-3.1-flash-lite");
     expect(capturedBody?.userId).toBe("u1");
     expect(Array.isArray(capturedBody?.messages)).toBe(true);
   });
@@ -140,7 +140,7 @@ describe("Session handle", () => {
       userId: "u1",
       sessionId: "s1",
       provider: "gemini",
-      model: "gemini-3.1-flash-lite-preview",
+      model: "gemini-3.1-flash-lite",
     });
     await session.turn({
       messages: [{ role: "user", content: "hi" }],

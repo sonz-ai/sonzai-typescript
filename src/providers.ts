@@ -53,7 +53,7 @@ export const models = {
   /** Google Gemini model IDs. */
   gemini: {
     /** Fast, cost-efficient model — recommended default for most use cases. */
-    FLASH_LITE: "gemini-3.1-flash-lite-preview",
+    FLASH_LITE: "gemini-3.1-flash-lite",
   },
 
   /** Zhipu AI (GLM-4 family) model IDs. */
