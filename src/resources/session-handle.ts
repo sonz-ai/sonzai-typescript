@@ -133,4 +133,95 @@ export class Session implements SessionResponse {
       pollTimeoutMs: options.pollTimeoutMs,
     });
   }
+
+  // -------------------------------------------------------------------
+  // Per-user proxy methods — auto-scope by (agentId, userId, instanceId)
+  // -------------------------------------------------------------------
+  //
+  // The platform scopes per-user rows under `inst:<instanceId>:<userId>`
+  // when a session was started with an instanceId. Calling the
+  // agent-level helpers directly (e.g. `client.agents.getMood(...)`)
+  // without instanceId silently targets the UNSCOPED row, which
+  // `session.context()` then never reads. The reproduction in the demo:
+  // user applies a mood override, get_mood confirms the new value, but
+  // the next reply uses the old mood because /context reads the scoped
+  // row. These wrappers eliminate that footgun by always forwarding the
+  // session's instanceId.
+
+  /** Hard-set mood (0-100 per dimension), auto-scoped to this session's user. */
+  async updateMood(args: {
+    valence: number;
+    arousal: number;
+    tension: number;
+    affiliation: number;
+  }): Promise<unknown> {
+    // http.put doesn't accept params kwarg — inline scope into the URL.
+    const qs = new URLSearchParams({ user_id: this.userId });
+    if (this.instanceId) qs.append("instance_id", this.instanceId);
+    return this.http.put<unknown>(
+      `/api/v1/agents/${this.agentId}/mood?${qs.toString()}`,
+      args,
+    );
+  }
+
+  /** Current mood (0-100 per dimension) for this session's user. */
+  async getMood(): Promise<unknown> {
+    const params: Record<string, string> = { user_id: this.userId };
+    if (this.instanceId) params.instance_id = this.instanceId;
+    return this.http.get<unknown>(`/api/v1/agents/${this.agentId}/mood`, params);
+  }
+
+  /** Active facts about this session's user. */
+  async listFacts(opts: { limit?: number } = {}): Promise<unknown> {
+    const params: Record<string, string | number> = {};
+    if (this.instanceId) params.instance_id = this.instanceId;
+    if (opts.limit) params.limit = opts.limit;
+    return this.http.get<unknown>(
+      `/api/v1/agents/${this.agentId}/users/${this.userId}/facts`,
+      params as Record<string, string>,
+    );
+  }
+
+  /** Inventory query for this session's user. */
+  async queryInventory(
+    opts: { mode?: string; limit?: number } = {},
+  ): Promise<unknown> {
+    const params: Record<string, string | number> = {};
+    if (this.instanceId) params.instance_id = this.instanceId;
+    if (opts.mode) params.mode = opts.mode;
+    if (opts.limit) params.limit = opts.limit;
+    return this.http.get<unknown>(
+      `/api/v1/agents/${this.agentId}/users/${this.userId}/inventory`,
+      params as Record<string, string>,
+    );
+  }
+
+  /** Concept-graph constellation for this session's user. */
+  async getConstellation(): Promise<unknown> {
+    const params: Record<string, string> = { user_id: this.userId };
+    if (this.instanceId) params.instance_id = this.instanceId;
+    return this.http.get<unknown>(
+      `/api/v1/agents/${this.agentId}/constellation`,
+      params,
+    );
+  }
+
+  /** Schedule a proactive wakeup for this session's user. */
+  async scheduleWakeup(args: {
+    checkType: string;
+    intent: string;
+    delayHours?: number;
+  }): Promise<unknown> {
+    const params: Record<string, string> = { user_id: this.userId };
+    if (this.instanceId) params.instance_id = this.instanceId;
+    return this.http.post<unknown>(
+      `/api/v1/agents/${this.agentId}/wakeups`,
+      {
+        check_type: args.checkType,
+        intent: args.intent,
+        delay_hours: args.delayHours ?? 24,
+      },
+      params,
+    );
+  }
 }
