@@ -204,6 +204,59 @@ const result = await client.agents.chatAsyncBlocking(
 );
 ```
 
+### Streaming and cancellation (detached variants)
+
+The default `chat` / `chatStream` methods use the SDK's own `AbortController` — they don't accept a caller-supplied `AbortSignal`. That's a deliberate ergonomic choice for one specific anti-pattern that surfaces over and over:
+
+```ts
+// ❌ DON'T do this. req.signal fires the moment the HTTP request ends,
+//    which aborts fetch mid-generation and wastes the tokens.
+app.post("/chat", async (req, res) => {
+  await someQueue.publish({ agentId, signal: req.signal });
+  res.json({ status: "queued" });
+});
+
+// Background worker:
+const reply = await fetch("...", { signal: queueJob.signal /* ← stale! */ });
+```
+
+When you're calling Sonzai from a queue worker, NATS handler, Express/Hono route, or any context where the caller's signal lifetime is shorter than the AI generation, use the `*Detached` variants. They keep an internal `AbortController` whose signal is **not** chained to the caller's, while still:
+
+- Enforcing an SDK-managed 5-minute timeout so calls can't leak indefinitely (override via `opts.timeoutMs`, or pass `<= 0` to disable).
+- Watching an optional `opts.parentSignal` so misuse surfaces as a `console.warn` (or `opts.onParentCancel` callback) instead of silently aborting fetch.
+
+```ts
+import type { DetachOptions } from "@sonzai-labs/agents";
+
+// Non-streaming (aggregates the SSE stream like chat()):
+const reply = await client.agents.chatDetached(
+  { agent: "agent-id", messages: [...] },
+  {
+    parentSignal: req.signal,                 // observed, NOT propagated
+    timeoutMs: 120_000,                       // default: 300_000 (5 min)
+    onParentCancel: () => metrics.inc("chat_detached.parent_cancelled"),
+  } satisfies DetachOptions,
+);
+
+// Callback-based streaming:
+await client.agents.chatStreamDetached(
+  { agent: "agent-id", messages: [...] },
+  (event) => process.stdout.write(event.choices?.[0]?.delta?.content ?? ""),
+  { parentSignal: req.signal },
+);
+
+// AsyncIterableIterator-based streaming (the TypeScript analogue of Go's
+// ChatStreamChannelDetached):
+for await (const event of client.agents.chatStreamChannelDetached(
+  { agent: "agent-id", messages: [...] },
+  { parentSignal: req.signal },
+)) {
+  process.stdout.write(event.choices?.[0]?.delta?.content ?? "");
+}
+```
+
+For interactive UIs where the caller really does want to cancel the generation on user nav-away, keep using vanilla `chat` / `chatStream` — they already abort fetch cleanly on internal timeout.
+
 ### Sync vs async memory recall (`memoryMode`)
 
 Supplementary memory recall can run **synchronously** (blocks context build until recall completes — every fact lands in the current turn) or **asynchronously** (races a deadline — slow hits spill to the next turn for lower first-token latency). Default is `sync`.
@@ -258,6 +311,20 @@ await client.agents.chat({
   skillLevels: { negotiation: 5 },
 });
 ```
+
+### Temperature
+
+Pass `temperature` on any chat call to override the AI service's default sampling temperature (currently `0.1` for most models). Omit the field to inherit the server-side default.
+
+```ts
+await client.agents.chat({
+  agent: "agent-id",
+  messages: [...],
+  temperature: 0.7,
+});
+```
+
+The Platform automatically adapts or omits `temperature` for providers whose models constrain it. You do not need to know provider-specific rules — pass the value you want, and the Platform reconciles it where necessary. `temperature: 0` is forwarded as a literal zero.
 
 ### Provider constants
 

@@ -45,6 +45,20 @@ export class HTTPClient {
       body?: Record<string, unknown>;
       params?: Record<string, string | number | boolean | undefined>;
       headers?: Record<string, string>;
+      /**
+       * Override the per-request timeout, in milliseconds. Used by
+       * detached call variants which manage their own (longer)
+       * deadline. Falls back to the client-level timeout.
+       */
+      timeoutMs?: number;
+      /**
+       * Override the AbortSignal used for the underlying fetch. Used
+       * by detached call variants to drive cancellation from a
+       * decoupled controller. When supplied, the per-request timeout
+       * is expected to be encoded in this signal already (e.g. via
+       * `AbortSignal.any([controller.signal, AbortSignal.timeout(...)])`).
+       */
+      signal?: AbortSignal;
     },
   ): Promise<T> {
     const url = this.buildUrl(path, options?.params);
@@ -53,17 +67,24 @@ export class HTTPClient {
     const mergedHeaders = options?.headers
       ? { ...this.headers, ...options.headers }
       : this.headers;
+    const useExternalSignal = options?.signal !== undefined;
+    const effectiveTimeout = options?.timeoutMs ?? this.timeout;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), this.timeout);
+      // When the caller supplies its own signal (detached variants), we
+      // trust it to encode the timeout and skip the per-attempt timer.
+      const controller = useExternalSignal ? null : new AbortController();
+      const timer = controller
+        ? setTimeout(() => controller.abort(), effectiveTimeout)
+        : null;
+      const signal = options?.signal ?? controller?.signal;
 
       try {
         const response = await this.fetchFn(url, {
           method,
           headers: mergedHeaders,
           body: options?.body ? JSON.stringify(options.body) : undefined,
-          signal: controller.signal,
+          signal,
         });
 
         // Retry on 5xx for idempotent methods
@@ -72,7 +93,7 @@ export class HTTPClient {
           isIdempotent &&
           attempt < maxAttempts - 1
         ) {
-          clearTimeout(timer);
+          if (timer) clearTimeout(timer);
           await this.backoff(attempt);
           continue;
         }
@@ -85,7 +106,7 @@ export class HTTPClient {
         }
         return (await response.text()) as T;
       } catch (error) {
-        clearTimeout(timer);
+        if (timer) clearTimeout(timer);
         // Retry on network errors for idempotent methods
         if (
           isIdempotent &&
@@ -97,7 +118,7 @@ export class HTTPClient {
         }
         throw error;
       } finally {
-        clearTimeout(timer);
+        if (timer) clearTimeout(timer);
       }
     }
 
@@ -224,12 +245,32 @@ export class HTTPClient {
     method: string,
     path: string,
     body?: Record<string, unknown>,
+    options?: {
+      /**
+       * Externally-managed AbortSignal. When supplied, this signal
+       * drives cancellation of the underlying fetch (and the SDK does
+       * NOT also wire up its own timeout — the caller is expected to
+       * encode any deadline in the supplied signal, e.g. via
+       * `AbortSignal.any([controller.signal, AbortSignal.timeout(...)])`).
+       *
+       * Used by the detached chat variants on {@link Agents} to keep
+       * the stream alive independently of the caller's request
+       * lifecycle.
+       */
+      signal?: AbortSignal;
+    },
   ): AsyncGenerator<Record<string, unknown>> {
     const url = this.buildUrl(path);
 
-    const controller = new AbortController();
-    // Longer timeout for streaming
-    const timer = setTimeout(() => controller.abort(), this.timeout * 10);
+    const useExternalSignal = options?.signal !== undefined;
+    // When the caller supplies its own signal, skip the SDK's
+    // streaming-timeout fallback — the caller's signal is expected to
+    // encode the deadline.
+    const controller = useExternalSignal ? null : new AbortController();
+    const timer = controller
+      ? setTimeout(() => controller.abort(), this.timeout * 10)
+      : null;
+    const signal = options?.signal ?? controller?.signal;
 
     try {
       const response = await this.fetchFn(url, {
@@ -239,7 +280,7 @@ export class HTTPClient {
           Accept: "text/event-stream",
         },
         body: body ? JSON.stringify(body) : undefined,
-        signal: controller.signal,
+        signal,
       });
 
       await this.throwOnError(response);
@@ -309,8 +350,11 @@ export class HTTPClient {
         reader.releaseLock();
       }
     } finally {
-      clearTimeout(timer);
-      controller.abort();
+      if (timer) clearTimeout(timer);
+      // Only abort the SDK-owned controller; if the caller supplied an
+      // external signal we leave teardown to them (the underlying fetch
+      // is already done by the time we exit the generator).
+      controller?.abort();
     }
   }
 

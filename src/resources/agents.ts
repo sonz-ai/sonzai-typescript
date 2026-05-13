@@ -6,6 +6,10 @@ function requireNonEmpty(value: string, name: string): void {
   }
 }
 
+import {
+  DEFAULT_DETACHED_TIMEOUT_MS,
+  type DetachOptions,
+} from "../types.js";
 import type {
   Agent,
   AgentCapabilities,
@@ -241,6 +245,154 @@ export class Agents {
     )) {
       yield event as ChatStreamEvent;
     }
+  }
+
+  // -- Chat (detached — decouples from caller's AbortSignal) --
+
+  /**
+   * Behaves like {@link chat} but detaches the underlying fetch from the
+   * caller's {@link AbortSignal}. Use this when invoking the SDK from a
+   * queue worker, Express/Hono request handler, or any context where
+   * the caller's `req.signal` (or equivalent) may fire before the AI
+   * generation completes — passing that signal to a vanilla
+   * {@link chat} would abort fetch mid-generation and waste tokens.
+   *
+   * Honours an SDK-managed timeout (default 5 minutes; override via
+   * `opts.timeoutMs`) so it cannot leak indefinitely. The optional
+   * `opts.parentSignal` is watched but NOT propagated — if it fires
+   * while the detached call is still running, the SDK invokes
+   * `opts.onParentCancel` (or logs a warning) so the misuse is visible
+   * during dev.
+   *
+   * Canonical use case: orchestrator wakeup handler dispatched from a
+   * NATS message whose ack window is shorter than an LLM stream.
+   */
+  async chatDetached(
+    options: ChatOptions,
+    opts: DetachOptions = {},
+  ): Promise<ChatResponse> {
+    requireNonEmpty(options.agent, "agentId");
+    const body = this.buildChatBody(options);
+    const { signal, dispose } = createDetachedSignal(opts);
+    try {
+      const parts: string[] = [];
+      let usage: ChatUsage | undefined;
+      for await (const event of this.http.streamSSE(
+        "POST",
+        `/api/v1/agents/${options.agent}/chat`,
+        body,
+        { signal },
+      )) {
+        const parsed = event as ChatStreamEvent;
+        const content = parsed.choices?.[0]?.delta?.content;
+        if (content) parts.push(content);
+        if (parsed.usage) usage = parsed.usage;
+      }
+      return { content: parts.join(""), sessionId: "", usage };
+    } finally {
+      dispose();
+    }
+  }
+
+  /**
+   * Callback-based detached streaming variant. The callback fires for
+   * every {@link ChatStreamEvent}. See {@link chatDetached} for when and
+   * why to use the detached variants.
+   */
+  async chatStreamDetached(
+    options: ChatOptions,
+    callback: (event: ChatStreamEvent) => void | Promise<void>,
+    opts: DetachOptions = {},
+  ): Promise<void> {
+    requireNonEmpty(options.agent, "agentId");
+    const body = this.buildChatBody(options);
+    const { signal, dispose } = createDetachedSignal(opts);
+    try {
+      for await (const event of this.http.streamSSE(
+        "POST",
+        `/api/v1/agents/${options.agent}/chat`,
+        body,
+        { signal },
+      )) {
+        await callback(event as ChatStreamEvent);
+      }
+    } finally {
+      dispose();
+    }
+  }
+
+  /**
+   * AsyncIterableIterator-based detached streaming variant — the
+   * TypeScript analogue of sonzai-go's
+   * `ChatStreamChannelDetached(parent, params, opts) -> chan`. The
+   * returned iterator yields {@link ChatStreamEvent} frames until the
+   * stream ends or the detached timeout fires; cancellation from the
+   * caller's `parentSignal` is observed (via the warning/callback)
+   * but NOT propagated to the underlying fetch.
+   *
+   * See {@link chatDetached} for the broader rationale.
+   */
+  chatStreamChannelDetached(
+    options: ChatOptions,
+    opts: DetachOptions = {},
+  ): AsyncIterableIterator<ChatStreamEvent> {
+    requireNonEmpty(options.agent, "agentId");
+    const body = this.buildChatBody(options);
+    const { signal, dispose } = createDetachedSignal(opts);
+
+    const upstream = this.http.streamSSE(
+      "POST",
+      `/api/v1/agents/${options.agent}/chat`,
+      body,
+      { signal },
+    );
+
+    let disposed = false;
+    const disposeOnce = (): void => {
+      if (disposed) return;
+      disposed = true;
+      dispose();
+    };
+
+    const iter: AsyncIterableIterator<ChatStreamEvent> = {
+      [Symbol.asyncIterator]() {
+        return iter;
+      },
+      async next(): Promise<IteratorResult<ChatStreamEvent>> {
+        try {
+          const result = await upstream.next();
+          if (result.done) {
+            disposeOnce();
+            return { value: undefined, done: true };
+          }
+          return {
+            value: result.value as ChatStreamEvent,
+            done: false,
+          };
+        } catch (err) {
+          disposeOnce();
+          throw err;
+        }
+      },
+      async return(): Promise<IteratorResult<ChatStreamEvent>> {
+        try {
+          await upstream.return?.(undefined);
+        } finally {
+          disposeOnce();
+        }
+        return { value: undefined, done: true };
+      },
+      async throw(err): Promise<IteratorResult<ChatStreamEvent>> {
+        try {
+          await upstream.throw?.(err);
+        } finally {
+          disposeOnce();
+        }
+        throw err;
+      },
+    };
+
+    return iter;
   }
 
   // -- Chat (async / processing_id polling, iter-140u-2) --
@@ -1227,10 +1379,92 @@ export class Agents {
     if (options.toolDefinitions)
       body.tool_definitions = options.toolDefinitions;
     if (options.maxTurns) body.max_turns = options.maxTurns;
+    // Explicit undefined check: temperature: 0 is a legitimate value
+    // and must reach the wire as `"temperature": 0`. The Platform
+    // reconciles provider-specific constraints downstream.
+    if (options.temperature !== undefined)
+      body.temperature = options.temperature;
     if (options.skipContextBuild)
       body.skip_context_build = options.skipContextBuild;
     if (options.gameContext) body.game_context = options.gameContext;
     if (options.skillLevels) body.skill_levels = options.skillLevels;
     return body;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Detached-signal helper
+//
+// The TypeScript analogue of sonzai-go's detachContext: build a fresh
+// AbortController (deliberately NOT chained to the caller's signal) that
+// fires only on the SDK-managed timeout, while watching the caller's
+// parentSignal to surface a warning if it fires mid-stream. The whole
+// point is that parentSignal cancellation does NOT propagate to fetch.
+// ---------------------------------------------------------------------------
+function createDetachedSignal(opts: DetachOptions): {
+  signal: AbortSignal;
+  dispose: () => void;
+} {
+  const timeoutMs = opts.timeoutMs ?? DEFAULT_DETACHED_TIMEOUT_MS;
+
+  const inner = new AbortController();
+  // Compose with AbortSignal.timeout when a positive timeout was
+  // configured (timeoutMs <= 0 means "no SDK-managed timeout", a rare
+  // power-user flag mirroring the Go SDK's negative-Timeout convention).
+  const signal: AbortSignal =
+    timeoutMs > 0
+      ? AbortSignal.any([inner.signal, AbortSignal.timeout(timeoutMs)])
+      : inner.signal;
+
+  let finished = false;
+  let parentListener: (() => void) | null = null;
+  const parent = opts.parentSignal;
+
+  if (parent) {
+    parentListener = () => {
+      // Only surface the warning if the underlying call is still
+      // running — silent no-op if the call already completed.
+      if (finished) return;
+      if (opts.onParentCancel) {
+        try {
+          opts.onParentCancel();
+        } catch {
+          // Swallow callback errors — they are observability, not
+          // control flow.
+        }
+        return;
+      }
+      const logger = opts.logger ?? {
+        warn: (msg: string, meta?: Record<string, unknown>) =>
+          // eslint-disable-next-line no-console
+          console.warn(msg, meta),
+      };
+      logger.warn(
+        "sonzai: parent AbortSignal fired during detached streaming call; " +
+          "call continues until completion or detached timeout — this " +
+          "usually indicates the wrong helper is being used (use the " +
+          "non-detached chat / chatStream when the caller's signal " +
+          "lifetime exceeds the generation)",
+        { detached_timeout_ms: timeoutMs },
+      );
+    };
+    if (parent.aborted) {
+      parentListener();
+    } else {
+      parent.addEventListener("abort", parentListener, { once: true });
+    }
+  }
+
+  const dispose = (): void => {
+    finished = true;
+    if (parent && parentListener) {
+      parent.removeEventListener("abort", parentListener);
+      parentListener = null;
+    }
+    // Aborting the inner controller is a no-op once the fetch has
+    // finished but ensures any racing fetch-cleanup wakes up promptly.
+    if (!inner.signal.aborted) inner.abort();
+  };
+
+  return { signal, dispose };
 }

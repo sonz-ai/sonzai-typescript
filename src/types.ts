@@ -162,9 +162,82 @@ export interface ChatOptions {
   toolCapabilities?: AgentToolCapabilities;
   toolDefinitions?: ToolDefinition[];
   maxTurns?: number;
+  /**
+   * Optional sampling temperature for this chat turn. Leave unset to
+   * inherit the AI service's per-model default (currently 0.1 for most
+   * models).
+   *
+   * The Platform automatically adapts or omits this value for providers
+   * whose models require it. Callers do not need to know provider-
+   * specific constraints — pass the value you want, and the Platform
+   * will silently reconcile it where necessary. `temperature: 0` is
+   * forwarded as a literal zero.
+   */
+  temperature?: number;
   skipContextBuild?: boolean;
   gameContext?: GameContext;
   skillLevels?: Record<string, number>;
+}
+
+/**
+ * Default detached call timeout (5 minutes). The upper bound applied to
+ * detached streaming calls when {@link DetachOptions.timeoutMs} is omitted.
+ *
+ * AI generations rarely exceed a couple of minutes, but the 5-minute
+ * ceiling tolerates a slow LLM, a retrying upstream, or a long
+ * tool-use chain while still guaranteeing the call eventually returns
+ * instead of leaking a fetch.
+ */
+export const DEFAULT_DETACHED_TIMEOUT_MS = 300_000;
+
+/**
+ * Minimal logger shape accepted by {@link DetachOptions}. Compatible with
+ * `console`, pino, winston, or any structured logger that exposes a
+ * `warn(message, meta?)` method.
+ */
+export interface DetachLogger {
+  warn: (message: string, meta?: Record<string, unknown>) => void;
+}
+
+/**
+ * Tunes the `*Detached` chat variants on {@link Agents}.
+ *
+ * All fields are optional. The zero-config call runs with
+ * {@link DEFAULT_DETACHED_TIMEOUT_MS} and emits a `console.warn` if a
+ * supplied parent signal fires mid-stream.
+ */
+export interface DetachOptions {
+  /**
+   * Caps the detached call. Omit to fall back to
+   * {@link DEFAULT_DETACHED_TIMEOUT_MS} (5 minutes). Pass a value `<= 0`
+   * to disable the SDK-managed timeout entirely — rarely what you want,
+   * prefer an explicit cap.
+   */
+  timeoutMs?: number;
+
+  /**
+   * Optional parent {@link AbortSignal}. The detached method watches
+   * this signal so it can surface a warning if the caller's request
+   * lifecycle ends while the AI generation is still running, but it
+   * deliberately does NOT propagate cancellation to the underlying
+   * fetch — that is the whole point of the detached helpers.
+   */
+  parentSignal?: AbortSignal;
+
+  /**
+   * Overrides the default `console.warn` logger used to surface the
+   * misuse warning when `parentSignal` fires during the call.
+   */
+  logger?: DetachLogger;
+
+  /**
+   * Invoked instead of the default logger warning when `parentSignal`
+   * fires while the detached call is still running. Fires at most once
+   * per call, and only if the underlying call has not already
+   * completed. Useful for routing the condition to metrics or
+   * structured tracing rather than logs alone.
+   */
+  onParentCancel?: () => void;
 }
 
 // ---------------------------------------------------------------------------

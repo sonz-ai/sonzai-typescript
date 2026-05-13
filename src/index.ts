@@ -43,6 +43,8 @@ export type {
   ChatStreamEvent,
   ChatResponse,
   ChatOptions,
+  DetachOptions,
+  DetachLogger,
   GameContext,
   // Dialogue
   DialogueOptions,
@@ -339,4 +341,4 @@ export type {
 } from "./types.js";
 
 // Runtime value exports (non-type)
-export { KBScope } from "./types.js";
+export { KBScope, DEFAULT_DETACHED_TIMEOUT_MS } from "./types.js";
