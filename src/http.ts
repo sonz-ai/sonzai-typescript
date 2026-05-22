@@ -30,7 +30,7 @@ export class HTTPClient {
     this.headers = {
       Authorization: `Bearer ${options.apiKey}`,
       "Content-Type": "application/json",
-      "User-Agent": "sonzai-typescript/1.5.5",
+      "User-Agent": "sonzai-typescript/1.6.0",
       ...options.defaultHeaders,
     };
     this.timeout = options.timeout;
