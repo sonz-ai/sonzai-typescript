@@ -176,6 +176,7 @@ export class Agents {
         related_traits: g.relatedTraits,
       }));
     }
+    if (options.proactiveMode) body.proactiveMode = options.proactiveMode;
 
     return this.http.post<Agent>("/api/v1/agents", body);
   }

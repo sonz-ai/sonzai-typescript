@@ -1422,6 +1422,13 @@ export interface CreateAgentOptions {
   generateOriginStory?: boolean;
   generatePersonalizedMemories?: boolean;
   initialGoals?: InitialGoal[];
+  /**
+   * Initial per-agent proactive-messaging mode:
+   * - `"full"` (default): all wakeup types fire.
+   * - `"scheduled_only"`: only tenant-defined reminder schedules fire.
+   * - `"off"`: no proactive outreach of any kind.
+   */
+  proactiveMode?: "full" | "scheduled_only" | "off";
 }
 
 export interface Agent {
@@ -2182,6 +2189,17 @@ export interface UpdateCapabilitiesOptions {
    * lower first-token latency.
    */
   memoryMode?: "sync" | "async";
+  /**
+   * Per-agent proactive-messaging mode:
+   * - `"full"` (default): all wakeup types fire (fallback, mood, follow-up,
+   *   celebration, interest research, reminder).
+   * - `"scheduled_only"`: only tenant-defined reminder schedules fire; the
+   *   agent never decides to reach out on its own.
+   * - `"off"`: no wakeup of any type fires, including reminders.
+   *
+   * Omitted = no change.
+   */
+  proactiveMode?: "full" | "scheduled_only" | "off";
 }
 
 // ---------------------------------------------------------------------------

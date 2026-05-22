@@ -2754,6 +2754,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/onboarding/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Claim a trial tenant into your account
+         * @description Binds a trial tenant to a freshly created Clerk organization owned by the signed-in user. The agent and its memory are preserved; agent_id does not change.
+         */
+        post: operations["onboardingClaim"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/onboarding/claim-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get a claim link for the caller's trial tenant
+         * @description Returns a fresh claim URL the trial-key holder can hand to a human to bind the trial to a real account. Only valid for trial tenants.
+         */
+        post: operations["onboardingClaimLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/org/billing": {
         parameters: {
             query?: never;
@@ -3378,6 +3418,26 @@ export interface paths {
         patch: operations["kbBulkUpdateProperties"];
         trace?: never;
     };
+    "/projects/{projectId}/knowledge/compare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Compare a property across entities via a shared relation
+         * @description Given a list of source entities, a relation type, a shared target entity, and a property path, returns each source's value for that property. Backs the kb_compare agent tool.
+         */
+        post: operations["kbCompare"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/projects/{projectId}/knowledge/documents": {
         parameters: {
             query?: never;
@@ -3426,7 +3486,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/projects/{projectId}/knowledge/facts": {
+    "/projects/{projectId}/knowledge/documents/{documentId}/classification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Resolve a needs_classification document
+         * @description Records the human-confirmed root entity for a document in the needs_classification queue and publishes kb.work.document.extract.
+         */
+        patch: operations["kbPatchDocumentClassification"];
+        trace?: never;
+    };
+    "/projects/{projectId}/knowledge/documents/{documentId}/cost": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Per-document billed cost breakdown
+         * @description Returns LLM + Document AI cost rows attributable to the given document. Useful for the workbench per-doc cost view (spec §10.7).
+         */
+        get: operations["kbGetDocumentCost"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/knowledge/documents/{documentId}/reingest": {
         parameters: {
             query?: never;
             header?: never;
@@ -3436,10 +3536,138 @@ export interface paths {
         get?: never;
         put?: never;
         /**
+         * Re-ingest a previously uploaded document
+         * @description Republishes a kb.work.document.classify (multimodal) or kb.work.document.parse (legacy) work item for an existing document. Useful after schema changes or model updates. Costs the project the same as a fresh ingest.
+         */
+        post: operations["kbReingestDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/knowledge/entities/{entityType}/{entityKey}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Direct entity lookup by (type, key)
+         * @description Returns the entity plus all active facts attached to it (both outgoing and incoming relationships). Backs the kb_get_entity agent tool.
+         */
+        get: operations["kbGetEntity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/knowledge/facts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List active KB facts for a project
+         * @description Paginates active kb_facts rows. Each fact carries verbatim source provenance (source_document_id, source_page, source_snippet, extraction_confidence) plus effective_date + version.
+         */
+        get: operations["kbListFacts"];
+        put?: never;
+        /**
          * Insert facts into the knowledge base
          * @description Resolves entities against existing nodes by label+type, creates or updates nodes with version history, and optionally creates edges between them.
          */
         post: operations["kbInsertFacts"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/knowledge/facts/active": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the active KB fact for a (from, to, relation) tuple
+         * @description Returns the currently-active fact for the given tuple, or null if none exists. Same shape as items in the list endpoint.
+         */
+        get: operations["kbGetActiveFact"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/knowledge/facts/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the version chain for a KB fact tuple
+         * @description Returns every version of the fact for (from_node_id, to_node_id, relation_type), newest first. Includes archived and quarantined versions.
+         */
+        get: operations["kbGetFactHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/knowledge/multimodal-schemas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List multimodal KB schema versions for a project
+         * @description Returns every version of the project's multimodal KB schema, newest first. Distinct from /knowledge/schemas (per-entity legacy schemas).
+         */
+        get: operations["kbListMultimodalSchemas"];
+        put?: never;
+        /**
+         * Create a new multimodal KB schema version
+         * @description Creates a new schema row (status defaults to 'draft' if not specified). To activate it, POST /multimodal-schemas/{version}/activate which atomically demotes the prior active schema to 'superseded'.
+         */
+        post: operations["kbCreateMultimodalSchema"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/knowledge/multimodal-schemas/{version}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Activate a draft multimodal schema version
+         * @description Atomically promotes the given draft schema to 'active' and demotes the prior active to 'superseded'. After activation, UploadDocument on a multimodal-pipeline project will accept uploads against this schema.
+         */
+        post: operations["kbActivateMultimodalSchema"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3638,6 +3866,26 @@ export interface paths {
          * @description Returns aggregate counts for documents, nodes, edges, and extraction tokens.
          */
         get: operations["kbGetStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/knowledge/traverse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Graph traversal from a starting entity
+         * @description Walks the project graph from (from_type, from_key) along relation_type up to max_depth. Returns facts encountered with their depth. Backs the kb_traverse agent tool.
+         */
+        get: operations["kbTraverse"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4831,6 +5079,7 @@ export interface components {
             /** Format: date-time */
             musicUnlockedAt?: string;
             pendingCapabilities?: components["schemas"]["PendingCapability"][] | null;
+            proactiveMode?: string;
             rememberName?: boolean;
             sharedMemory?: boolean;
             skills?: boolean;
@@ -4900,6 +5149,7 @@ export interface components {
             personality_prompt?: string;
             preferences?: components["schemas"]["InteractionPreferences"];
             primary_traits?: string[] | null;
+            proactive_mode?: string;
             project_id?: string;
             speech_patterns?: string[] | null;
             tenant_id: string;
@@ -4954,6 +5204,7 @@ export interface components {
             owner_display_name?: string;
             owner_email?: string;
             owner_user_id: string;
+            proactive_mode?: string;
             project_id?: string;
             tenant_id: string;
         };
@@ -5531,6 +5782,47 @@ export interface components {
              */
             sessionIndex: number;
         };
+        ClaimInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ClaimInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The claim token from the claim link */
+            claim_token: string;
+        };
+        ClaimLinkInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ClaimLinkInputBody.json
+             */
+            readonly $schema?: string;
+        };
+        ClaimLinkOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ClaimLinkOutputBody.json
+             */
+            readonly $schema?: string;
+            claim_url: string;
+            expires_at: string;
+        };
+        ClaimResult: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ClaimResult.json
+             */
+            readonly $schema?: string;
+            agent_id: string;
+            agent_name: string;
+            clerk_org_id: string;
+            status: string;
+            tenant_id: string;
+        };
         ColumnMappingSpec: {
             is_label?: boolean;
             property: string;
@@ -5901,6 +6193,11 @@ export interface components {
             preferences?: components["schemas"]["CreateAgentBodyPreferencesStruct"];
             /** @description Primary personality traits */
             primary_traits?: string[] | null;
+            /**
+             * @description Initial per-agent proactive-messaging mode. Omitted defaults to 'full' (all wakeup types fire).
+             * @enum {string}
+             */
+            proactiveMode?: "full" | "scheduled_only" | "off";
             /** @description Project UUID to assign */
             project_id?: string;
             /** @description Pre-generated lore entries */
@@ -7579,6 +7876,11 @@ export interface components {
             /** Format: int64 */
             total_leads: number;
         };
+        KBDocType: {
+            expected_relationships?: string[] | null;
+            root_entity_type: string;
+            type: string;
+        };
         KBDocument: {
             /**
              * Format: uri
@@ -7587,9 +7889,14 @@ export interface components {
              */
             readonly $schema?: string;
             checksum: string;
+            classification_candidates_json?: string;
+            /** Format: double */
+            classification_confidence?: number;
+            classification_status?: string;
             content_type: string;
             /** Format: date-time */
             created_at: string;
+            doc_type?: string;
             document_id: string;
             /** Format: int64 */
             edge_count: number;
@@ -7605,6 +7912,11 @@ export interface components {
             /** Format: int64 */
             node_count: number;
             project_id: string;
+            root_entity_key?: string;
+            root_entity_node_id?: string;
+            root_entity_type?: string;
+            /** Format: int64 */
+            schema_version_used?: number;
             status: string;
             /** Format: date-time */
             updated_at: string;
@@ -7648,6 +7960,13 @@ export interface components {
             similarity_config?: components["schemas"]["KBSimilarityConfig"];
             /** Format: date-time */
             updated_at: string;
+        };
+        KBEntityType: {
+            aliases_field?: string;
+            is_root_candidate: boolean;
+            key_fields: string[] | null;
+            properties?: components["schemas"]["KBSchemaProperty"][] | null;
+            type: string;
         };
         KBNode: {
             /**
@@ -7753,10 +8072,57 @@ export interface components {
             };
             type: string;
         };
+        KBRelationType: {
+            from: string;
+            properties?: components["schemas"]["KBSchemaProperty"][] | null;
+            supersession_identity: string[] | null;
+            to: string;
+            type: string;
+        };
+        KBSchema: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KBSchema.json
+             */
+            readonly $schema?: string;
+            config: components["schemas"]["KBSchemaConfig"];
+            /** Format: date-time */
+            created_at: string;
+            created_by?: string;
+            doc_types: components["schemas"]["KBDocType"][] | null;
+            entity_types: components["schemas"]["KBEntityType"][] | null;
+            project_id: string;
+            relationship_types: components["schemas"]["KBRelationType"][] | null;
+            /** Format: int64 */
+            schema_version: number;
+            status: string;
+            template_lineage?: string;
+            vertical_template?: string;
+        };
+        KBSchemaConfig: {
+            /** Format: double */
+            abstain_below_confidence?: number;
+            /** Format: double */
+            classify_auto_threshold?: number;
+            classify_model?: string;
+            /** Format: double */
+            extract_min_provenance_confidence?: number;
+            extract_model?: string;
+            ingestion_verifier_model?: string;
+            schema_propose_model?: string;
+            use_document_ai_preprocessor?: boolean;
+        };
         KBSchemaField: {
             description?: string;
             enum_values?: string[] | null;
             indexed?: boolean;
+            name: string;
+            required: boolean;
+            type: string;
+        };
+        KBSchemaProperty: {
+            description?: string;
             name: string;
             required: boolean;
             type: string;
@@ -7915,6 +8281,44 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        KbCompareEntity: {
+            key: {
+                [key: string]: unknown;
+            };
+            type: string;
+        };
+        KbCompareInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbCompareInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Entities to compare (e.g. list of hospitals). */
+            entities: components["schemas"]["KbCompareEntity"][] | null;
+            /** @description Dot-path of the property to extract from each fact (e.g. 'price'). */
+            property_path: string;
+            /** @description Target entity all the listed entities should be related to (e.g. procedure 'MRI'). */
+            target_entity: components["schemas"]["KbCompareEntity"];
+            /** @description Relation type connecting the entities to the target (e.g. 'hospital_offers_procedure'). */
+            via_relation: string;
+        };
+        KbCompareOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbCompareOutputBody.json
+             */
+            readonly $schema?: string;
+            rows: components["schemas"]["KbCompareRow"][] | null;
+        };
+        KbCompareRow: {
+            entity: components["schemas"]["KbCompareEntity"];
+            fact?: components["schemas"]["KbFactDTO"];
+            missing: boolean;
+            missing_reason?: string;
+            value?: unknown;
+        };
         KbCreateAnalyticsRuleInputBody: {
             /**
              * Format: uri
@@ -7972,6 +8376,49 @@ export interface components {
             /** @description Similarity search configuration */
             similarity_config?: components["schemas"]["KBSimilarityConfig"];
         };
+        KbDocCostBreakdown: {
+            /** Format: double */
+            cost_usd: number;
+            model: string;
+            operation: string;
+            /** Format: int64 */
+            pages?: number;
+        };
+        KbDocCostOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbDocCostOutputBody.json
+             */
+            readonly $schema?: string;
+            document_ai_rows: components["schemas"]["KbDocCostBreakdown"][] | null;
+            document_id: string;
+            llm_rows: components["schemas"]["KbDocCostBreakdown"][] | null;
+            /** Format: double */
+            total_cost_usd: number;
+        };
+        KbFactDTO: {
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            effective_date: string;
+            /** Format: double */
+            extraction_confidence: number;
+            fact_id: string;
+            from_node_id: string;
+            is_active: boolean;
+            properties: {
+                [key: string]: unknown;
+            };
+            relation_type: string;
+            source_document_id: string;
+            /** Format: int64 */
+            source_page: number;
+            source_snippet: string;
+            to_node_id: string;
+            /** Format: int64 */
+            version: number;
+        };
         KbGetConversionStatsOutputBody: {
             /**
              * Format: uri
@@ -7986,6 +8433,39 @@ export interface components {
              * @description Total count
              */
             total: number;
+        };
+        KbGetEntityOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbGetEntityOutputBody.json
+             */
+            readonly $schema?: string;
+            entity_key: {
+                [key: string]: unknown;
+            };
+            entity_node_id: string;
+            entity_type: string;
+            incoming_facts: components["schemas"]["KbFactDTO"][] | null;
+            outgoing_facts: components["schemas"]["KbFactDTO"][] | null;
+        };
+        KbGetFactHistoryOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbGetFactHistoryOutputBody.json
+             */
+            readonly $schema?: string;
+            versions: components["schemas"]["KbFactDTO"][] | null;
+        };
+        KbGetFactOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbGetFactOutputBody.json
+             */
+            readonly $schema?: string;
+            fact: components["schemas"]["KbFactDTO"];
         };
         KbGetNodeHistoryOutputBody: {
             /**
@@ -8160,6 +8640,16 @@ export interface components {
              */
             total: number;
         };
+        KbListFactsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbListFactsOutputBody.json
+             */
+            readonly $schema?: string;
+            facts: components["schemas"]["KbFactDTO"][] | null;
+            next_page_token?: string;
+        };
         KbListNodesOutputBody: {
             /**
              * Format: uri
@@ -8197,6 +8687,54 @@ export interface components {
              * @description Total count
              */
             total: number;
+        };
+        KbMultimodalSchemaActivateOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbMultimodalSchemaActivateOutputBody.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            active_version: number;
+            status: string;
+        };
+        KbMultimodalSchemaCreateOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbMultimodalSchemaCreateOutputBody.json
+             */
+            readonly $schema?: string;
+            schema: components["schemas"]["KBSchema"];
+        };
+        KbMultimodalSchemaListOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbMultimodalSchemaListOutputBody.json
+             */
+            readonly $schema?: string;
+            schemas: components["schemas"]["KBSchema"][] | null;
+        };
+        KbPatchClassificationInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbPatchClassificationInputBody.json
+             */
+            readonly $schema?: string;
+            root_entity: components["schemas"]["RootEntityStruct"];
+        };
+        KbPatchClassificationOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbPatchClassificationOutputBody.json
+             */
+            readonly $schema?: string;
+            document_id: string;
+            status: string;
         };
         KbPromoteNodeInputBody: {
             /**
@@ -8241,6 +8779,17 @@ export interface components {
             /** @description Result status */
             status: string;
         };
+        KbReingestOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbReingestOutputBody.json
+             */
+            readonly $schema?: string;
+            document_id: string;
+            mode: string;
+            status: string;
+        };
         KbResolutionInfo: {
             kb_label?: string;
             kb_node_id?: string;
@@ -8281,6 +8830,20 @@ export interface components {
             score: number;
             source?: string;
             type: string;
+        };
+        KbTraverseOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbTraverseOutputBody.json
+             */
+            readonly $schema?: string;
+            facts: components["schemas"]["KbTraversedFact"][] | null;
+        };
+        KbTraversedFact: {
+            /** Format: int64 */
+            depth: number;
+            fact: components["schemas"]["KbFactDTO"];
         };
         KbUpdateAnalyticsRuleInputBody: {
             /**
@@ -9583,6 +10146,14 @@ export interface components {
             readonly $schema?: string;
             success: boolean;
         };
+        RootEntityStruct: {
+            /** @description Root entity key fields per schema entity_types[].key_fields. */
+            key: {
+                [key: string]: unknown;
+            };
+            /** @description Root entity type from the active schema. */
+            type: string;
+        };
         RotateSigningSecretOutputBody: {
             /**
              * Format: uri
@@ -10295,10 +10866,14 @@ export interface components {
             /** Format: date-time */
             created_at: string;
             is_active: boolean;
+            is_trial?: boolean;
             license_key_id?: string;
             name: string;
             slug?: string;
             tenant_id: string;
+            /** Format: date-time */
+            trial_expires_at?: string;
+            trial_source?: string;
         };
         TenantBillingLedgerEntry: {
             /** Format: double */
@@ -10775,6 +11350,11 @@ export interface components {
              * @enum {string}
              */
             memoryMode?: "sync" | "async";
+            /**
+             * @description Per-agent proactive-messaging mode. 'full' (default) fires all wakeup types; 'scheduled_only' fires only tenant-defined reminder schedules; 'off' fires nothing. Omitted = no change.
+             * @enum {string}
+             */
+            proactiveMode?: "full" | "scheduled_only" | "off";
             /** @description Enable/disable remember name tool */
             rememberName?: boolean;
             /** @description Enable/disable person/entity-attributed memory shared across users of this agent (teams, parties, business context). Off by default. Requires wisdom. */
@@ -18245,6 +18825,72 @@ export interface operations {
             };
         };
     };
+    onboardingClaim: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimResult"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    onboardingClaimLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimLinkInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimLinkOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     getOrgBilling: {
         parameters: {
             query?: never;
@@ -19584,6 +20230,42 @@ export interface operations {
             };
         };
     };
+    kbCompare: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KbCompareInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbCompareOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     kbListDocuments: {
         parameters: {
             query?: {
@@ -19724,6 +20406,185 @@ export interface operations {
             };
         };
     };
+    kbPatchDocumentClassification: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+                /** @description Document UUID. */
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KbPatchClassificationInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbPatchClassificationOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbGetDocumentCost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+                /** @description Document UUID. */
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbDocCostOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbReingestDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+                /** @description Document UUID. */
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbReingestOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbGetEntity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+                /** @description Entity type (e.g. 'hospital'). */
+                entityType: string;
+                /** @description URL-encoded JSON of the entity's key fields (e.g. '%7B%22name%22%3A%22Mt+Elizabeth%22%7D'). */
+                entityKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbGetEntityOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbListFacts: {
+        parameters: {
+            query?: {
+                /** @description Max facts to return (default 50, max 500). */
+                limit?: number;
+                /** @description Opaque pagination cursor returned by the previous response. */
+                page_token?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbListFactsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     kbInsertFacts: {
         parameters: {
             query?: never;
@@ -19747,6 +20608,186 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["KbInsertFactsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbGetActiveFact: {
+        parameters: {
+            query?: {
+                /** @description Fact tuple component. */
+                from_node_id?: string;
+                /** @description Fact tuple component. */
+                to_node_id?: string;
+                /** @description Fact tuple component. */
+                relation_type?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbGetFactOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbGetFactHistory: {
+        parameters: {
+            query?: {
+                /** @description Fact tuple component. */
+                from_node_id?: string;
+                /** @description Fact tuple component. */
+                to_node_id?: string;
+                /** @description Fact tuple component. */
+                relation_type?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbGetFactHistoryOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbListMultimodalSchemas: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbMultimodalSchemaListOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbCreateMultimodalSchema: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["KBSchema"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbMultimodalSchemaCreateOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbActivateMultimodalSchema: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+                /** @description Schema version to activate. */
+                version: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbMultimodalSchemaActivateOutputBody"];
                 };
             };
             /** @description Error */
@@ -20270,6 +21311,49 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["KbGetStatsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbTraverse: {
+        parameters: {
+            query?: {
+                /** @description Starting entity type. */
+                from_type?: string;
+                /** @description Starting entity key (URL-encoded JSON). */
+                from_key?: string;
+                /** @description Relation to traverse. */
+                relation_type?: string;
+                /** @description outbound | inbound | both (default outbound). */
+                direction?: string;
+                /** @description Traversal depth (default 1, max 3). */
+                max_depth?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbTraverseOutputBody"];
                 };
             };
             /** @description Error */
