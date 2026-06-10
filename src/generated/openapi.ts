@@ -2598,6 +2598,124 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/builtin-agents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Sonzai built-in backend agents
+         * @description Vertical task agents (deep lead research, market intel, …) run on Anthropic managed agents and billed per token + runtime. Invoke directly or let your Sonzai agents call them as tools.
+         */
+        get: operations["listBuiltinAgents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List built-in agent chat sessions */
+        get: operations["listBuiltinAgentSessions"];
+        put?: never;
+        /**
+         * Start a chat session with a built-in agent
+         * @description Opens a persistent managed-agent session (sandbox + conversation state held by Anthropic, checkpointed 30 days). Each subsequent message bills the usage delta.
+         */
+        post: operations["startBuiltinAgentSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/sessions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a built-in agent session (status, billed usage, cost) */
+        get: operations["getBuiltinAgentSession"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/sessions/{id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a chat message to a built-in agent session
+         * @description Streams the agent's work (messages, tool use) live when stream=true. Bills the token-usage delta for the turn at the tenant's billing mode.
+         */
+        post: operations["sendBuiltinAgentMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/{slug}/invoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run a built-in agent task
+         * @description Spins up an isolated managed-agent session, runs the task with real web research tools, and returns structured findings. With stream=true the response is an SSE stream of live progress events ending in a `result` event.
+         */
+        post: operations["invokeBuiltinAgent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/enrichment/person": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enrich a person (cost-ordered vendor waterfall)
+         * @description Runs a cache-first, cost-ordered vendor waterfall (Crustdata → Fiber → Apollo) to research a person and resolve contact points. Results are cached per tenant+identifier so a vendor is never re-billed for a cached lookup. Contact data is best-effort and PH/OFW coverage is limited.
+         */
+        post: operations["enrichPerson"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/eval-runs": {
         parameters: {
             query?: never;
@@ -5710,6 +5828,22 @@ export interface components {
             default_model: string;
             providers: unknown[] | null;
         };
+        CatalogEntry: {
+            description: string;
+            model: string;
+            name: string;
+            provisioned: boolean;
+            slug: string;
+        };
+        ChatMsgInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ChatMsgInputBody.json
+             */
+            readonly $schema?: string;
+            text: string;
+        };
         ChatSSEChoice: {
             /** @description Incremental delta for this chunk */
             delta: components["schemas"]["ChatSSEDelta"];
@@ -5910,6 +6044,21 @@ export interface components {
             readonly $schema?: string;
             /** @description Whether the notification was consumed */
             success: boolean;
+        };
+        ContactPoint: {
+            e164?: string;
+            type: string;
+            value: string;
+            verified: boolean;
+        };
+        ContactResult: {
+            confidence: string;
+            /** Format: int64 */
+            credits_used: number;
+            emails: components["schemas"]["ContactPoint"][] | null;
+            ph_resolved: boolean;
+            phones: components["schemas"]["ContactPoint"][] | null;
+            provider: string;
         };
         ContextEngineEventByType: {
             /** Format: double */
@@ -6983,6 +7132,59 @@ export interface components {
             /** @description Whether the session end was accepted */
             success: boolean;
         };
+        EnrichPersonInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/EnrichPersonInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description ISO country (e.g. PH) — coverage caveats apply outside US/EU */
+            country?: string;
+            /** @description Known email address (contact-resolution identifier) */
+            email?: string;
+            /** @description Current employer / company */
+            employer?: string;
+            /** @description LinkedIn profile URL — the Crustdata identifier; strongly preferred */
+            linkedin_url?: string;
+            /** @description Full name */
+            name?: string;
+            /** @description Contact fields desired: "email", "phone". Defaults to both. */
+            want?: string[] | null;
+        };
+        EnrichPersonOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/EnrichPersonOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description True when served from the ScyllaDB cache (no vendor was billed). */
+            cache_hit: boolean;
+            /** @description Resolved contact points (Fiber/Apollo). null when unresolved. */
+            contact: components["schemas"]["ContactResult"];
+            /**
+             * Format: int64
+             * @description Best-effort estimate of vendor credits consumed (0 on cache hit).
+             */
+            credits_used: number;
+            /** @description Vendors actually invoked in this run. */
+            providers_used: string[] | null;
+            /** @description Person/company research (Crustdata). null when unresolved. */
+            research: components["schemas"]["EnrichResult"];
+            /** @description Per-step waterfall trace for transparency. */
+            steps: components["schemas"]["Step"][] | null;
+        };
+        EnrichResult: {
+            citations: string[] | null;
+            confidence: string;
+            coverage_note?: string;
+            employer_guess?: string;
+            role_signals: string[] | null;
+            summary: string;
+            tier: string;
+            wealth_signals: components["schemas"]["WealthSignal"][] | null;
+        };
         EnterpriseContract: {
             /**
              * Format: uri
@@ -7513,6 +7715,22 @@ export interface components {
             /** @description Available provider/model combinations */
             providers: components["schemas"]["AgentModelsModelEntry"][] | null;
         };
+        GetBuiltinAgentSessionResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/GetBuiltinAgentSessionResponse.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            billed_cache_creation_tokens: number;
+            /** Format: int64 */
+            billed_cache_read_tokens: number;
+            /** Format: int64 */
+            billed_input_tokens: number;
+            /** Format: int64 */
+            billed_output_tokens: number;
+        };
         GetSkillLoadCountOutputBody: {
             /**
              * Format: uri
@@ -7812,6 +8030,20 @@ export interface components {
             inventory_item_id?: string;
             kb_resolution?: components["schemas"]["KbResolutionInfo"];
             status: string;
+        };
+        InvokeInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/InvokeInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Task payload passed verbatim to the agent (e.g. lead fields: name, linkedin_url, employer, country, inquiry) */
+            input: {
+                [key: string]: unknown;
+            };
+            /** @description Optional session title for traceability */
+            title?: string;
         };
         JobUser: {
             /** Format: date-time */
@@ -8921,6 +9153,24 @@ export interface components {
              */
             readonly $schema?: string;
             keys: components["schemas"]["BYOKKeyResponse"][] | null;
+        };
+        ListBuiltinAgentSessionsResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListBuiltinAgentSessionsResponse.json
+             */
+            readonly $schema?: string;
+            sessions: components["schemas"]["SessionBody"][] | null;
+        };
+        ListBuiltinAgentsResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListBuiltinAgentsResponse.json
+             */
+            readonly $schema?: string;
+            agents: components["schemas"]["CatalogEntry"][] | null;
         };
         ListComposioAuditOutputBody: {
             /**
@@ -10351,6 +10601,24 @@ export interface components {
             /** Format: int64 */
             totalEvents: number;
         };
+        SessionBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/SessionBody.json
+             */
+            readonly $schema?: string;
+            agent: string;
+            byok: boolean;
+            /** Format: double */
+            cost_usd: number;
+            /** Format: date-time */
+            created_at: string;
+            id: string;
+            model: string;
+            status: string;
+            title: string;
+        };
         SessionConfig: {
             name: string;
             /** Format: int64 */
@@ -10601,6 +10869,17 @@ export interface components {
             /** @description Language code for transcription */
             language?: string;
         };
+        StartChatInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/StartChatInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Built-in agent slug */
+            agent: string;
+            title?: string;
+        };
         StartSessionInputBody: {
             /**
              * Format: uri
@@ -10632,6 +10911,10 @@ export interface components {
             readonly $schema?: string;
             /** @description Whether the session was started successfully */
             success: boolean;
+        };
+        Step: {
+            outcome: string;
+            step: string;
         };
         StoredFact: {
             /** Format: double */
@@ -11954,6 +12237,12 @@ export interface components {
              */
             readonly $schema?: string;
             wakeups: components["schemas"]["WakeupEntry"][] | null;
+        };
+        WealthSignal: {
+            signal: string;
+            source: string;
+            /** Format: double */
+            weight?: number;
         };
         Webhook: {
             auth_header?: string;
@@ -18467,6 +18756,236 @@ export interface operations {
             };
         };
     };
+    listBuiltinAgents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListBuiltinAgentsResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listBuiltinAgentSessions: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListBuiltinAgentSessionsResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    startBuiltinAgentSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartChatInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getBuiltinAgentSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GetBuiltinAgentSessionResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    sendBuiltinAgentMessage: {
+        parameters: {
+            query?: {
+                /** @description true → SSE of live agent events ending in a final result event */
+                stream?: boolean;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatMsgInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    invokeBuiltinAgent: {
+        parameters: {
+            query?: {
+                /** @description true → stream live agent progress as SSE; false → block and return JSON */
+                stream?: boolean;
+            };
+            header?: never;
+            path: {
+                /** @description Built-in agent slug, e.g. lead_research */
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvokeInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    enrichPerson: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrichPersonInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnrichPersonOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     listEvalRuns: {
         parameters: {
             query?: {
@@ -22178,7 +22697,7 @@ export interface operations {
             path: {
                 project_id: string;
                 /** @description Provider name */
-                provider: "openai" | "gemini" | "xai" | "openrouter";
+                provider: "openai" | "gemini" | "xai" | "openrouter" | "anthropic";
             };
             cookie?: never;
         };
@@ -22214,7 +22733,7 @@ export interface operations {
             header?: never;
             path: {
                 project_id: string;
-                provider: "openai" | "gemini" | "xai" | "openrouter";
+                provider: "openai" | "gemini" | "xai" | "openrouter" | "anthropic";
             };
             cookie?: never;
         };
@@ -22244,7 +22763,7 @@ export interface operations {
             header?: never;
             path: {
                 project_id: string;
-                provider: "openai" | "gemini" | "xai" | "openrouter";
+                provider: "openai" | "gemini" | "xai" | "openrouter" | "anthropic";
             };
             cookie?: never;
         };
@@ -22280,7 +22799,7 @@ export interface operations {
             header?: never;
             path: {
                 project_id: string;
-                provider: "openai" | "gemini" | "xai" | "openrouter";
+                provider: "openai" | "gemini" | "xai" | "openrouter" | "anthropic";
             };
             cookie?: never;
         };
