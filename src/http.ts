@@ -30,7 +30,7 @@ export class HTTPClient {
     this.headers = {
       Authorization: `Bearer ${options.apiKey}`,
       "Content-Type": "application/json",
-      "User-Agent": "sonzai-typescript/1.6.0",
+      "User-Agent": "sonzai-typescript/1.7.0",
       ...options.defaultHeaders,
     };
     this.timeout = options.timeout;
@@ -354,6 +354,159 @@ export class HTTPClient {
       // Only abort the SDK-owned controller; if the caller supplied an
       // external signal we leave teardown to them (the underlying fetch
       // is already done by the time we exit the generator).
+      controller?.abort();
+    }
+  }
+
+  /**
+   * Stream a named-event SSE response (`event: <name>` + `data: <json>`
+   * frame pairs) and yield `{event, data}` for each dispatched frame.
+   *
+   * Unlike {@link streamSSE} (which is tailored to the chat wire format
+   * and ignores `event:` lines), this parser tracks the SSE event name
+   * so callers can distinguish e.g. `update` vs `result` vs `error`
+   * frames. Frames without an explicit `event:` line are reported under
+   * the SSE default name `"message"`. A `data: [DONE]` sentinel ends
+   * the stream.
+   */
+  async *streamNamedSSE(
+    method: string,
+    path: string,
+    body?: Record<string, unknown>,
+    options?: {
+      /** Query-string parameters appended to the URL. */
+      params?: Record<string, string | number | boolean | undefined>;
+      /**
+       * Externally-managed AbortSignal. When supplied, the SDK does not
+       * wire up its own timeout — the caller is expected to encode any
+       * deadline in the supplied signal.
+       */
+      signal?: AbortSignal;
+      /**
+       * Overall stream deadline in milliseconds when no external signal
+       * is supplied. Defaults to 10× the client timeout. Long-running
+       * callers (built-in agent invocations) pass a larger value.
+       */
+      timeoutMs?: number;
+    },
+  ): AsyncGenerator<{ event: string; data: Record<string, unknown> }> {
+    const url = this.buildUrl(path, options?.params);
+
+    const useExternalSignal = options?.signal !== undefined;
+    const controller = useExternalSignal ? null : new AbortController();
+    const timer = controller
+      ? setTimeout(
+          () => controller.abort(),
+          options?.timeoutMs ?? this.timeout * 10,
+        )
+      : null;
+    const signal = options?.signal ?? controller?.signal;
+
+    try {
+      const response = await this.fetchFn(url, {
+        method,
+        headers: {
+          ...this.headers,
+          Accept: "text/event-stream",
+        },
+        body: body ? JSON.stringify(body) : undefined,
+        signal,
+      });
+
+      await this.throwOnError(response);
+
+      if (!response.body) {
+        return;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let eventName = "message";
+      let dataLines: string[] = [];
+      let done = false;
+
+      // Dispatch the accumulated frame (blank-line boundary reached).
+      const flush = (): {
+        event: string;
+        data: Record<string, unknown>;
+      } | null => {
+        const name = eventName;
+        eventName = "message";
+        if (dataLines.length === 0) return null;
+        const payload = dataLines.join("\n");
+        dataLines = [];
+        if (payload === "[DONE]") {
+          done = true;
+          return null;
+        }
+        try {
+          return {
+            event: name,
+            data: JSON.parse(payload) as Record<string, unknown>,
+          };
+        } catch (e) {
+          console.warn(
+            "[sonzai-sdk] Malformed SSE JSON event skipped:",
+            payload,
+            e,
+          );
+          return null;
+        }
+      };
+
+      const handleLine = (
+        rawLine: string,
+      ): { event: string; data: Record<string, unknown> } | null => {
+        const line = rawLine.endsWith("\r") ? rawLine.slice(0, -1) : rawLine;
+        if (line === "") return flush();
+        if (line.startsWith(":")) return null; // SSE comment / keepalive
+        if (line.startsWith("event:")) {
+          eventName = line.slice(6).trim();
+          return null;
+        }
+        if (line.startsWith("data:")) {
+          let value = line.slice(5);
+          if (value.startsWith(" ")) value = value.slice(1);
+          dataLines.push(value);
+          return null;
+        }
+        return null;
+      };
+
+      try {
+        while (true) {
+          const { done: readDone, value } = await reader.read();
+          if (readDone) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          // Keep the last incomplete line in the buffer
+          buffer = lines.pop() ?? "";
+
+          for (const line of lines) {
+            const frame = handleLine(line);
+            if (frame) yield frame;
+            if (done) return;
+          }
+        }
+
+        // Process any remaining buffered line, then flush the final frame
+        // (streams that end without a trailing blank line).
+        if (buffer !== "") {
+          const frame = handleLine(buffer);
+          if (frame) yield frame;
+          if (done) return;
+        }
+        const tail = flush();
+        if (tail) yield tail;
+      } finally {
+        // releaseLock() detaches the reader without awaiting stream cleanup
+        // (see streamSSE above for why reader.cancel() is avoided).
+        reader.releaseLock();
+      }
+    } finally {
+      if (timer) clearTimeout(timer);
       controller?.abort();
     }
   }

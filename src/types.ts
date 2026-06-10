@@ -3133,3 +3133,143 @@ export interface AdvanceTimeJob {
   error?: string;
   [key: string]: unknown;
 }
+
+// ---------------------------------------------------------------------------
+// Sonzai Built-in Agents
+// ---------------------------------------------------------------------------
+//
+// Platform-hosted vertical task agents invoked by slug. Invocations are
+// billed per token plus runtime at the tenant's billing mode.
+
+/**
+ * Known built-in agent slugs. The catalog is server-driven, so any string
+ * is accepted — this union exists for editor completions.
+ */
+export type BuiltinAgentSlug =
+  | "lead_research"
+  | "market_intel"
+  | "lead_extract"
+  | "lead_score"
+  | "lead_qualifier"
+  // `string & {}` keeps literal completions while accepting new
+  // server-added slugs.
+  | (string & {});
+
+/** Catalog entry returned by GET /builtin-agents. */
+export interface BuiltinAgentSummary {
+  slug: string;
+  name: string;
+  description: string;
+  model: string;
+  /** Whether the agent is provisioned (ready to invoke) for this tenant. */
+  provisioned: boolean;
+}
+
+export interface BuiltinAgentListResponse {
+  agents: BuiltinAgentSummary[];
+}
+
+/** Token usage for a built-in agent invocation or chat turn. */
+export interface BuiltinAgentUsage {
+  input_tokens: number;
+  output_tokens: number;
+  cache_creation_input_tokens: number;
+  cache_read_input_tokens: number;
+}
+
+/** Final result of a built-in agent invocation. */
+export interface BuiltinAgentInvokeResult {
+  /** Structured findings produced by the agent (shape is agent-specific). */
+  findings: unknown;
+  summary: string;
+  session_id: string;
+  model: string;
+  byok: boolean;
+  usage: BuiltinAgentUsage;
+  running_seconds: number;
+  cost_usd: number;
+}
+
+/** Progress frame emitted on the `update` SSE channel while an agent runs. */
+export interface BuiltinAgentUpdate {
+  type:
+    | "status"
+    | "thinking"
+    | "message"
+    | "tool_use"
+    | "tool_result"
+    | "findings"
+    | "usage"
+    | "error";
+  tool?: string;
+  text?: string;
+  detail?: unknown;
+  /** Seconds elapsed since the invocation started. */
+  elapsed?: number;
+}
+
+export interface BuiltinAgentInvokeOptions {
+  /** Agent-specific input payload (see the catalog entry's description). */
+  input: Record<string, unknown>;
+  /** Optional human-readable title for the resulting session. */
+  title?: string;
+}
+
+export interface BuiltinAgentInvokeStreamOptions
+  extends BuiltinAgentInvokeOptions {
+  /** Called for every `update` frame while the agent runs. */
+  onUpdate?: (update: BuiltinAgentUpdate) => void | Promise<void>;
+}
+
+/** A built-in agent session (one invocation or chat thread). */
+export interface BuiltinAgentSession {
+  id: string;
+  agent: string;
+  model: string;
+  status: string;
+  title: string;
+  byok: boolean;
+  cost_usd: number;
+  created_at: string;
+}
+
+/** Session detail (GET /builtin-agents/sessions/{id}) with billed-token totals. */
+export interface BuiltinAgentSessionDetail extends BuiltinAgentSession {
+  billed_input_tokens: number;
+  billed_output_tokens: number;
+  billed_cache_read_tokens: number;
+  billed_cache_creation_tokens: number;
+}
+
+export interface BuiltinAgentSessionListResponse {
+  sessions: BuiltinAgentSession[];
+}
+
+export interface CreateBuiltinAgentSessionOptions {
+  /** Slug of the built-in agent to bind the session to. */
+  agent: BuiltinAgentSlug;
+  title?: string;
+}
+
+export interface BuiltinAgentSessionListOptions {
+  limit?: number;
+}
+
+/** Result of a single follow-up chat turn in a built-in agent session. */
+export interface BuiltinAgentChatTurnResult {
+  reply: string;
+  findings?: unknown;
+  usage: BuiltinAgentUsage;
+  turn_cost_usd: number;
+  running_seconds: number;
+}
+
+export interface BuiltinAgentSendOptions {
+  text: string;
+  /** Called for every `update` frame while the turn runs. */
+  onUpdate?: (update: BuiltinAgentUpdate) => void | Promise<void>;
+}
+
+export interface BuiltinAgentSendBlockingOptions {
+  text: string;
+}

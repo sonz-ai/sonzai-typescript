@@ -3,7 +3,43 @@
 All notable changes to `@sonzai-labs/agents` are documented here. The project
 follows [Semantic Versioning](https://semver.org/). Dates are `YYYY-MM-DD`.
 
-## Unreleased
+## 1.7.0 — 2026-06-10
+
+### Added
+
+- New `builtinAgents` resource (`client.builtinAgents`) for Sonzai Built-in
+  Agents — platform-hosted vertical task agents invoked by slug (current
+  catalog: `lead_research`, `market_intel`, `lead_extract`, `lead_score`,
+  `lead_qualifier`). Runs are billed per token plus runtime at the tenant's
+  billing mode.
+  - `list()` — built-in agent catalog with provisioning state.
+  - `invoke(slug, {input, title?})` — blocking invocation (`stream=false`).
+    Long-running: the SDK applies a 20-minute deadline instead of the
+    client-level timeout.
+  - `invokeStream(slug, {input, title?, onUpdate?})` — streaming invocation
+    (`stream=true`); `onUpdate` receives every progress frame (status,
+    thinking, message, tool_use, tool_result, findings, usage, error) and the
+    call resolves with the final `BuiltinAgentInvokeResult`.
+  - `sessions.create({agent, title?})`, `sessions.list({limit?})`,
+    `sessions.get(id)`, `sessions.send(id, {text, onUpdate?})` (streaming),
+    and `sessions.sendBlocking(id, {text})` for multi-turn follow-up chat.
+  - Exports: `BuiltinAgentSlug`, `BuiltinAgentSummary`,
+    `BuiltinAgentListResponse`, `BuiltinAgentUsage`,
+    `BuiltinAgentInvokeResult`, `BuiltinAgentUpdate`,
+    `BuiltinAgentInvokeOptions`, `BuiltinAgentInvokeStreamOptions`,
+    `BuiltinAgentSession`, `BuiltinAgentSessionDetail`,
+    `BuiltinAgentSessionListResponse`, `BuiltinAgentSessionListOptions`,
+    `CreateBuiltinAgentSessionOptions`, `BuiltinAgentChatTurnResult`,
+    `BuiltinAgentSendOptions`, `BuiltinAgentSendBlockingOptions`.
+- `HTTPClient.streamNamedSSE(...)` — named-event SSE parser
+  (`event: <name>` + `data: <json>` frames) used by the built-in agents
+  streaming endpoints; supports query params and a per-call deadline.
+- REST surface: `GET /api/v1/builtin-agents`,
+  `POST /api/v1/builtin-agents/{slug}/invoke?stream=<bool>`,
+  `POST/GET /api/v1/builtin-agents/sessions[/{id}]`, and
+  `POST /api/v1/builtin-agents/sessions/{id}/messages?stream=<bool>`.
+
+## 1.6.0 — 2026-05-22
 
 ### Added
 

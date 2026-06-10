@@ -338,6 +338,23 @@ export type {
   AdvanceTimeResponse,
   AdvanceTimeJob,
   WakeupExecution,
+  // Sonzai Built-in Agents
+  BuiltinAgentSlug,
+  BuiltinAgentSummary,
+  BuiltinAgentListResponse,
+  BuiltinAgentUsage,
+  BuiltinAgentInvokeResult,
+  BuiltinAgentUpdate,
+  BuiltinAgentInvokeOptions,
+  BuiltinAgentInvokeStreamOptions,
+  BuiltinAgentSession,
+  BuiltinAgentSessionDetail,
+  BuiltinAgentSessionListResponse,
+  BuiltinAgentSessionListOptions,
+  CreateBuiltinAgentSessionOptions,
+  BuiltinAgentChatTurnResult,
+  BuiltinAgentSendOptions,
+  BuiltinAgentSendBlockingOptions,
 } from "./types.js";
 
 // Runtime value exports (non-type)

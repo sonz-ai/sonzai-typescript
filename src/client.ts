@@ -1,6 +1,7 @@
 import { HTTPClient } from "./http.js";
 import { Agents } from "./resources/agents.js";
 import { Analytics } from "./resources/analytics.js";
+import { BuiltinAgents } from "./resources/builtin-agents.js";
 import { BYOK } from "./resources/byok.js";
 import { Composio } from "./resources/composio.js";
 import { CustomLLM } from "./resources/custom-llm.js";
@@ -114,6 +115,13 @@ declare const Deno:
  */
 export class Sonzai {
   readonly agents: Agents;
+  /**
+   * Sonzai Built-in Agents — platform-hosted vertical task agents
+   * (lead research, market intel, lead extraction / scoring /
+   * qualification) invoked by slug. Runs are billed per token plus
+   * runtime at the tenant's billing mode.
+   */
+  readonly builtinAgents: BuiltinAgents;
   /** Usage, cost, and real-time analytics for the current project. */
   readonly analytics: Analytics;
   /** Project-scoped knowledge base (documents, graph, schemas, search, analytics). */
@@ -197,6 +205,7 @@ export class Sonzai {
     });
 
     this.agents = new Agents(this.http);
+    this.builtinAgents = new BuiltinAgents(this.http);
     this.analytics = new Analytics(this.http);
     this.knowledge = new Knowledge(this.http);
     this.evalTemplates = new EvalTemplates(this.http);
