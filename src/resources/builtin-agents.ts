@@ -264,4 +264,53 @@ export class BuiltinAgents {
       options.onUpdate,
     );
   }
+
+  /* ---- Lead-scoring feedback loop (bandit) ---- */
+
+  /** Record a realized lead-scoring outcome (won/lost/…). Recomputes and returns
+      the project's scoring calibration the lead_score agent applies to future leads. */
+  async recordLeadOutcome(outcome: {
+    lead_ref: string;
+    predicted_score?: number;
+    predicted_band?: string;
+    features?: Record<string, unknown>;
+    outcome: string;
+    score_signal?: string;
+    note?: string;
+  }): Promise<Record<string, unknown>> {
+    requireNonEmpty(outcome.lead_ref, "lead_ref");
+    requireNonEmpty(outcome.outcome, "outcome");
+    return this.http.request("POST", "/api/v1/builtin-agents/lead_score/outcome", { body: outcome });
+  }
+
+  /** Current lead-scoring calibration (predicted-vs-actual by band + segment adjustments). */
+  async getLeadCalibration(): Promise<Record<string, unknown>> {
+    return this.http.get("/api/v1/builtin-agents/lead_score/calibration");
+  }
+
+  /* ---- Closed-loop agent self-improvement (learned guidance) ---- */
+
+  /** Run one distillation cycle for an agent: turn accumulated critiques/outcomes
+      into a new, bounded, auto-applied guidance version (respects the kill switch). */
+  async learnAgent(slug: BuiltinAgentSlug, evidence?: unknown): Promise<Record<string, unknown>> {
+    requireNonEmpty(slug, "slug");
+    return this.http.request("POST", `/api/v1/builtin-agents/${slug}/learn`, { body: { evidence } });
+  }
+
+  /** Active learned guidance + recent version history for an agent. */
+  async getAgentGuidance(slug: BuiltinAgentSlug): Promise<Record<string, unknown>> {
+    requireNonEmpty(slug, "slug");
+    return this.http.get(`/api/v1/builtin-agents/${slug}/guidance`);
+  }
+
+  /** Roll the agent's active guidance back to the prior version. */
+  async rollbackAgentGuidance(slug: BuiltinAgentSlug): Promise<Record<string, unknown>> {
+    requireNonEmpty(slug, "slug");
+    return this.http.request("POST", `/api/v1/builtin-agents/${slug}/guidance/rollback`, { body: {} });
+  }
+
+  /** Toggle closed-loop auto-apply for the project (kill switch). */
+  async setAgentLearning(enabled: boolean): Promise<Record<string, unknown>> {
+    return this.http.request("PUT", "/api/v1/builtin-agents/learning", { body: { enabled } });
+  }
 }
