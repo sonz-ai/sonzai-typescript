@@ -355,6 +355,9 @@ export type {
   BuiltinAgentChatTurnResult,
   BuiltinAgentSendOptions,
   BuiltinAgentSendBlockingOptions,
+  EnrichLeadInput,
+  EnrichLeadParams,
+  EnrichJob,
 } from "./types.js";
 
 // Runtime value exports (non-type)

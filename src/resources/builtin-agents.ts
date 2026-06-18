@@ -16,6 +16,8 @@ import type {
   BuiltinAgentSummary,
   BuiltinAgentUpdate,
   CreateBuiltinAgentSessionOptions,
+  EnrichJob,
+  EnrichLeadParams,
 } from "../types.js";
 
 function requireNonEmpty(value: string, name: string): void {
@@ -286,6 +288,29 @@ export class BuiltinAgents {
   /** Current lead-scoring calibration (predicted-vs-actual by band + segment adjustments). */
   async getLeadCalibration(): Promise<Record<string, unknown>> {
     return this.http.get("/api/v1/builtin-agents/lead_score/calibration");
+  }
+
+  /* ---- Async lead enrichment ---- */
+
+  /** Enqueue an async lead-enrichment job. Returns the job handle ({@link EnrichJob}
+      with `status: "queued"`); poll {@link getEnrichment} with `job_id` until done. */
+  async enrichLead(params: EnrichLeadParams): Promise<EnrichJob> {
+    const body: Record<string, unknown> = { lead: params.lead };
+    if (params.webhookUrl) body.webhook_url = params.webhookUrl;
+    return this.http.request<EnrichJob>(
+      "POST",
+      "/api/v1/builtin-agents/lead/enrich",
+      { body },
+    );
+  }
+
+  /** Get the current state of an async lead-enrichment job. When `status` is
+      `"done"`, `result` carries the enriched lead profile. */
+  async getEnrichment(jobId: string): Promise<EnrichJob> {
+    requireNonEmpty(jobId, "jobId");
+    return this.http.get<EnrichJob>(
+      `/api/v1/builtin-agents/lead/enrich/${jobId}`,
+    );
   }
 
   /* ---- Closed-loop agent self-improvement (learned guidance) ---- */

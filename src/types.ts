@@ -3273,3 +3273,35 @@ export interface BuiltinAgentSendOptions {
 export interface BuiltinAgentSendBlockingOptions {
   text: string;
 }
+
+/** Raw lead payload submitted for async enrichment (all fields optional). */
+export interface EnrichLeadInput {
+  name?: string;
+  phone?: string;
+  email?: string;
+  company?: string;
+  brand?: string;
+  vertical?: string;
+  raw?: string;
+}
+
+export interface EnrichLeadParams {
+  /** Raw lead payload to enrich. */
+  lead: EnrichLeadInput;
+  /** Optional callback URL invoked when the job completes. */
+  webhookUrl?: string;
+}
+
+/**
+ * State of an async lead-enrichment job. `status` moves
+ * `queued` → `processing` → `done` (or `error`). When `done`, `result`
+ * carries the rich, evolving enrichment object (identity, affiliations,
+ * current_location, net_worth, score, band, intent, value,
+ * recommended_brand, next_best_action, recommended_message, …).
+ */
+export interface EnrichJob {
+  job_id: string;
+  status: string;
+  result?: Record<string, unknown>;
+  error?: string;
+}
