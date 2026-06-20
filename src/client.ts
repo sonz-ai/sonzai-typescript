@@ -9,6 +9,7 @@ import { EvalRuns } from "./resources/eval-runs.js";
 import { EvalTemplates } from "./resources/eval-templates.js";
 import { Knowledge } from "./resources/knowledge.js";
 import { MCPCatalog } from "./resources/mcp-catalog.js";
+import { Ml } from "./resources/ml.js";
 import { AccountConfig } from "./resources/account-config.js";
 import { Org } from "./resources/org.js";
 import { ProjectConfig } from "./resources/project-config.js";
@@ -122,6 +123,14 @@ export class Sonzai {
    * runtime at the tenant's billing mode.
    */
   readonly builtinAgents: BuiltinAgents;
+  /**
+   * Sonzai ML — the platform's generalized, multi-tenant / multi-vertical ML &
+   * RL primitives keyed by a free-form `useCase` string: supervised scoring
+   * (train + calibrated predict), contextual-bandit next-best-action (decide +
+   * learn), off-policy evaluation, an end-to-end learning simulation, and a
+   * single unified feedback call.
+   */
+  readonly ml: Ml;
   /** Usage, cost, and real-time analytics for the current project. */
   readonly analytics: Analytics;
   /** Project-scoped knowledge base (documents, graph, schemas, search, analytics). */
@@ -206,6 +215,7 @@ export class Sonzai {
 
     this.agents = new Agents(this.http);
     this.builtinAgents = new BuiltinAgents(this.http);
+    this.ml = new Ml(this.http);
     this.analytics = new Analytics(this.http);
     this.knowledge = new Knowledge(this.http);
     this.evalTemplates = new EvalTemplates(this.http);
