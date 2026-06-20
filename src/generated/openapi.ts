@@ -2618,6 +2618,380 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/builtin-agents/lead/enrich": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enqueue an async lead-enrichment job
+         * @description Persists a minimal lead (name+phone) and enriches it in the background (research → score → Next-Best-Action), delivering the result to the project's registered webhook (or the supplied webhook_url). Returns a job_id immediately; poll GET /builtin-agents/lead/enrich/{jobId} for status.
+         */
+        post: operations["enqueueLeadEnrichment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead/enrich/{jobId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get an async lead-enrichment job
+         * @description Returns the status (queued | processing | done | error), and the assembled enrichment result when done. Tenant/project scoped.
+         */
+        get: operations["getLeadEnrichment"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead_score/calibration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the current lead-scoring calibration
+         * @description Returns the Beta-Bernoulli calibration computed from all recorded outcomes for the project: per-segment score adjustments and per-band predicted-vs-actual accuracy.
+         */
+        get: operations["getLeadScoreCalibration"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead_score/model": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the current lead-scoring model
+         * @description Returns the current trained model's learned weights (per feature), online sample count, and last training metrics. Empty when the model is untrained.
+         */
+        get: operations["getLeadScoreModel"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead_score/model/train": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Train the lead-scoring model (batch)
+         * @description Fits a logistic-regression lead-conversion model from scratch over all recorded outcomes for the project, recording a per-epoch loss curve. Persists the model and returns the full training result (history + learned weights + final metrics).
+         */
+        post: operations["trainLeadScoreModel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead_score/nba": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Recommend the Next-Best-Action for a lead
+         * @description Builds an MDP state from the lead's feature map and returns the policy's recommended action, every action's Q-value, and the state value V(s) (the lead's RL score, also mapped to 0-100).
+         */
+        post: operations["recommendLeadScoreNBA"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead_score/outcome": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record a realized lead-scoring outcome
+         * @description Logs the won/lost result of a previously scored lead and recomputes the Beta-Bernoulli calibration the lead_score agent applies to future leads in the same segment.
+         */
+        post: operations["recordLeadScoreOutcome"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead_score/reset-learning": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reset all learned lead-scoring state (demo blank-slate)
+         * @description DESTRUCTIVE, project-scoped: deletes the project's RL policy, trained score model, all recorded lead outcomes, and all agent-guidance versions, returning the learning loop to a clean slate. Best-effort per resource; returns the list of resources actually cleared.
+         */
+        post: operations["resetLeadScoreLearning"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead_score/rl/policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the current Next-Best-Action RL policy
+         * @description Returns the current trained policy's recommended action + value for canonical lead archetypes, plus training metrics (episodes, average return). Empty when untrained.
+         */
+        get: operations["getLeadScoreRLPolicy"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead_score/rl/train": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Train the Next-Best-Action RL policy
+         * @description Trains an episodic Q-learning policy on the lead-nurture MDP simulator. Warm-starts from the global prior on first train (cold-start), persists the policy, and returns the full training result (return-history curve + per-archetype policy + final average return).
+         */
+        post: operations["trainLeadScoreRLPolicy"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/learning": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Enable or disable closed-loop agent learning
+         * @description Sets the per-project kill switch for closed-loop auto-apply of learned guidance. Default ON; setting enabled=false stops new distillation cycles from changing guidance.
+         */
+        put: operations["setAgentLearningEnabled"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/ml/{use_case}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record a realized outcome — improves the scoring model + the bandit in one call
+         * @description The single feedback call for the self-learning loop. Persists the labeled outcome (features + converted) so the per-tenant scoring model retrains automatically on the platform schedule, and — when action_id is supplied — feeds the realized reward to the contextual bandit immediately. Reward defaults to 1.0/0.0 from `converted` when omitted. Non-technical clients just keep reporting conversions; the models improve on their own.
+         */
+        post: operations["recordMLFeedback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/ml/{use_case}/nba/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Next-best-action over a per-tenant variable action set
+         * @description Contextual-bandit decision over the supplied (possibly per-request-varying) action set with per-action features. Returns the chosen action and its propensity — LOG the action_id + propensity so the decision can later feed /nba/learn and off-policy evaluation.
+         */
+        post: operations["decideMLNBA"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/ml/{use_case}/nba/learn": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Teach the bandit a realized (action, propensity, reward) */
+        post: operations["learnMLNBA"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/ml/{use_case}/ope/evaluate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Off-policy evaluation (IPS / SNIPS / doubly-robust + CI)
+         * @description Estimates a policy's value from logged (context, action, propensity, reward) decisions without exposing customers — the honest basis for 'the policy improved over time'.
+         */
+        post: operations["evaluateMLOPE"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/ml/{use_case}/scoring/predict": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Score a record with the per-tenant model (falls back to the global prior) */
+        post: operations["predictMLScoring"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/ml/{use_case}/scoring/train": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Train the per-tenant scoring model (CatBoost + Optuna, calibrated)
+         * @description Auto-trains and tunes a calibrated conversion-scoring model for this tenant + use_case on the supplied labelled rows, pooling into the cross-tenant global prior. Returns AUC/logloss/Brier/ECE, gain-based feature importances, and the chosen hyperparameters.
+         */
+        post: operations["trainMLScoring"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/ml/{use_case}/simulate-rounds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Single-call self-learning simulation (train → decide → learn → OPE over rounds)
+         * @description Runs a synthetic scenario through multiple rounds of training, next-best-action decisions, reward learning, and off-policy evaluation server-side, returning the per-round learning curve plus the final model and policy. One call demonstrates the engine improving over time.
+         */
+        post: operations["simulateMLRounds"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/onboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Onboard a project onto a vertical
+         * @description Sets the project's vertical config and (optionally) seeds per-vertical STARTER GUIDANCE as version 1 active for each agent that has no active guidance yet — so a new org isn't cold-start. Idempotent: existing active guidance is never overwritten.
+         */
+        post: operations["onboardProjectVertical"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/builtin-agents/sessions": {
         parameters: {
             query?: never;
@@ -2676,6 +3050,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/builtin-agents/vertical": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the project's vertical config
+         * @description Returns the per-tenant vertical config injected into every built-in agent's input. Falls back to the real_estate default when unset.
+         */
+        get: operations["getProjectVertical"];
+        /**
+         * Set the project's vertical config
+         * @description Resolves the built-in default config for the given vertical slug (merged with any override) and persists it. 400 on unknown slug.
+         */
+        put: operations["setProjectVertical"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/{slug}/guidance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get an agent's learned guidance
+         * @description Returns the active learned-guidance version plus recent version history for the project.
+         */
+        get: operations["getBuiltinAgentGuidance"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/{slug}/guidance/rollback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Roll back an agent's learned guidance
+         * @description Retires the active learned-guidance version and reinstates the most recent prior version as active (audit-safe).
+         */
+        post: operations["rollbackBuiltinAgentGuidance"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/builtin-agents/{slug}/invoke": {
         parameters: {
             query?: never;
@@ -2690,6 +3128,26 @@ export interface paths {
          * @description Spins up an isolated managed-agent session, runs the task with real web research tools, and returns structured findings. With stream=true the response is an SSE stream of live progress events ending in a `result` event.
          */
         post: operations["invokeBuiltinAgent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/{slug}/learn": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run one agent self-improvement cycle
+         * @description Distills the agent's recent mistakes (critiques) and outcomes into bounded, additive learned guidance and activates it as the next version. Respects the per-project kill switch.
+         */
+        post: operations["learnBuiltinAgentGuidance"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5110,6 +5568,18 @@ export interface components {
             turn_id: string;
             user_id: string;
         };
+        ActionScore: {
+            action_id: string;
+            /** Format: double */
+            propensity: number;
+            /** Format: double */
+            score: number;
+        };
+        ActionValue: {
+            name: string;
+            /** Format: double */
+            q: number;
+        };
         ActiveCharacterSummary: {
             /**
              * Format: uri
@@ -5307,6 +5777,30 @@ export interface components {
             response: string;
             /** @description Side effects produced by the agent */
             side_effects?: unknown;
+        };
+        AgentGuidance: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/AgentGuidance.json
+             */
+            readonly $schema?: string;
+            /** Format: date-time */
+            activated_at?: string;
+            agent_slug: string;
+            /** Format: date-time */
+            created_at: string;
+            evidence?: unknown;
+            guidance: unknown;
+            id: string;
+            /** Format: double */
+            metric_baseline?: number;
+            metric_name?: string;
+            project_id: string;
+            status: string;
+            tenant_id: string;
+            /** Format: int64 */
+            version: number;
         };
         AgentIndex: {
             agent_id: string;
@@ -5572,6 +6066,27 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
         };
+        BandAccuracy: {
+            /** Format: double */
+            actual_rate: number;
+            /** Format: double */
+            avg_score: number;
+            band: string;
+            /** Format: double */
+            calibration_gap: number;
+            /** Format: int64 */
+            conversions: number;
+            /** Format: int64 */
+            n: number;
+            /** Format: double */
+            predicted_rate: number;
+        };
+        BanditAction: {
+            features?: {
+                [key: string]: unknown;
+            };
+            id: string;
+        };
         BatchGetPersonalitiesInputBody: {
             /**
              * Format: uri
@@ -5827,6 +6342,20 @@ export interface components {
             readonly $schema?: string;
             default_model: string;
             providers: unknown[] | null;
+        };
+        Calibration: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/Calibration.json
+             */
+            readonly $schema?: string;
+            bands: components["schemas"]["BandAccuracy"][] | null;
+            /** Format: double */
+            base_rate: number;
+            segments: components["schemas"]["SegmentCal"][] | null;
+            /** Format: date-time */
+            updated_at: string;
         };
         CatalogEntry: {
             description: string;
@@ -6848,6 +7377,34 @@ export interface components {
             /** Format: int64 */
             sessions: number;
         };
+        DecideMLNBARequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/DecideMLNBARequest.json
+             */
+            readonly $schema?: string;
+            actions: components["schemas"]["BanditAction"][] | null;
+            context?: {
+                [key: string]: unknown;
+            };
+            explore?: boolean;
+        };
+        DecideResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/DecideResponse.json
+             */
+            readonly $schema?: string;
+            action_id: string;
+            explore: boolean;
+            /** Format: int64 */
+            model_n: number;
+            /** Format: double */
+            propensity: number;
+            scores: components["schemas"]["ActionScore"][] | null;
+        };
         DeleteAgentOutputBody: {
             /**
              * Format: uri
@@ -7132,6 +7689,52 @@ export interface components {
             /** @description Whether the session end was accepted */
             success: boolean;
         };
+        EnrichJobView: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/EnrichJobView.json
+             */
+            readonly $schema?: string;
+            error?: string;
+            result?: unknown;
+            status: string;
+        };
+        EnrichLeadBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/EnrichLeadBody.json
+             */
+            readonly $schema?: string;
+            lead: components["schemas"]["EnrichLeadBodyLeadStruct"];
+            /** @description Override delivery URL; defaults to the project's registered lead.enriched webhook */
+            webhook_url?: string;
+        };
+        EnrichLeadBodyLeadStruct: {
+            /** @description Preferred / hinted brand */
+            brand?: string;
+            company?: string;
+            email?: string;
+            /** @description Lead full name (minimum input) */
+            name: string;
+            /** @description Lead phone (minimum input) */
+            phone?: string;
+            /** @description Raw inquiry text, if any */
+            raw?: string;
+            /** @description Vertical key (default real_estate) */
+            vertical?: string;
+        };
+        EnrichLeadResp: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/EnrichLeadResp.json
+             */
+            readonly $schema?: string;
+            job_id: string;
+            status: string;
+        };
         EnrichPersonInputBody: {
             /**
              * Format: uri
@@ -7236,6 +7839,16 @@ export interface components {
             totalValueUsd: number;
             /** Format: date-time */
             updatedAt: string;
+        };
+        EpochMetric: {
+            /** Format: double */
+            accuracy: number;
+            /** Format: double */
+            auc: number;
+            /** Format: int64 */
+            epoch: number;
+            /** Format: double */
+            log_loss: number;
         };
         ErrorDetail: {
             /** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
@@ -7435,6 +8048,15 @@ export interface components {
             /** @description Initial run status (always "pending") */
             status: string;
         };
+        EvaluateMLOPERequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/EvaluateMLOPERequest.json
+             */
+            readonly $schema?: string;
+            logged: components["schemas"]["LoggedTuple"][] | null;
+        };
         EvaluateRequest: {
             /**
              * Format: uri
@@ -7483,6 +8105,28 @@ export interface components {
             readonly $schema?: string;
             current: components["schemas"]["AtomicFact"];
             previous_versions: components["schemas"]["AtomicFact"][] | null;
+        };
+        FeatureWeight: {
+            name: string;
+            /** Format: double */
+            weight: number;
+        };
+        FeedbackResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/FeedbackResponse.json
+             */
+            readonly $schema?: string;
+            bandit_error?: string;
+            /** Format: int64 */
+            bandit_n?: number;
+            bandit_updated: boolean;
+            converted: boolean;
+            message: string;
+            ok: boolean;
+            outcome_recorded: boolean;
+            use_case: string;
         };
         ForkAgentInputBody: {
             /**
@@ -7791,6 +8435,16 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        GuidanceOutput: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/GuidanceOutput.json
+             */
+            readonly $schema?: string;
+            active: components["schemas"]["AgentGuidance"];
+            history: components["schemas"]["AgentGuidance"][] | null;
+        };
         Habit: {
             /**
              * Format: uri
@@ -7829,6 +8483,22 @@ export interface components {
              */
             readonly $schema?: string;
             habits: components["schemas"]["Habit"][] | null;
+        };
+        HyperParams: {
+            /** Format: double */
+            gamma: number;
+            /** Format: double */
+            lambda: number;
+            /** Format: double */
+            learning_rate: number;
+            /** Format: int64 */
+            max_depth: number;
+            /** Format: double */
+            min_child_weight: number;
+            /** Format: int64 */
+            n_estimators: number;
+            /** Format: double */
+            subsample: number;
         };
         ImportJob: {
             /**
@@ -7871,6 +8541,11 @@ export interface components {
             user_id?: string;
             /** Format: int64 */
             warmth_score: number;
+        };
+        Importance: {
+            /** Format: double */
+            gain: number;
+            name: string;
         };
         InitiateComposioConnectInputBody: {
             /**
@@ -9134,6 +9809,67 @@ export interface components {
             /** @description Processing status */
             status: string;
         };
+        LearnInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/LearnInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Optional evidence payload: recent critiques (research_grader/qualifier_critic outputs) and outcomes (won/lost). Required for agents without a server-side critique store. */
+            evidence?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Format: double
+             * @description Optional metric value at activation (prior version's recent metric).
+             */
+            metric_baseline?: number;
+            /** @description Optional metric the new version is judged on (e.g. research_grade | won_rate | calibration_gap_abs). */
+            metric_name?: string;
+        };
+        LearnMLNBARequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/LearnMLNBARequest.json
+             */
+            readonly $schema?: string;
+            action_features?: {
+                [key: string]: unknown;
+            };
+            action_id: string;
+            context?: {
+                [key: string]: unknown;
+            };
+            /** Format: double */
+            propensity?: number;
+            /** Format: double */
+            reward: number;
+        };
+        LearnResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/LearnResponse.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            n: number;
+            ok: boolean;
+        };
+        LearnResult: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/LearnResult.json
+             */
+            readonly $schema?: string;
+            changed: boolean;
+            guidance?: components["schemas"]["AgentGuidance"];
+            reason?: string;
+            violations?: string[] | null;
+        };
         ListAllFactsResponse: {
             /**
              * Format: uri
@@ -9385,6 +10121,16 @@ export interface components {
             name: string;
             when_to_use?: string;
         };
+        LoggedTuple: {
+            action_id: string;
+            context?: {
+                [key: string]: unknown;
+            };
+            /** Format: double */
+            propensity: number;
+            /** Format: double */
+            reward: number;
+        };
         MCPCatalogAuth: {
             /** @description sm:// reference (read only) */
             readonly bearer_secret_ref?: string;
@@ -9571,6 +10317,21 @@ export interface components {
             topics?: string[] | null;
             user_id?: string;
         };
+        ModelView: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ModelView.json
+             */
+            readonly $schema?: string;
+            metrics?: components["schemas"]["EpochMetric"];
+            /** Format: int64 */
+            n: number;
+            /** Format: int64 */
+            pending: number;
+            trained: boolean;
+            weights: components["schemas"]["FeatureWeight"][] | null;
+        };
         MoodAggregateResponse: {
             /**
              * Format: uri
@@ -9669,6 +10430,32 @@ export interface components {
             /** Format: double */
             valence: number;
         };
+        NBAResult: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/NBAResult.json
+             */
+            readonly $schema?: string;
+            action_values: components["schemas"]["ActionValue"][] | null;
+            recommended_action: string;
+            /** Format: double */
+            score_0_100: number;
+            /** Format: double */
+            value: number;
+        };
+        NbaInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/NbaInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Lead facts (financing/budget/timeline known flags, engagement, value_tier, band, touchpoints, elapsed). */
+            features: {
+                [key: string]: unknown;
+            };
+        };
         Node: {
             /**
              * Format: uri
@@ -9711,6 +10498,51 @@ export interface components {
             project_id: string;
             status: string;
             user_id?: string;
+        };
+        OPEResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/OPEResponse.json
+             */
+            readonly $schema?: string;
+            /** Format: double */
+            ci_high: number;
+            /** Format: double */
+            ci_low: number;
+            /** Format: double */
+            dr: number;
+            /** Format: double */
+            ess: number;
+            estimator_ci: string;
+            /** Format: double */
+            ips: number;
+            /** Format: int64 */
+            n: number;
+            /** Format: double */
+            snips: number;
+        };
+        OnboardProjectVerticalRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/OnboardProjectVerticalRequest.json
+             */
+            readonly $schema?: string;
+            /** @description When true, seed per-vertical starter guidance for agents without active guidance. */
+            seed_guidance?: boolean;
+            /** @description Vertical slug (required): real_estate | insurance | auto. */
+            vertical: string;
+        };
+        OnboardSummary: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/OnboardSummary.json
+             */
+            readonly $schema?: string;
+            seeded_agents: string[] | null;
+            vertical_config: components["schemas"]["VerticalConfig"];
         };
         OrgBillingCheckoutInputBody: {
             /**
@@ -9968,6 +10800,55 @@ export interface components {
             timestamp?: string;
             trait_name: string;
             trigger_types: string[] | null;
+        };
+        PolicyEntry: {
+            archetype: string;
+            recommended_action: string;
+            /** Format: double */
+            value: number;
+        };
+        PolicyView: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PolicyView.json
+             */
+            readonly $schema?: string;
+            actions: string[] | null;
+            /** Format: double */
+            avg_return: number;
+            /** Format: int64 */
+            episodes: number;
+            features: string[] | null;
+            policy: components["schemas"]["PolicyEntry"][] | null;
+            trained: boolean;
+        };
+        PredictMLScoringRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PredictMLScoringRequest.json
+             */
+            readonly $schema?: string;
+            features: {
+                [key: string]: unknown;
+            };
+        };
+        PredictResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PredictResponse.json
+             */
+            readonly $schema?: string;
+            calibration_method: string;
+            /** Format: int64 */
+            model_version: number;
+            /** Format: double */
+            raw: number;
+            /** Format: double */
+            score: number;
+            served_from: string;
         };
         Preferences: {
             conversation_pace?: string;
@@ -10243,6 +11124,23 @@ export interface components {
             /** @description Plaintext API key from the provider. Stored encrypted; never returned. */
             api_key: string;
         };
+        RLTrainResult: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/RLTrainResult.json
+             */
+            readonly $schema?: string;
+            algo?: string;
+            /** Format: int64 */
+            episodes: number;
+            /** Format: double */
+            final_avg_return: number;
+            /** Format: double */
+            kl_divergence?: number;
+            policy: components["schemas"]["PolicyEntry"][] | null;
+            return_history: number[] | null;
+        };
         RecentShiftsResponse: {
             /**
              * Format: uri
@@ -10259,6 +11157,60 @@ export interface components {
             role: string;
             /** @description RFC3339 UTC timestamp of when /process received the turn */
             timestamp: string;
+        };
+        RecordMLFeedbackRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/RecordMLFeedbackRequest.json
+             */
+            readonly $schema?: string;
+            action_features?: {
+                [key: string]: unknown;
+            };
+            action_id?: string;
+            context?: {
+                [key: string]: unknown;
+            };
+            converted: boolean;
+            features?: {
+                [key: string]: unknown;
+            };
+            note?: string;
+            /** Format: int64 */
+            predicted_score?: number;
+            /** Format: double */
+            propensity?: number;
+            /** Format: double */
+            reward?: number;
+            subject_id?: string;
+        };
+        RecordOutcomeInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/RecordOutcomeInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Lead features used to derive the calibration segment (budget, financing, timeline, …) */
+            features?: {
+                [key: string]: unknown;
+            };
+            /** @description Stable lead identifier (primed user ID, CRM ref, …) */
+            lead_ref: string;
+            /** @description Optional human note */
+            note?: string;
+            /** @description Realized outcome, e.g. won | lost | site_visit | reserved */
+            outcome: string;
+            /** @description Band the agent assigned: Hot | Warm | Nurture */
+            predicted_band: string;
+            /**
+             * Format: int64
+             * @description Score the agent assigned at qualification time (0–100)
+             */
+            predicted_score: number;
+            /** @description Optional free-text signal note for the outcome */
+            score_signal?: string;
         };
         RedeemVoucherResponse: {
             /**
@@ -10367,6 +11319,16 @@ export interface components {
              */
             nodes_deleted: number;
         };
+        ResetLearningResp: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ResetLearningResp.json
+             */
+            readonly $schema?: string;
+            /** @description Resources successfully cleared (subset of rl_policy, score_model, lead_outcomes, agent_guidance). */
+            reset: string[] | null;
+        };
         ResetMemoryResponse: {
             /**
              * Format: uri
@@ -10395,6 +11357,19 @@ export interface components {
              */
             readonly $schema?: string;
             success: boolean;
+        };
+        RlTrainInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/RlTrainInputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: int64
+             * @description Training episodes (default 3000, max 50000)
+             */
+            episodes?: number;
         };
         RootEntityStruct: {
             /** @description Root entity key fields per schema entity_types[].key_fields. */
@@ -10578,6 +11553,17 @@ export interface components {
             /** Format: double */
             importance: number;
         };
+        SegmentCal: {
+            /** Format: int64 */
+            adjust: number;
+            /** Format: int64 */
+            conversions: number;
+            /** Format: int64 */
+            n: number;
+            /** Format: double */
+            p_hat: number;
+            segment: string;
+        };
         ServiceUsageByOp: {
             /** Format: double */
             chargeUsd: number;
@@ -10697,6 +11683,25 @@ export interface components {
             readonly $schema?: string;
             success: boolean;
         };
+        SetAgentLearningEnabledRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/SetAgentLearningEnabledRequest.json
+             */
+            readonly $schema?: string;
+            /** @description true → closed loop enabled (default); false → auto-apply disabled. */
+            enabled: boolean;
+        };
+        SetAgentLearningEnabledResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/SetAgentLearningEnabledResponse.json
+             */
+            readonly $schema?: string;
+            enabled: boolean;
+        };
         SetAgentStatusInputBody: {
             /**
              * Format: uri
@@ -10754,6 +11759,18 @@ export interface components {
             readonly $schema?: string;
             success: boolean;
         };
+        SetProjectVerticalRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/SetProjectVerticalRequest.json
+             */
+            readonly $schema?: string;
+            /** @description Optional override merged onto the default config (non-empty fields win). */
+            config?: components["schemas"]["VerticalConfig"];
+            /** @description Vertical slug (real_estate | insurance | auto). */
+            slug: string;
+        };
         SetSessionToolsOutputBody: {
             /**
              * Format: uri
@@ -10800,6 +11817,19 @@ export interface components {
             /** Format: int64 */
             simulated_duration_hours: number;
         };
+        SimulateMLRoundsRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/SimulateMLRoundsRequest.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            rounds?: number;
+            scenario?: string;
+            /** Format: int64 */
+            seed?: number;
+        };
         SimulateRequest: {
             /**
              * Format: uri
@@ -10819,6 +11849,48 @@ export interface components {
             user_id?: string;
             /** @description Synthetic user persona (defaults to DefaultUserPersona) */
             user_persona?: components["schemas"]["UserPersona"];
+        };
+        SimulateRoundPoint: {
+            /** Format: double */
+            auc: number;
+            /** Format: double */
+            ci_high: number;
+            /** Format: double */
+            ci_low: number;
+            /** Format: int64 */
+            n: number;
+            /** Format: double */
+            nba_reward: number;
+            /** Format: double */
+            nba_value: number;
+            /** Format: double */
+            ope_dr: number;
+            /** Format: int64 */
+            round: number;
+        };
+        SimulateRoundsResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/SimulateRoundsResponse.json
+             */
+            readonly $schema?: string;
+            action_labels: {
+                [key: string]: string;
+            };
+            model: unknown;
+            ope: components["schemas"]["SimulateRoundsResponseOPEStruct"];
+            policy: unknown;
+            scenario: string;
+            series: components["schemas"]["SimulateRoundPoint"][] | null;
+        };
+        SimulateRoundsResponseOPEStruct: {
+            /** Format: double */
+            ci_high: number;
+            /** Format: double */
+            ci_low: number;
+            /** Format: double */
+            dr: number;
         };
         SimulateRunningBody: {
             /**
@@ -11338,6 +12410,83 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        TrainInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/TrainInputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: int64
+             * @description Training epochs (default 50, max 1000)
+             */
+            epochs?: number;
+        };
+        TrainMLScoringRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/TrainMLScoringRequest.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            optimize_budget?: number;
+            rows: components["schemas"]["TrainRow"][] | null;
+        };
+        TrainResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/TrainResponse.json
+             */
+            readonly $schema?: string;
+            /** Format: double */
+            auc: number;
+            best_params: {
+                [key: string]: unknown;
+            };
+            /** Format: double */
+            brier: number;
+            /** Format: double */
+            brier_baseline: number;
+            /** Format: double */
+            brier_uncalibrated: number;
+            calibration_method: string;
+            /** Format: double */
+            ece: number;
+            importances: components["schemas"]["Importance"][] | null;
+            /** Format: double */
+            logloss: number;
+            /** Format: int64 */
+            model_version: number;
+            /** Format: int64 */
+            n: number;
+            /** Format: int64 */
+            trials: number;
+        };
+        TrainResult: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/TrainResult.json
+             */
+            readonly $schema?: string;
+            algo?: string;
+            final: components["schemas"]["EpochMetric"];
+            history: components["schemas"]["EpochMetric"][] | null;
+            /** Format: int64 */
+            n: number;
+            tuning?: components["schemas"]["TuningResult"];
+            weights: components["schemas"]["FeatureWeight"][] | null;
+        };
+        TrainRow: {
+            features: {
+                [key: string]: unknown;
+            };
+            /** Format: int64 */
+            label: number;
+        };
         TraitPrecision: {
             /** Format: date-time */
             last_updated_at: string;
@@ -11345,6 +12494,13 @@ export interface components {
             observation_count: number;
             /** Format: double */
             precision: number;
+        };
+        TrialResult: {
+            /** Format: double */
+            cv_auc: number;
+            /** Format: double */
+            cv_logloss: number;
+            params: components["schemas"]["HyperParams"];
         };
         TriggerConsolidationInputBody: {
             /**
@@ -11406,6 +12562,14 @@ export interface components {
             accepted: boolean;
             /** @description Unique identifier for the accepted event */
             event_id: string;
+        };
+        TuningResult: {
+            /** Format: double */
+            best_cv_auc: number;
+            chosen: components["schemas"]["HyperParams"];
+            summary?: components["schemas"]["TrialResult"][] | null;
+            /** Format: int64 */
+            trials: number;
         };
         Turn: {
             user_message: string;
@@ -12176,6 +13340,22 @@ export interface components {
             has_more: boolean;
             next_cursor?: string;
             users: components["schemas"]["UserEntry"][] | null;
+        };
+        VerticalConfig: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/VerticalConfig.json
+             */
+            readonly $schema?: string;
+            brands?: string[] | null;
+            intent_signals: string[] | null;
+            label: string;
+            notes?: string;
+            qualify_fields: string[] | null;
+            segment_features: string[] | null;
+            slug: string;
+            value_signals: string[] | null;
         };
         VoiceConfig: {
             language?: string;
@@ -18785,6 +19965,630 @@ export interface operations {
             };
         };
     };
+    enqueueLeadEnrichment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrichLeadBody"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnrichLeadResp"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getLeadEnrichment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Enrichment job id */
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnrichJobView"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getLeadScoreCalibration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Calibration"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getLeadScoreModel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelView"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    trainLeadScoreModel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainResult"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    recommendLeadScoreNBA: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NbaInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NBAResult"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    recordLeadScoreOutcome: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordOutcomeInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Calibration"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    resetLeadScoreLearning: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResetLearningResp"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getLeadScoreRLPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyView"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    trainLeadScoreRLPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RlTrainInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RLTrainResult"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    setAgentLearningEnabled: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetAgentLearningEnabledRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetAgentLearningEnabledResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    recordMLFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordMLFeedbackRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    decideMLNBA: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecideMLNBARequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecideResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    learnMLNBA: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LearnMLNBARequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearnResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    evaluateMLOPE: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EvaluateMLOPERequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OPEResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    predictMLScoring: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PredictMLScoringRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PredictResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    trainMLScoring: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainMLScoringRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    simulateMLRounds: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimulateMLRoundsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulateRoundsResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    onboardProjectVertical: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardProjectVerticalRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OnboardSummary"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     listBuiltinAgentSessions: {
         parameters: {
             query?: {
@@ -18916,6 +20720,130 @@ export interface operations {
             };
         };
     };
+    getProjectVertical: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerticalConfig"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    setProjectVertical: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetProjectVerticalRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerticalConfig"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getBuiltinAgentGuidance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuidanceOutput"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    rollbackBuiltinAgentGuidance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentGuidance"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     invokeBuiltinAgent: {
         parameters: {
             query?: {
@@ -18941,6 +20869,42 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    learnBuiltinAgentGuidance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Built-in agent slug to improve (lead_score | lead_research | lead_qualifier | …) */
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LearnInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearnResult"];
+                };
             };
             /** @description Error */
             default: {
