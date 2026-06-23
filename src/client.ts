@@ -5,7 +5,9 @@ import { BuiltinAgents } from "./resources/builtin-agents.js";
 import { Channels } from "./resources/channels.js";
 import { BYOK } from "./resources/byok.js";
 import { Composio } from "./resources/composio.js";
+import { CustomAgents } from "./resources/custom-agents.js";
 import { CustomLLM } from "./resources/custom-llm.js";
+import { Pipelines } from "./resources/pipelines.js";
 import { EvalRuns } from "./resources/eval-runs.js";
 import { EvalTemplates } from "./resources/eval-templates.js";
 import { Knowledge } from "./resources/knowledge.js";
@@ -200,6 +202,13 @@ export class Sonzai {
   readonly wisdom: Wisdom;
   /** Workbench (time-machine / harness) operations for benchmarks and dev workflows. */
   readonly workbench: Workbench;
+  /** Project-scoped custom agent definitions (create, update, delete custom agents). */
+  readonly customAgents: CustomAgents;
+  /**
+   * Project-scoped pipelines — chain multiple agent steps into a single
+   * run. Manage definitions, append steps, and execute end-to-end.
+   */
+  readonly pipelines: Pipelines;
 
   private readonly http: HTTPClient;
 
@@ -245,6 +254,8 @@ export class Sonzai {
     this.skills = new Skills(this.http);
     this.wisdom = new Wisdom(this.http);
     this.workbench = new Workbench(this.http);
+    this.customAgents = new CustomAgents(this.http);
+    this.pipelines = new Pipelines(this.http);
   }
 
   /**

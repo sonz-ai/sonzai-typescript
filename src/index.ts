@@ -195,6 +195,17 @@ export type {
 	ChannelWriteOptions,
 	ChannelListResponse,
 	ChannelEventType,
+	// Custom Agents
+	CustomAgent,
+	CustomAgentInput,
+	CustomAgentListResponse,
+	// Pipelines
+	Pipeline,
+	PipelineInput,
+	PipelineStep,
+	PipelineStepResult,
+	PipelineRun,
+	PipelineListResponse,
 	// Evaluation
 	EvalCategory,
 	EvaluationResult,

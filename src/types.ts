@@ -2032,6 +2032,93 @@ export const CHANNEL_EVENTS = {
 
 export type ChannelEventType = (typeof CHANNEL_EVENTS)[keyof typeof CHANNEL_EVENTS];
 
+// -- Custom Agents --
+
+/** A project-scoped custom agent definition. */
+export interface CustomAgent {
+	agent_id: string;
+	project_id: string;
+	slug: string;
+	name: string;
+	description?: string;
+	model: string;
+	system: string;
+	findings_schema?: Record<string, unknown>;
+	tools: string[];
+	disable_tools: boolean;
+	max_tool_rounds: number;
+	created_at: string;
+	updated_at: string;
+}
+
+/** Request body for creating or updating a custom agent. */
+export interface CustomAgentInput {
+	slug: string;
+	name: string;
+	description?: string;
+	model: string;
+	system: string;
+	findings_schema?: Record<string, unknown>;
+	tools?: string[];
+	disable_tools?: boolean;
+	max_tool_rounds?: number;
+}
+
+/** Response shape for `GET /api/v1/custom-agents`. */
+export interface CustomAgentListResponse {
+	agents: CustomAgent[];
+}
+
+// -- Pipelines --
+
+/** A single step in a pipeline. */
+export interface PipelineStep {
+	slug: string;
+	title?: string;
+}
+
+/** A project-scoped pipeline definition. */
+export interface Pipeline {
+	pipeline_id: string;
+	project_id: string;
+	name: string;
+	description?: string;
+	steps: PipelineStep[];
+	created_at: string;
+	updated_at: string;
+}
+
+/** Request body for creating or updating a pipeline. */
+export interface PipelineInput {
+	name: string;
+	description?: string;
+	steps?: PipelineStep[];
+}
+
+/** Result of a single pipeline step within a run. */
+export interface PipelineStepResult {
+	slug: string;
+	title?: string;
+	findings: unknown;
+	summary?: string;
+	cost_usd: number;
+	error?: string;
+}
+
+/** Result of executing a pipeline. */
+export interface PipelineRun {
+	pipeline_id: string;
+	steps: PipelineStepResult[];
+	final_findings: unknown;
+	total_cost_usd: number;
+	completed: boolean;
+}
+
+/** Response shape for `GET /api/v1/pipelines`. */
+export interface PipelineListResponse {
+	pipelines: Pipeline[];
+}
+
 export interface WebhookRegisterResponse {
 	success: boolean;
 	signing_secret?: string;

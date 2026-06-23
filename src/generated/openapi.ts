@@ -3191,6 +3191,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/custom-agents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List custom agents */
+        get: operations["listCustomAgents"];
+        put?: never;
+        /** Create a custom agent */
+        post: operations["createCustomAgent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/custom-agents/{agentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a custom agent */
+        get: operations["getCustomAgent"];
+        /** Update a custom agent */
+        put: operations["updateCustomAgent"];
+        post?: never;
+        /** Delete a custom agent */
+        delete: operations["deleteCustomAgent"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/enrichment/person": {
         parameters: {
             query?: never;
@@ -3661,6 +3698,80 @@ export interface paths {
          * @description Redeems a voucher code for credits or a contract discount. Voucher single-use rules are enforced server-side.
          */
         post: operations["redeemOrgVoucher"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pipelines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List pipelines */
+        get: operations["listPipelines"];
+        put?: never;
+        /** Create a pipeline */
+        post: operations["createPipeline"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pipelines/{pipelineId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a pipeline */
+        get: operations["getPipeline"];
+        /** Update a pipeline */
+        put: operations["updatePipeline"];
+        post?: never;
+        /** Delete a pipeline */
+        delete: operations["deletePipeline"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pipelines/{pipelineId}/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run a pipeline end to end
+         * @description Executes every step in order, threading each step's findings into the next, and returns the full run with per-step output. Each step bills like any agent invocation.
+         */
+        post: operations["runPipeline"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pipelines/{pipelineId}/steps": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Append a step to a pipeline */
+        post: operations["appendPipelineStep"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7454,6 +7565,58 @@ export interface components {
             readonly $schema?: string;
             relation: components["schemas"]["AttributedRelation"];
         };
+        CustomAgentDTO: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CustomAgentDTO.json
+             */
+            readonly $schema?: string;
+            agent_id: string;
+            /** Format: date-time */
+            created_at: string;
+            description?: string;
+            disable_tools: boolean;
+            findings_schema?: {
+                [key: string]: unknown;
+            };
+            /** Format: int64 */
+            max_tool_rounds: number;
+            model: string;
+            name: string;
+            project_id: string;
+            slug: string;
+            system: string;
+            tools: string[] | null;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        CustomAgentWriteBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CustomAgentWriteBody.json
+             */
+            readonly $schema?: string;
+            description?: string;
+            /** @description Disable the toolset entirely (pure reasoning) */
+            disable_tools?: boolean;
+            /** @description JSON Schema for the agent's structured return_findings output */
+            findings_schema?: {
+                [key: string]: unknown;
+            };
+            /** Format: int64 */
+            max_tool_rounds?: number;
+            /** @description Anthropic model: claude-sonnet-4-6 | claude-haiku-4-5 */
+            model: string;
+            name: string;
+            /** @description Project-scoped agent slug (referenced from pipeline steps) */
+            slug: string;
+            /** @description The agent's system prompt */
+            system: string;
+            /** @description Sandbox toolset tools to enable (empty = all) */
+            tools?: string[] | null;
+        };
         CustomLLMConfigResponse: {
             /**
              * Format: uri
@@ -10073,6 +10236,15 @@ export interface components {
             readonly $schema?: string;
             connections: components["schemas"]["Connection"][] | null;
         };
+        ListCustomAgentsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListCustomAgentsOutputBody.json
+             */
+            readonly $schema?: string;
+            agents: components["schemas"]["CustomAgentDTO"][] | null;
+        };
         ListCustomStatesOutputBody: {
             /**
              * Format: uri
@@ -10173,6 +10345,15 @@ export interface components {
             readonly $schema?: string;
             /** @description Catalog entries */
             entries: components["schemas"]["MCPCatalogEntry"][] | null;
+        };
+        ListPipelinesOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListPipelinesOutputBody.json
+             */
+            readonly $schema?: string;
+            pipelines: components["schemas"]["PipelineDTO"][] | null;
         };
         ListProjectSkillsOutputBody: {
             /**
@@ -10939,6 +11120,68 @@ export interface components {
             trait_name: string;
             trigger_types: string[] | null;
         };
+        PipelineDTO: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PipelineDTO.json
+             */
+            readonly $schema?: string;
+            /** Format: date-time */
+            created_at: string;
+            description?: string;
+            name: string;
+            pipeline_id: string;
+            project_id: string;
+            steps: components["schemas"]["PipelineStep"][] | null;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        PipelineRun: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PipelineRun.json
+             */
+            readonly $schema?: string;
+            completed: boolean;
+            final_findings: unknown;
+            pipeline_id: string;
+            steps: components["schemas"]["PipelineStepResult"][] | null;
+            /** Format: double */
+            total_cost_usd: number;
+        };
+        PipelineStep: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PipelineStep.json
+             */
+            readonly $schema?: string;
+            slug: string;
+            title?: string;
+        };
+        PipelineStepResult: {
+            /** Format: double */
+            cost_usd: number;
+            error?: string;
+            findings: unknown;
+            slug: string;
+            summary?: string;
+            title?: string;
+        };
+        PipelineWriteBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PipelineWriteBody.json
+             */
+            readonly $schema?: string;
+            description?: string;
+            name: string;
+            /** @description Ordered agent steps (each {slug, title?}); slug is a built-in or custom agent */
+            steps?: components["schemas"]["PipelineStep"][] | null;
+        };
         PolicyEntry: {
             archetype: string;
             recommended_action: string;
@@ -11552,6 +11795,18 @@ export interface components {
             template_id: string;
             /** @description Synthetic user persona */
             user_persona?: components["schemas"]["UserPersona"];
+        };
+        RunPipelineInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/RunPipelineInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Initial input passed to the first step */
+            input?: {
+                [key: string]: unknown;
+            };
         };
         RunningBody: {
             /**
@@ -21215,6 +21470,166 @@ export interface operations {
             };
         };
     };
+    listCustomAgents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListCustomAgentsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    createCustomAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CustomAgentWriteBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomAgentDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getCustomAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Custom agent UUID */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomAgentDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    updateCustomAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Custom agent UUID */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CustomAgentWriteBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomAgentDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteCustomAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Custom agent UUID */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     enrichPerson: {
         parameters: {
             query?: never;
@@ -22063,6 +22478,238 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RedeemVoucherResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listPipelines: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListPipelinesOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    createPipeline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PipelineWriteBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getPipeline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Pipeline UUID */
+                pipelineId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    updatePipeline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Pipeline UUID */
+                pipelineId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PipelineWriteBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deletePipeline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Pipeline UUID */
+                pipelineId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    runPipeline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Pipeline UUID */
+                pipelineId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunPipelineInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineRun"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    appendPipelineStep: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Pipeline UUID */
+                pipelineId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PipelineStep"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineDTO"];
                 };
             };
             /** @description Error */
