@@ -301,6 +301,7 @@ export type ListInstancesOutputBody = components["schemas"]["ListInstancesOutput
 export type ListMCPCatalogOutputBody = components["schemas"]["ListMCPCatalogOutputBody"];
 export type ListPipelinesOutputBody = components["schemas"]["ListPipelinesOutputBody"];
 export type ListProjectSkillsOutputBody = components["schemas"]["ListProjectSkillsOutputBody"];
+export type ListRunsOutputBody = components["schemas"]["ListRunsOutputBody"];
 export type ListSchedulesOutputBody = components["schemas"]["ListSchedulesOutputBody"];
 export type ListUserPersonasOutputBody = components["schemas"]["ListUserPersonasOutputBody"];
 export type VoiceListResponse = components["schemas"]["ListVoicesResponse"];

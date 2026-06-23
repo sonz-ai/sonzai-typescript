@@ -3751,10 +3751,44 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Run a pipeline end to end
-         * @description Executes every step in order, threading each step's findings into the next, and returns the full run with per-step output. Each step bills like any agent invocation.
+         * Start a pipeline run (async)
+         * @description Enqueues a run and returns immediately with {run_id, status:"queued"}. The run executes in the background, threading each step's findings into the next; poll GET /pipelines/{id}/runs/{runId} for progress + results. Each step bills like any agent invocation.
          */
         post: operations["runPipeline"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pipelines/{pipelineId}/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List recent runs for a pipeline */
+        get: operations["listPipelineRuns"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pipelines/{pipelineId}/runs/{runId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a pipeline run (poll for status + results) */
+        get: operations["getPipelineRun"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -10364,6 +10398,15 @@ export interface components {
             readonly $schema?: string;
             skills: components["schemas"]["Skill"][] | null;
         };
+        ListRunsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListRunsOutputBody.json
+             */
+            readonly $schema?: string;
+            runs: components["schemas"]["PipelineRun"][] | null;
+        };
         ListSchedulesOutputBody: {
             /**
              * Format: uri
@@ -11145,11 +11188,18 @@ export interface components {
              */
             readonly $schema?: string;
             completed: boolean;
+            /** Format: date-time */
+            created_at: string;
+            error?: string;
             final_findings: unknown;
             pipeline_id: string;
+            run_id: string;
+            status: string;
             steps: components["schemas"]["PipelineStepResult"][] | null;
             /** Format: double */
             total_cost_usd: number;
+            /** Format: date-time */
+            updated_at: string;
         };
         PipelineStep: {
             /**
@@ -22666,6 +22716,75 @@ export interface operations {
                 "application/json": components["schemas"]["RunPipelineInputBody"];
             };
         };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineRun"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listPipelineRuns: {
+        parameters: {
+            query?: {
+                /** @description Max runs to return (default 25) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Pipeline UUID */
+                pipelineId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListRunsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getPipelineRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Pipeline UUID */
+                pipelineId: string;
+                /** @description Run UUID */
+                runId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {

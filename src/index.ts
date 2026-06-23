@@ -205,6 +205,7 @@ export type {
 	PipelineStep,
 	PipelineStepResult,
 	PipelineRun,
+	PipelineRunListResponse,
 	PipelineListResponse,
 	// Evaluation
 	EvalCategory,

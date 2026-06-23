@@ -4,15 +4,15 @@ import type {
   PipelineInput,
   PipelineListResponse,
   PipelineRun,
+  PipelineRunListResponse,
   PipelineStep,
 } from "../types.js";
 
-/**
- * Pipeline runs chain multiple agent steps and can take minutes, so the
- * SDK applies a generous 10-minute deadline to {@link Pipelines.run}
- * instead of the client-level default.
- */
-const PIPELINE_RUN_TIMEOUT_MS = 600_000;
+/** Default poll interval for {@link Pipelines.runAndWait}. */
+const DEFAULT_RUN_POLL_INTERVAL_MS = 2_000;
+
+/** Default overall deadline for {@link Pipelines.runAndWait} (30 minutes). */
+const DEFAULT_RUN_WAIT_TIMEOUT_MS = 1_800_000;
 
 /** Project-scoped pipeline management and execution operations. */
 export class Pipelines {
@@ -61,20 +61,64 @@ export class Pipelines {
   }
 
   /**
-   * Run a pipeline end-to-end. Runs chain multiple agent steps and can
-   * take minutes, so this call gets a 10-minute deadline.
+   * Enqueue a pipeline run. Returns immediately (HTTP 202) with the queued
+   * {@link PipelineRun} (`status: "queued"`). Poll {@link getRun} until
+   * `status` is `"completed"` or `"failed"`, or use {@link runAndWait}.
    */
   async run(
     pipelineId: string,
     input?: Record<string, unknown>,
   ): Promise<PipelineRun> {
-    return this.http.request<PipelineRun>(
-      "POST",
+    return this.http.post<PipelineRun>(
       `/api/v1/pipelines/${pipelineId}/run`,
-      {
-        body: { input },
-        timeoutMs: PIPELINE_RUN_TIMEOUT_MS,
-      },
+      { input },
     );
+  }
+
+  /** Fetch a single pipeline run by id (used to poll run status). */
+  async getRun(pipelineId: string, runId: string): Promise<PipelineRun> {
+    return this.http.get<PipelineRun>(
+      `/api/v1/pipelines/${pipelineId}/runs/${runId}`,
+    );
+  }
+
+  /** List all runs for a pipeline. */
+  async listRuns(pipelineId: string): Promise<PipelineRunListResponse> {
+    return this.http.get<PipelineRunListResponse>(
+      `/api/v1/pipelines/${pipelineId}/runs`,
+    );
+  }
+
+  /**
+   * Enqueue a pipeline run and poll until it reaches a terminal state.
+   *
+   * Calls {@link run}, then polls {@link getRun} every `pollIntervalMs`
+   * (default 2s) until `status` is `"completed"` or `"failed"`. Throws if
+   * `timeoutMs` (default 30 minutes) elapses first.
+   */
+  async runAndWait(
+    pipelineId: string,
+    input?: Record<string, unknown>,
+    opts?: { pollIntervalMs?: number; timeoutMs?: number },
+  ): Promise<PipelineRun> {
+    const pollIntervalMs = opts?.pollIntervalMs ?? DEFAULT_RUN_POLL_INTERVAL_MS;
+    const timeoutMs = opts?.timeoutMs ?? DEFAULT_RUN_WAIT_TIMEOUT_MS;
+    const deadline = Date.now() + timeoutMs;
+
+    const queued = await this.run(pipelineId, input);
+    const runId = queued.run_id;
+
+    let run = queued;
+    while (run.status !== "completed" && run.status !== "failed") {
+      if (Date.now() >= deadline) {
+        throw new Error(
+          `Pipeline run ${runId} did not complete within ${timeoutMs}ms ` +
+            `(last status: "${run.status}")`,
+        );
+      }
+      await new Promise((r) => setTimeout(r, pollIntervalMs));
+      run = await this.getRun(pipelineId, runId);
+    }
+    return run;
   }
 }

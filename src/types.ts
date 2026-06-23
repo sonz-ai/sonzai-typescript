@@ -2105,13 +2105,29 @@ export interface PipelineStepResult {
 	error?: string;
 }
 
-/** Result of executing a pipeline. */
+/**
+ * Result of executing a pipeline. Runs are asynchronous: `run()` enqueues a
+ * run and returns this shape with `status: "queued"`; poll `getRun()` until
+ * `status` is `"completed"` or `"failed"`.
+ */
 export interface PipelineRun {
+	run_id: string;
 	pipeline_id: string;
+	/** queued | running | completed | failed */
+	status: string;
 	steps: PipelineStepResult[];
 	final_findings: unknown;
 	total_cost_usd: number;
 	completed: boolean;
+	/** Populated only when status is "failed". */
+	error?: string;
+	created_at?: string;
+	updated_at?: string;
+}
+
+/** Response shape for `GET /api/v1/pipelines/{id}/runs`. */
+export interface PipelineRunListResponse {
+	runs: PipelineRun[];
 }
 
 /** Response shape for `GET /api/v1/pipelines`. */
