@@ -1993,6 +1993,45 @@ export interface WebhookRegisterOptions {
 	authHeader?: string;
 }
 
+// -- Notification Channels --
+
+/** A notification channel (webhook / email / composio delivery target). */
+export interface Channel {
+	channel_id: string;
+	project_id: string;
+	name: string;
+	type: "webhook" | "email" | "composio";
+	config: Record<string, unknown>;
+	events: string[];
+	filter?: Record<string, unknown>;
+	active: boolean;
+	created_at: string;
+	updated_at: string;
+}
+
+/** Request body for creating or updating a notification channel. */
+export interface ChannelWriteOptions {
+	name: string;
+	type: "webhook" | "email" | "composio";
+	config?: Record<string, unknown>;
+	events?: string[];
+	filter?: Record<string, unknown>;
+	active?: boolean;
+}
+
+/** Response shape for `GET /api/v1/channels`. */
+export interface ChannelListResponse {
+	channels: Channel[];
+}
+
+/** Known notification channel event types. */
+export const CHANNEL_EVENTS = {
+	BUILTIN_AGENT_COMPLETED: "builtin_agent.completed",
+	LEAD_ENRICHED: "lead.enriched",
+} as const;
+
+export type ChannelEventType = (typeof CHANNEL_EVENTS)[keyof typeof CHANNEL_EVENTS];
+
 export interface WebhookRegisterResponse {
 	success: boolean;
 	signing_secret?: string;

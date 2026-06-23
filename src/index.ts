@@ -190,6 +190,11 @@ export type {
 	// Webhooks options
 	WebhookRegisterOptions,
 	WebhookRegisterResponse,
+	// Notification Channels
+	Channel,
+	ChannelWriteOptions,
+	ChannelListResponse,
+	ChannelEventType,
 	// Evaluation
 	EvalCategory,
 	EvaluationResult,
@@ -417,3 +422,4 @@ export type {
 
 // Runtime value exports (non-type)
 export { KBScope, DEFAULT_DETACHED_TIMEOUT_MS } from "./types.js";
+export { CHANNEL_EVENTS } from "./types.js";

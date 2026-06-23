@@ -2,6 +2,7 @@ import { HTTPClient } from "./http.js";
 import { Agents } from "./resources/agents.js";
 import { Analytics } from "./resources/analytics.js";
 import { BuiltinAgents } from "./resources/builtin-agents.js";
+import { Channels } from "./resources/channels.js";
 import { BYOK } from "./resources/byok.js";
 import { Composio } from "./resources/composio.js";
 import { CustomLLM } from "./resources/custom-llm.js";
@@ -139,6 +140,8 @@ export class Sonzai {
   readonly evalRuns: EvalRuns;
   readonly voices: Voices;
   readonly webhooks: Webhooks;
+  /** Notification channels — webhook / email / composio delivery targets for platform events. */
+  readonly channels: Channels;
   /** Project-scoped configuration (key-value store). */
   readonly projectConfig: ProjectConfig;
   /** Tenant-scoped ("account-level") configuration. Applies to every project in the tenant. */
@@ -222,6 +225,7 @@ export class Sonzai {
     this.evalRuns = new EvalRuns(this.http);
     this.voices = new Voices(this.http);
     this.webhooks = new Webhooks(this.http);
+    this.channels = new Channels(this.http);
     this.projectConfig = new ProjectConfig(this.http);
     this.accountConfig = new AccountConfig(this.http);
     this.customLLM = new CustomLLM(this.http);
