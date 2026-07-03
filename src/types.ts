@@ -15,6 +15,8 @@ import type {
 	KBResolutionInfo,
 	KBSchemaField,
 	KBSimilarityConfig,
+	OmnichannelConversationDTO,
+	OmnichannelMessageDTO,
 	PersonalityDelta,
 	Project,
 	ProjectAPIKey,
@@ -2031,6 +2033,111 @@ export const CHANNEL_EVENTS = {
 } as const;
 
 export type ChannelEventType = (typeof CHANNEL_EVENTS)[keyof typeof CHANNEL_EVENTS];
+
+// -- Omnichannel Conversations --
+
+export interface ConversationListOptions {
+	projectId?: string;
+	channel?: string;
+	agentId?: string;
+	userId?: string;
+	controller?: "agent" | "human" | string;
+	status?: "open" | "snoozed" | "closed" | string;
+	q?: string;
+	cursor?: string;
+	limit?: number;
+}
+
+export interface ConversationMessageListOptions {
+	cursor?: string;
+	limit?: number;
+}
+
+export interface ConversationStreamOptions {
+	projectId?: string;
+}
+
+export interface ConversationStreamEvent {
+	type?: ConversationWebhookEventType | string;
+	event?: ConversationWebhookEventType | string;
+	conversation_id?: string;
+	conversation?: OmnichannelConversationDTO;
+	message?: OmnichannelMessageDTO;
+	data?: Record<string, unknown>;
+	error?: { message: string };
+	[key: string]: unknown;
+}
+
+export interface ConversationTakeOverOptions {
+	operatorId?: string;
+	force?: boolean;
+}
+
+export interface ConversationSendAsAgentOptions {
+	content: string;
+	attachments?: unknown;
+}
+
+export interface ConversationUpdateOptions {
+	agentId?: string;
+	status?: "open" | "snoozed" | "closed";
+}
+
+export const CONVERSATION_WEBHOOK_EVENTS = {
+	STARTED: "conversation.started",
+	MESSAGE: "conversation.message",
+	TAKEOVER_STARTED: "conversation.takeover.started",
+	TAKEOVER_RELEASED: "conversation.takeover.released",
+	MESSAGE_FAILED: "conversation.message.failed",
+	UNROUTED: "conversation.unrouted",
+} as const;
+
+export type ConversationWebhookEventType =
+	(typeof CONVERSATION_WEBHOOK_EVENTS)[keyof typeof CONVERSATION_WEBHOOK_EVENTS];
+
+// -- Meta Channel Connections --
+
+export type ChannelConnectionProviderMode = "byo_app" | "embedded_signup";
+export type MetaChannelType = "whatsapp" | "messenger" | "instagram";
+
+export interface ChannelConnectionCreateOptions {
+	channelType: MetaChannelType;
+	providerMode: ChannelConnectionProviderMode;
+	appId?: string;
+	appSecret?: string;
+	phoneNumberId?: string;
+	wabaId?: string;
+	pageId?: string;
+	igAccountId?: string;
+	accessToken?: string;
+	verifyToken?: string;
+	displayName?: string;
+	defaultAgentId?: string;
+	code?: string;
+	templates?: unknown;
+	testTo?: string;
+	testMessage?: string;
+}
+
+export interface ChannelConnectionUpdateOptions {
+	defaultAgentId?: string;
+	status?: string;
+	templates?: unknown;
+}
+
+export interface ChannelConnectionTestOptions {
+	to: string;
+	message: string;
+}
+
+export interface BYOKKeyResponse {
+	provider: string;
+	api_key_prefix?: string;
+	is_active: boolean;
+	health_status?: string;
+	last_health_check_at?: string;
+	updated_at?: string;
+}
 
 // -- Custom Agents --
 

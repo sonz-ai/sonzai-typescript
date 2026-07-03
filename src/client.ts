@@ -2,7 +2,9 @@ import { HTTPClient } from "./http.js";
 import { Agents } from "./resources/agents.js";
 import { Analytics } from "./resources/analytics.js";
 import { BuiltinAgents } from "./resources/builtin-agents.js";
+import { ChannelConnections } from "./resources/channel-connections.js";
 import { Channels } from "./resources/channels.js";
+import { Conversations } from "./resources/conversations.js";
 import { BYOK } from "./resources/byok.js";
 import { Composio } from "./resources/composio.js";
 import { CustomAgents } from "./resources/custom-agents.js";
@@ -144,6 +146,10 @@ export class Sonzai {
   readonly webhooks: Webhooks;
   /** Notification channels — webhook / email / composio delivery targets for platform events. */
   readonly channels: Channels;
+  /** Omnichannel conversations — inbox, messages, handoff, read state, and SSE events. */
+  readonly conversations: Conversations;
+  /** Project-scoped Meta channel connections (WhatsApp / Messenger / Instagram). */
+  readonly channelConnections: ChannelConnections;
   /** Project-scoped configuration (key-value store). */
   readonly projectConfig: ProjectConfig;
   /** Tenant-scoped ("account-level") configuration. Applies to every project in the tenant. */
@@ -235,6 +241,8 @@ export class Sonzai {
     this.voices = new Voices(this.http);
     this.webhooks = new Webhooks(this.http);
     this.channels = new Channels(this.http);
+    this.conversations = new Conversations(this.http);
+    this.channelConnections = new ChannelConnections(this.http);
     this.projectConfig = new ProjectConfig(this.http);
     this.accountConfig = new AccountConfig(this.http);
     this.customLLM = new CustomLLM(this.http);

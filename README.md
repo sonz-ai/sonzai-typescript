@@ -69,6 +69,8 @@ client.evalTemplates      // evaluation templates
 client.evalRuns           // eval/simulation runs, reconnectable streaming
 client.voices             // global voice catalog
 client.webhooks           // webhook registration and rotation
+client.conversations      // omnichannel inbox, messages, handoff, SSE events
+client.channelConnections // Meta channel connections for WhatsApp / Messenger / Instagram
 client.projects           // project management & API keys
 client.userPersonas       // user persona CRUD
 client.analytics          // cost, usage, real-time analytics

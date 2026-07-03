@@ -4,6 +4,7 @@ export { VoiceStreamInstance } from "./resources/voice.js";
 export { Session } from "./resources/session-handle.js";
 export type { ScheduleUpcomingOptions } from "./resources/schedules.js";
 export type { BYOKProvider } from "./resources/byok.js";
+export { redactChannelConnectionSecrets } from "./resources/channel-connections.js";
 
 // Errors
 export {
@@ -195,6 +196,21 @@ export type {
 	ChannelWriteOptions,
 	ChannelListResponse,
 	ChannelEventType,
+	// Omnichannel Conversations
+	ConversationListOptions,
+	ConversationMessageListOptions,
+	ConversationStreamOptions,
+	ConversationStreamEvent,
+	ConversationTakeOverOptions,
+	ConversationSendAsAgentOptions,
+	ConversationUpdateOptions,
+	ConversationWebhookEventType,
+	// Meta Channel Connections
+	ChannelConnectionProviderMode,
+	MetaChannelType,
+	ChannelConnectionCreateOptions,
+	ChannelConnectionUpdateOptions,
+	ChannelConnectionTestOptions,
 	// Custom Agents
 	CustomAgent,
 	CustomAgentInput,
@@ -359,6 +375,8 @@ export type {
 	// Custom LLM
 	CustomLLMConfigResponse,
 	SetCustomLLMOptions,
+	// BYOK
+	BYOKKeyResponse,
 	// Project Notifications
 	ProjectNotificationListOptions,
 	ProjectNotificationListResponse,
@@ -434,4 +452,4 @@ export type {
 
 // Runtime value exports (non-type)
 export { KBScope, DEFAULT_DETACHED_TIMEOUT_MS } from "./types.js";
-export { CHANNEL_EVENTS } from "./types.js";
+export { CHANNEL_EVENTS, CONVERSATION_WEBHOOK_EVENTS } from "./types.js";

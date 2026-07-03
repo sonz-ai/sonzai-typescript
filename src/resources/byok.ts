@@ -1,5 +1,5 @@
 import type { HTTPClient } from "../http.js";
-import type { BYOKKeyResponse } from "../generated/flat-exports.js";
+import type { BYOKKeyResponse } from "../types.js";
 
 export type BYOKProvider = "openai" | "gemini" | "xai" | "openrouter";
 
