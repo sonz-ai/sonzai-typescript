@@ -1640,26 +1640,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/agents/{agentId}/sessions/{sessionId}/turn": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Submit a conversation turn
-         * @description Standalone-memory realtime API entry point. Runs sync mood-only extraction inline and publishes the rest of the post-processing (facts, personality, habits, etc.) as a deferred work item. Returns the extraction_id for status polling. Sessions are not auto-created — call POST /agents/{agentId}/sessions/start first when you need session-level tool definitions or provider/model defaults; otherwise /turn operates against the path-supplied session_id directly.
-         */
-        post: operations["submitTurn"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/agents/{agentId}/simulate": {
         parameters: {
             query?: never;
@@ -1856,26 +1836,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/agents/{agentId}/turns/{extractionId}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Poll deferred-turn processing status
-         * @description Returns the lifecycle state of a deferred-turn job. Callers should poll with exponential backoff until state is "done" or "failed". The CRDB row is the source of truth.
-         */
-        get: operations["getTurnStatus"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/agents/{agentId}/users": {
         parameters: {
             query?: never;
@@ -1990,6 +1950,26 @@ export interface paths {
          * @description Queues raw content blocks (text, chat transcripts) for async LLM extraction. Returns a job ID for tracking.
          */
         post: operations["addUserContent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/users/{userId}/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get an agent-user conversation history
+         * @description Returns the (agent, user) conversation history, newest-first, backed by the memory-episode timeline (session-end-segmenter summaries) — there is no durable raw-turn store (the AI service is stateless; callers supply session history per request). The response always sets source="memory_timeline" since no raw transcript is fabricated.
+         */
+        get: operations["listUserConversations"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2598,7 +2578,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/builtin-agents": {
+    "/conversations": {
         parameters: {
             query?: never;
             header?: never;
@@ -2606,10 +2586,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List Sonzai built-in backend agents
-         * @description Vertical task agents (deep lead research, market intel, …) run on Anthropic managed agents and billed per token + runtime. Invoke directly or let your Sonzai agents call them as tools.
+         * List conversations
+         * @description Lists durable omnichannel conversations for the authenticated project. Falls back to the memory timeline for pre-migration conversations when no durable rows are present.
          */
-        get: operations["listBuiltinAgents"];
+        get: operations["listConversations"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2618,38 +2598,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/builtin-agents/lead/enrich": {
+    "/conversations/stream": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
-        /**
-         * Enqueue an async lead-enrichment job
-         * @description Persists a minimal lead (name+phone) and enriches it in the background (research → score → Next-Best-Action), delivering the result to the project's registered webhook (or the supplied webhook_url). Returns a job_id immediately; poll GET /builtin-agents/lead/enrich/{jobId} for status.
-         */
-        post: operations["enqueueLeadEnrichment"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/lead/enrich/{jobId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get an async lead-enrichment job
-         * @description Returns the status (queued | processing | done | error), and the assembled enrichment result when done. Tenant/project scoped.
-         */
-        get: operations["getLeadEnrichment"];
+        /** Stream conversation events */
+        get: operations["streamConversations"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2658,47 +2615,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/builtin-agents/lead_score/calibration": {
+    "/conversations/{id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * Get the current lead-scoring calibration
-         * @description Returns the Beta-Bernoulli calibration computed from all recorded outcomes for the project: per-segment score adjustments and per-band predicted-vs-actual accuracy.
-         */
-        get: operations["getLeadScoreCalibration"];
+        /** Get conversation */
+        get: operations["getConversation"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** Update conversation */
+        patch: operations["patchConversation"];
         trace?: never;
     };
-    "/builtin-agents/lead_score/model": {
+    "/conversations/{id}/messages": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * Get the current lead-scoring model
-         * @description Returns the current trained model's learned weights (per feature), online sample count, and last training metrics. Empty when the model is untrained.
-         */
-        get: operations["getLeadScoreModel"];
+        /** List conversation messages */
+        get: operations["listConversationMessages"];
         put?: never;
-        post?: never;
+        /** Send operator message */
+        post: operations["sendConversationMessage"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/builtin-agents/lead_score/model/train": {
+    "/conversations/{id}/read": {
         parameters: {
             query?: never;
             header?: never;
@@ -2707,18 +2660,15 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Train the lead-scoring model (batch)
-         * @description Fits a logistic-regression lead-conversion model from scratch over all recorded outcomes for the project, recording a per-epoch loss curve. Persists the model and returns the full training result (history + learned weights + final metrics).
-         */
-        post: operations["trainLeadScoreModel"];
+        /** Mark conversation read */
+        post: operations["markConversationRead"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/builtin-agents/lead_score/nba": {
+    "/conversations/{id}/takeover": {
         parameters: {
             query?: never;
             header?: never;
@@ -2727,522 +2677,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Recommend the Next-Best-Action for a lead
-         * @description Builds an MDP state from the lead's feature map and returns the policy's recommended action, every action's Q-value, and the state value V(s) (the lead's RL score, also mapped to 0-100).
-         */
-        post: operations["recommendLeadScoreNBA"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/lead_score/outcome": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Record a realized lead-scoring outcome
-         * @description Logs the won/lost result of a previously scored lead and recomputes the Beta-Bernoulli calibration the lead_score agent applies to future leads in the same segment.
-         */
-        post: operations["recordLeadScoreOutcome"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/lead_score/reset-learning": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Reset all learned lead-scoring state (demo blank-slate)
-         * @description DESTRUCTIVE, project-scoped: deletes the project's RL policy, trained score model, all recorded lead outcomes, and all agent-guidance versions, returning the learning loop to a clean slate. Best-effort per resource; returns the list of resources actually cleared.
-         */
-        post: operations["resetLeadScoreLearning"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/lead_score/rl/policy": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get the current Next-Best-Action RL policy
-         * @description Returns the current trained policy's recommended action + value for canonical lead archetypes, plus training metrics (episodes, average return). Empty when untrained.
-         */
-        get: operations["getLeadScoreRLPolicy"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/lead_score/rl/train": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Train the Next-Best-Action RL policy
-         * @description Trains an episodic Q-learning policy on the lead-nurture MDP simulator. Warm-starts from the global prior on first train (cold-start), persists the policy, and returns the full training result (return-history curve + per-archetype policy + final average return).
-         */
-        post: operations["trainLeadScoreRLPolicy"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/learning": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Enable or disable closed-loop agent learning
-         * @description Sets the per-project kill switch for closed-loop auto-apply of learned guidance. Default ON; setting enabled=false stops new distillation cycles from changing guidance.
-         */
-        put: operations["setAgentLearningEnabled"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/ml/{use_case}/feedback": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Record a realized outcome — improves the scoring model + the bandit in one call
-         * @description The single feedback call for the self-learning loop. Persists the labeled outcome (features + converted) so the per-tenant scoring model retrains automatically on the platform schedule, and — when action_id is supplied — feeds the realized reward to the contextual bandit immediately. Reward defaults to 1.0/0.0 from `converted` when omitted. Non-technical clients just keep reporting conversions; the models improve on their own.
-         */
-        post: operations["recordMLFeedback"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/ml/{use_case}/nba/decide": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Next-best-action over a per-tenant variable action set
-         * @description Contextual-bandit decision over the supplied (possibly per-request-varying) action set with per-action features. Returns the chosen action and its propensity — LOG the action_id + propensity so the decision can later feed /nba/learn and off-policy evaluation.
-         */
-        post: operations["decideMLNBA"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/ml/{use_case}/nba/learn": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Teach the bandit a realized (action, propensity, reward) */
-        post: operations["learnMLNBA"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/ml/{use_case}/ope/evaluate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Off-policy evaluation (IPS / SNIPS / doubly-robust + CI)
-         * @description Estimates a policy's value from logged (context, action, propensity, reward) decisions without exposing customers — the honest basis for 'the policy improved over time'.
-         */
-        post: operations["evaluateMLOPE"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/ml/{use_case}/scoring/predict": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Score a record with the per-tenant model (falls back to the global prior) */
-        post: operations["predictMLScoring"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/ml/{use_case}/scoring/train": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Train the per-tenant scoring model (CatBoost + Optuna, calibrated)
-         * @description Auto-trains and tunes a calibrated conversion-scoring model for this tenant + use_case on the supplied labelled rows, pooling into the cross-tenant global prior. Returns AUC/logloss/Brier/ECE, gain-based feature importances, and the chosen hyperparameters.
-         */
-        post: operations["trainMLScoring"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/ml/{use_case}/simulate-rounds": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Single-call self-learning simulation (train → decide → learn → OPE over rounds)
-         * @description Runs a synthetic scenario through multiple rounds of training, next-best-action decisions, reward learning, and off-policy evaluation server-side, returning the per-round learning curve plus the final model and policy. One call demonstrates the engine improving over time.
-         */
-        post: operations["simulateMLRounds"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/onboard": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Onboard a project onto a vertical
-         * @description Sets the project's vertical config and (optionally) seeds per-vertical STARTER GUIDANCE as version 1 active for each agent that has no active guidance yet — so a new org isn't cold-start. Idempotent: existing active guidance is never overwritten.
-         */
-        post: operations["onboardProjectVertical"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/sessions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List built-in agent chat sessions */
-        get: operations["listBuiltinAgentSessions"];
-        put?: never;
-        /**
-         * Start a chat session with a built-in agent
-         * @description Opens a persistent managed-agent session (sandbox + conversation state held by Anthropic, checkpointed 30 days). Each subsequent message bills the usage delta.
-         */
-        post: operations["startBuiltinAgentSession"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/sessions/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a built-in agent session (status, billed usage, cost) */
-        get: operations["getBuiltinAgentSession"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/sessions/{id}/messages": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Send a chat message to a built-in agent session
-         * @description Streams the agent's work (messages, tool use) live when stream=true. Bills the token-usage delta for the turn at the tenant's billing mode.
-         */
-        post: operations["sendBuiltinAgentMessage"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/vertical": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get the project's vertical config
-         * @description Returns the per-tenant vertical config injected into every built-in agent's input. Falls back to the real_estate default when unset.
-         */
-        get: operations["getProjectVertical"];
-        /**
-         * Set the project's vertical config
-         * @description Resolves the built-in default config for the given vertical slug (merged with any override) and persists it. 400 on unknown slug.
-         */
-        put: operations["setProjectVertical"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/{slug}/guidance": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get an agent's learned guidance
-         * @description Returns the active learned-guidance version plus recent version history for the project.
-         */
-        get: operations["getBuiltinAgentGuidance"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/{slug}/guidance/rollback": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Roll back an agent's learned guidance
-         * @description Retires the active learned-guidance version and reinstates the most recent prior version as active (audit-safe).
-         */
-        post: operations["rollbackBuiltinAgentGuidance"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/{slug}/invoke": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Run a built-in agent task
-         * @description Spins up an isolated managed-agent session, runs the task with real web research tools, and returns structured findings. With stream=true the response is an SSE stream of live progress events ending in a `result` event.
-         */
-        post: operations["invokeBuiltinAgent"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/builtin-agents/{slug}/learn": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Run one agent self-improvement cycle
-         * @description Distills the agent's recent mistakes (critiques) and outcomes into bounded, additive learned guidance and activates it as the next version. Respects the per-project kill switch.
-         */
-        post: operations["learnBuiltinAgentGuidance"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/channels": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List notification channels */
-        get: operations["listChannels"];
-        put?: never;
-        /** Create a notification channel */
-        post: operations["createChannel"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/channels/{channelId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a notification channel */
-        get: operations["getChannel"];
-        /** Update a notification channel */
-        put: operations["updateChannel"];
-        post?: never;
-        /** Delete a notification channel */
-        delete: operations["deleteChannel"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/custom-agents": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List custom agents */
-        get: operations["listCustomAgents"];
-        put?: never;
-        /** Create a custom agent */
-        post: operations["createCustomAgent"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/custom-agents/{agentId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a custom agent */
-        get: operations["getCustomAgent"];
-        /** Update a custom agent */
-        put: operations["updateCustomAgent"];
-        post?: never;
-        /** Delete a custom agent */
-        delete: operations["deleteCustomAgent"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/enrichment/person": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Enrich a person (cost-ordered vendor waterfall)
-         * @description Runs a cache-first, cost-ordered vendor waterfall (Crustdata → Fiber → Apollo) to research a person and resolve contact points. Results are cached per tenant+identifier so a vendor is never re-billed for a cached lookup. Contact data is best-effort and PH/OFW coverage is limited.
-         */
-        post: operations["enrichPerson"];
-        delete?: never;
+        /** Take over conversation */
+        post: operations["takeOverConversation"];
+        /** Release conversation takeover */
+        delete: operations["releaseConversationTakeover"];
         options?: never;
         head?: never;
         patch?: never;
@@ -3398,46 +2836,6 @@ export interface paths {
         get: operations["listModels"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/onboarding/claim": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Claim a trial tenant into your account
-         * @description Binds a trial tenant to a freshly created Clerk organization owned by the signed-in user. The agent and its memory are preserved; agent_id does not change.
-         */
-        post: operations["onboardingClaim"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/onboarding/claim-link": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Get a claim link for the caller's trial tenant
-         * @description Returns a fresh claim URL the trial-key holder can hand to a human to bind the trial to a real account. Only valid for trial tenants.
-         */
-        post: operations["onboardingClaimLink"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3704,114 +3102,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/pipelines": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List pipelines */
-        get: operations["listPipelines"];
-        put?: never;
-        /** Create a pipeline */
-        post: operations["createPipeline"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/pipelines/{pipelineId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a pipeline */
-        get: operations["getPipeline"];
-        /** Update a pipeline */
-        put: operations["updatePipeline"];
-        post?: never;
-        /** Delete a pipeline */
-        delete: operations["deletePipeline"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/pipelines/{pipelineId}/run": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Start a pipeline run (async)
-         * @description Enqueues a run and returns immediately with {run_id, status:"queued"}. The run executes in the background, threading each step's findings into the next; poll GET /pipelines/{id}/runs/{runId} for progress + results. Each step bills like any agent invocation.
-         */
-        post: operations["runPipeline"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/pipelines/{pipelineId}/runs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List recent runs for a pipeline */
-        get: operations["listPipelineRuns"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/pipelines/{pipelineId}/runs/{runId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a pipeline run (poll for status + results) */
-        get: operations["getPipelineRun"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/pipelines/{pipelineId}/steps": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Append a step to a pipeline */
-        post: operations["appendPipelineStep"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/projects": {
         parameters: {
             query?: never;
@@ -3864,38 +3154,55 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/projects/{projectId}/channels": {
+    "/projects/{projectId}/channel-connections": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List notification channels for a project */
-        get: operations["listChannelsForProject"];
+        /** List channel connections */
+        get: operations["listChannelConnections"];
         put?: never;
-        /** Create a notification channel for a project */
-        post: operations["createChannelForProject"];
+        /** Create channel connection */
+        post: operations["createChannelConnection"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/projects/{projectId}/channels/{channelId}": {
+    "/projects/{projectId}/channel-connections/{id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get a notification channel for a project */
-        get: operations["getChannelForProject"];
-        /** Update a notification channel for a project */
-        put: operations["updateChannelForProject"];
+        /** Get channel connection */
+        get: operations["getChannelConnection"];
+        put?: never;
         post?: never;
-        /** Delete a notification channel for a project */
-        delete: operations["deleteChannelForProject"];
+        /** Delete channel connection */
+        delete: operations["deleteChannelConnection"];
+        options?: never;
+        head?: never;
+        /** Update channel connection */
+        patch: operations["patchChannelConnection"];
+        trace?: never;
+    };
+    "/projects/{projectId}/channel-connections/{id}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Test channel connection */
+        post: operations["testChannelConnection"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -4213,26 +3520,6 @@ export interface paths {
         patch: operations["kbBulkUpdateProperties"];
         trace?: never;
     };
-    "/projects/{projectId}/knowledge/compare": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Compare a property across entities via a shared relation
-         * @description Given a list of source entities, a relation type, a shared target entity, and a property path, returns each source's value for that property. Backs the kb_compare agent tool.
-         */
-        post: operations["kbCompare"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/projects/{projectId}/knowledge/documents": {
         parameters: {
             query?: never;
@@ -4281,26 +3568,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/projects/{projectId}/knowledge/documents/{documentId}/classification": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Resolve a needs_classification document
-         * @description Records the human-confirmed root entity for a document in the needs_classification queue and publishes kb.work.document.extract.
-         */
-        patch: operations["kbPatchDocumentClassification"];
-        trace?: never;
-    };
     "/projects/{projectId}/knowledge/documents/{documentId}/cost": {
         parameters: {
             query?: never;
@@ -4321,46 +3588,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/projects/{projectId}/knowledge/documents/{documentId}/reingest": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Re-ingest a previously uploaded document
-         * @description Republishes a kb.work.document.classify (multimodal) or kb.work.document.parse (legacy) work item for an existing document. Useful after schema changes or model updates. Costs the project the same as a fresh ingest.
-         */
-        post: operations["kbReingestDocument"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/projects/{projectId}/knowledge/entities/{entityType}/{entityKey}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Direct entity lookup by (type, key)
-         * @description Returns the entity plus all active facts attached to it (both outgoing and incoming relationships). Backs the kb_get_entity agent tool.
-         */
-        get: operations["kbGetEntity"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/projects/{projectId}/knowledge/facts": {
         parameters: {
             query?: never;
@@ -4368,101 +3595,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * List active KB facts for a project
-         * @description Paginates active kb_facts rows. Each fact carries verbatim source provenance (source_document_id, source_page, source_snippet, extraction_confidence) plus effective_date + version.
-         */
-        get: operations["kbListFacts"];
+        get?: never;
         put?: never;
         /**
          * Insert facts into the knowledge base
          * @description Resolves entities against existing nodes by label+type, creates or updates nodes with version history, and optionally creates edges between them.
          */
         post: operations["kbInsertFacts"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/projects/{projectId}/knowledge/facts/active": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get the active KB fact for a (from, to, relation) tuple
-         * @description Returns the currently-active fact for the given tuple, or null if none exists. Same shape as items in the list endpoint.
-         */
-        get: operations["kbGetActiveFact"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/projects/{projectId}/knowledge/facts/history": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get the version chain for a KB fact tuple
-         * @description Returns every version of the fact for (from_node_id, to_node_id, relation_type), newest first. Includes archived and quarantined versions.
-         */
-        get: operations["kbGetFactHistory"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/projects/{projectId}/knowledge/multimodal-schemas": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List multimodal KB schema versions for a project
-         * @description Returns every version of the project's multimodal KB schema, newest first. Distinct from /knowledge/schemas (per-entity legacy schemas).
-         */
-        get: operations["kbListMultimodalSchemas"];
-        put?: never;
-        /**
-         * Create a new multimodal KB schema version
-         * @description Creates a new schema row (status defaults to 'draft' if not specified). To activate it, POST /multimodal-schemas/{version}/activate which atomically demotes the prior active schema to 'superseded'.
-         */
-        post: operations["kbCreateMultimodalSchema"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/projects/{projectId}/knowledge/multimodal-schemas/{version}/activate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Activate a draft multimodal schema version
-         * @description Atomically promotes the given draft schema to 'active' and demotes the prior active to 'superseded'. After activation, UploadDocument on a multimodal-pipeline project will accept uploads against this schema.
-         */
-        post: operations["kbActivateMultimodalSchema"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4661,26 +3800,6 @@ export interface paths {
          * @description Returns aggregate counts for documents, nodes, edges, and extraction tokens.
          */
         get: operations["kbGetStats"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/projects/{projectId}/knowledge/traverse": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Graph traversal from a starting entity
-         * @description Walks the project graph from (from_type, from_key) along relation_type up to max_depth. Returns facts encountered with their depth. Backs the kb_traverse agent tool.
-         */
-        get: operations["kbTraverse"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5008,91 +4127,6 @@ export interface paths {
          * @description Generates a new HMAC signing secret for the given webhook. The old secret is immediately invalidated.
          */
         post: operations["rotateWebhookSigningSecret"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/projects/{project_id}/byok-keys": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List BYOK keys for a project
-         * @description Returns configured BYOK providers for the project. Key material is never returned — only the prefix and health status.
-         */
-        get: operations["listBYOKKeys"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/projects/{project_id}/byok-keys/{provider}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Create or replace a BYOK key
-         * @description Stores an encrypted-at-rest BYOK key for a provider. Validates the key against the provider before saving; rejects invalid keys with 400 invalid_api_key.
-         */
-        put: operations["putBYOKKey"];
-        post?: never;
-        /**
-         * Delete a BYOK key
-         * @description Removes the stored key. Subsequent LLM calls fall back to standard pricing.
-         */
-        delete: operations["deleteBYOKKey"];
-        options?: never;
-        head?: never;
-        /** Enable or disable a BYOK key without rotating it */
-        patch: operations["setBYOKActive"];
-        trace?: never;
-    };
-    "/projects/{project_id}/byok-keys/{provider}/test": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Re-test a stored BYOK key against the provider
-         * @description Issues a probe call to the provider with the stored key and updates health_status. Useful after a suspected key rotation upstream.
-         */
-        post: operations["testBYOKKey"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/sessions/end/status/{processingId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Poll async session-end processing status
-         * @description Returns the lifecycle state of an async session-end job (enqueued via POST /sessions/end when ENABLE_ASYNC_SESSION_END=true). Callers should poll with exponential backoff until state is "done" or "failed". Redis is a hot cache (1h TTL); CockroachDB is the durable source of truth (30d retention).
-         */
-        get: operations["getSessionEndStatus"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5739,7 +4773,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AcknowledgeAllProjectNotificationsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/AcknowledgeAllProjectNotificationsOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -5752,7 +4786,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AcknowledgeProjectNotificationsInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/AcknowledgeProjectNotificationsInputBody.json
              */
             readonly $schema?: string;
             /** @description IDs of notifications to acknowledge */
@@ -5762,7 +4796,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AcknowledgeProjectNotificationsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/AcknowledgeProjectNotificationsOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -5787,23 +4821,11 @@ export interface components {
             turn_id: string;
             user_id: string;
         };
-        ActionScore: {
-            action_id: string;
-            /** Format: double */
-            propensity: number;
-            /** Format: double */
-            score: number;
-        };
-        ActionValue: {
-            name: string;
-            /** Format: double */
-            q: number;
-        };
         ActiveCharacterSummary: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ActiveCharacterSummary.json
+             * @example https://api.sonz.ai/api/v1/schemas/ActiveCharacterSummary.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -5820,7 +4842,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AddCommentRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/AddCommentRequest.json
              */
             readonly $schema?: string;
             content: string;
@@ -5830,7 +4852,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AddContentRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/AddContentRequest.json
              */
             readonly $schema?: string;
             content: components["schemas"]["PrimeContentBlock"][] | null;
@@ -5840,7 +4862,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AddUserContentHumaOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/AddUserContentHumaOutputBody.json
              */
             readonly $schema?: string;
             /** @description Import job UUID for tracking */
@@ -5866,7 +4888,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AgentCapabilities.json
+             * @example https://api.sonz.ai/api/v1/schemas/AgentCapabilities.json
              */
             readonly $schema?: string;
             autoLearnSkills?: boolean;
@@ -5906,7 +4928,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AgentCreateRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/AgentCreateRequest.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -5921,7 +4943,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AgentDeleteRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/AgentDeleteRequest.json
              */
             readonly $schema?: string;
             expected_label: string;
@@ -5931,7 +4953,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AgentDetailResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/AgentDetailResponse.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -5967,7 +4989,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AgentDialogueInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/AgentDialogueInputBody.json
              */
             readonly $schema?: string;
             /** @description Pre-built enriched context JSON */
@@ -5989,37 +5011,13 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AgentDialogueOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/AgentDialogueOutputBody.json
              */
             readonly $schema?: string;
             /** @description Agent dialogue response */
             response: string;
             /** @description Side effects produced by the agent */
             side_effects?: unknown;
-        };
-        AgentGuidance: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AgentGuidance.json
-             */
-            readonly $schema?: string;
-            /** Format: date-time */
-            activated_at?: string;
-            agent_slug: string;
-            /** Format: date-time */
-            created_at: string;
-            evidence?: unknown;
-            guidance: unknown;
-            id: string;
-            /** Format: double */
-            metric_baseline?: number;
-            metric_name?: string;
-            project_id: string;
-            status: string;
-            tenant_id: string;
-            /** Format: int64 */
-            version: number;
         };
         AgentIndex: {
             agent_id: string;
@@ -6043,7 +5041,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AgentInstance.json
+             * @example https://api.sonz.ai/api/v1/schemas/AgentInstance.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -6061,7 +5059,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AgentKBSearchInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/AgentKBSearchInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -6084,7 +5082,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AnalyticsOverview.json
+             * @example https://api.sonz.ai/api/v1/schemas/AnalyticsOverview.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -6102,7 +5100,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AnalyticsRealtimeResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/AnalyticsRealtimeResponse.json
              */
             readonly $schema?: string;
             daily: components["schemas"]["DailyStatsEntry"][] | null;
@@ -6112,7 +5110,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AsyncChatResultOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/AsyncChatResultOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -6142,7 +5140,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AsyncChatStartOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/AsyncChatStartOutputBody.json
              */
             readonly $schema?: string;
             /** @description Opaque ID to poll via /chat/result/{processing_id} */
@@ -6154,7 +5152,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/AtomicFact.json
+             * @example https://api.sonz.ai/api/v1/schemas/AtomicFact.json
              */
             readonly $schema?: string;
             agent_framing?: string;
@@ -6266,51 +5264,11 @@ export interface components {
             app: string;
             connected_account_label?: string;
         };
-        BYOKKeyResponse: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BYOKKeyResponse.json
-             */
-            readonly $schema?: string;
-            api_key_prefix: string;
-            health_status: string;
-            is_active: boolean;
-            /** Format: date-time */
-            last_health_check_at?: string;
-            last_health_error?: string;
-            /** Format: date-time */
-            last_used_at?: string;
-            provider: string;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        BandAccuracy: {
-            /** Format: double */
-            actual_rate: number;
-            /** Format: double */
-            avg_score: number;
-            band: string;
-            /** Format: double */
-            calibration_gap: number;
-            /** Format: int64 */
-            conversions: number;
-            /** Format: int64 */
-            n: number;
-            /** Format: double */
-            predicted_rate: number;
-        };
-        BanditAction: {
-            features?: {
-                [key: string]: unknown;
-            };
-            id: string;
-        };
         BatchGetPersonalitiesInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BatchGetPersonalitiesInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/BatchGetPersonalitiesInputBody.json
              */
             readonly $schema?: string;
             /** @description List of agent IDs (max 50) */
@@ -6320,7 +5278,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BatchImportRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/BatchImportRequest.json
              */
             readonly $schema?: string;
             source?: string;
@@ -6340,7 +5298,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BatchImportUsersHumaOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/BatchImportUsersHumaOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -6371,7 +5329,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BatchInventoryRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/BatchInventoryRequest.json
              */
             readonly $schema?: string;
             items: components["schemas"]["BatchInventoryItem"][] | null;
@@ -6381,7 +5339,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BatchInventoryResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/BatchInventoryResponse.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -6402,7 +5360,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BatchPersonalityResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/BatchPersonalityResponse.json
              */
             readonly $schema?: string;
             personalities: {
@@ -6483,7 +5441,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BreakthroughsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/BreakthroughsResponse.json
              */
             readonly $schema?: string;
             breakthroughs: components["schemas"]["Breakthrough"][] | null;
@@ -6518,7 +5476,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BulkCreateFactsInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/BulkCreateFactsInputBody.json
              */
             readonly $schema?: string;
             /** @description Facts to create in a single request (1-1000) */
@@ -6530,7 +5488,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/BulkCreateFactsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/BulkCreateFactsOutputBody.json
              */
             readonly $schema?: string;
             /** @description The created facts, in input order */
@@ -6556,96 +5514,50 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CachedModelsPayload.json
+             * @example https://api.sonz.ai/api/v1/schemas/CachedModelsPayload.json
              */
             readonly $schema?: string;
             default_model: string;
             providers: unknown[] | null;
         };
-        Calibration: {
+        ChannelConnectionDTO: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/Calibration.json
+             * @example https://api.sonz.ai/api/v1/schemas/ChannelConnectionDTO.json
              */
             readonly $schema?: string;
-            bands: components["schemas"]["BandAccuracy"][] | null;
-            /** Format: double */
-            base_rate: number;
-            segments: components["schemas"]["SegmentCal"][] | null;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        CatalogEntry: {
-            description: string;
-            model: string;
-            name: string;
-            provisioned: boolean;
-            slug: string;
-        };
-        ChannelDTO: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ChannelDTO.json
-             */
-            readonly $schema?: string;
-            active: boolean;
-            channel_id: string;
-            /** @description Type-specific config; secret fields are returned masked */
-            config: {
-                [key: string]: unknown;
-            };
+            app_id?: string;
+            channel_type: string;
+            connection_id: string;
             /** Format: date-time */
             created_at: string;
-            /** @description Subscribed event types (empty = all) */
-            events: string[] | null;
-            /** @description Optional delivery predicate, e.g. {agents, min_score} */
-            filter?: {
-                [key: string]: unknown;
-            };
-            name: string;
+            default_agent_id?: string;
+            display_name: string;
+            ig_account_id?: string;
+            page_id?: string;
+            phone_number_id?: string;
             project_id: string;
-            /** @description Delivery backend: webhook | email | composio */
-            type: string;
+            provider_mode: string;
+            status: string;
+            status_detail?: string;
+            templates?: unknown;
+            test_send_succeeded?: boolean;
             /** Format: date-time */
             updated_at: string;
+            verify_token?: string;
+            waba_id?: string;
+            webhook_callback_url?: string;
         };
-        ChannelWriteBody: {
+        ChannelConnectionsOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ChannelWriteBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ChannelConnectionsOutputBody.json
              */
             readonly $schema?: string;
-            /** @description Whether the channel is active (default true) */
-            active?: boolean;
-            /** @description Type-specific config (url / api_key+from / agent_id+action ...) */
-            config?: {
-                [key: string]: unknown;
-            };
-            /** @description Event types to subscribe to (empty = all events) */
-            events?: string[] | null;
-            /** @description Optional delivery predicate, e.g. {"agents":["lead_research"],"min_score":80} */
-            filter?: {
-                [key: string]: unknown;
-            };
-            /** @description Human-readable channel name */
-            name: string;
-            /**
-             * @description Delivery backend
-             * @enum {string}
-             */
-            type: "webhook" | "email" | "composio";
-        };
-        ChatMsgInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ChatMsgInputBody.json
-             */
-            readonly $schema?: string;
-            text: string;
+            connections: components["schemas"]["ChannelConnectionDTO"][] | null;
+            items: components["schemas"]["ChannelConnectionDTO"][] | null;
         };
         ChatSSEChoice: {
             /** @description Incremental delta for this chunk */
@@ -6662,7 +5574,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ChatSSEChunk.json
+             * @example https://api.sonz.ai/api/v1/schemas/ChatSSEChunk.json
              */
             readonly $schema?: string;
             /**
@@ -6706,7 +5618,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CheckpointEvalRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/CheckpointEvalRequest.json
              */
             readonly $schema?: string;
             /** @description Workbench instance ID */
@@ -6718,47 +5630,6 @@ export interface components {
              * @description Session index for checkpoint
              */
             sessionIndex: number;
-        };
-        ClaimInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ClaimInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description The claim token from the claim link */
-            claim_token: string;
-        };
-        ClaimLinkInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ClaimLinkInputBody.json
-             */
-            readonly $schema?: string;
-        };
-        ClaimLinkOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ClaimLinkOutputBody.json
-             */
-            readonly $schema?: string;
-            claim_url: string;
-            expires_at: string;
-        };
-        ClaimResult: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ClaimResult.json
-             */
-            readonly $schema?: string;
-            agent_id: string;
-            agent_name: string;
-            clerk_org_id: string;
-            status: string;
-            tenant_id: string;
         };
         ColumnMappingSpec: {
             is_label?: boolean;
@@ -6776,7 +5647,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ComposioConnectCallbackInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ComposioConnectCallbackInputBody.json
              */
             readonly $schema?: string;
             account_label?: string;
@@ -6788,7 +5659,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ComposioConnectCallbackOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ComposioConnectCallbackOutputBody.json
              */
             readonly $schema?: string;
             connection?: components["schemas"]["Connection"];
@@ -6798,7 +5669,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ComposioUsageResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ComposioUsageResponse.json
              */
             readonly $schema?: string;
             by_app: components["schemas"]["ComposioAppUsage"][] | null;
@@ -6831,7 +5702,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ConstellationResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ConstellationResponse.json
              */
             readonly $schema?: string;
             edges: components["schemas"]["Edge"][] | null;
@@ -6842,26 +5713,11 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ConsumeNotificationOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ConsumeNotificationOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the notification was consumed */
             success: boolean;
-        };
-        ContactPoint: {
-            e164?: string;
-            type: string;
-            value: string;
-            verified: boolean;
-        };
-        ContactResult: {
-            confidence: string;
-            /** Format: int64 */
-            credits_used: number;
-            emails: components["schemas"]["ContactPoint"][] | null;
-            ph_resolved: boolean;
-            phones: components["schemas"]["ContactPoint"][] | null;
-            provider: string;
         };
         ContextEngineEventByType: {
             /** Format: double */
@@ -6876,7 +5732,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ContextEngineEventSummary.json
+             * @example https://api.sonz.ai/api/v1/schemas/ContextEngineEventSummary.json
              */
             readonly $schema?: string;
             byType: components["schemas"]["ContextEngineEventByType"][] | null;
@@ -6899,6 +5755,47 @@ export interface components {
             /** Format: double */
             serviceUsd: number;
         };
+        ConversationBody: {
+            agent: string;
+            agent_name: string;
+            channel: string;
+            /** Format: double */
+            cost_usd: number;
+            /** Format: date-time */
+            created_at: string;
+            handoffs: components["schemas"]["ConversationHandoff"][] | null;
+            id: string;
+            /** Format: date-time */
+            last_activity: string;
+            last_message: string;
+            model: string;
+            status: string;
+            tags: string[] | null;
+            tier: string;
+            title: string;
+        };
+        ConversationDetailBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://api.sonz.ai/api/v1/schemas/ConversationDetailBody.json
+             */
+            readonly $schema?: string;
+            conversation: components["schemas"]["OmnichannelConversationDTO"];
+            source: string;
+        };
+        ConversationHandoff: {
+            from: string;
+            to: string;
+            when: string;
+        };
+        ConversationMessage: {
+            content: string;
+            role: string;
+            session_id: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         CostBreakdownEntry: {
             /** Format: int64 */
             cacheTokens: number;
@@ -6917,7 +5814,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CostBreakdownResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/CostBreakdownResponse.json
              */
             readonly $schema?: string;
             byAgent: components["schemas"]["CostBreakdownEntry"][] | null;
@@ -7021,7 +5918,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CostResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/CostResponse.json
              */
             readonly $schema?: string;
             byBillingMode?: components["schemas"]["CostByBillingMode"][] | null;
@@ -7067,7 +5964,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateAPIKeyInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateAPIKeyInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -7084,7 +5981,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateAPIKeyOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateAPIKeyOutputBody.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -7106,7 +6003,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateAgentBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateAgentBody.json
              */
             readonly $schema?: string;
             /** @description Optional pre-set agent UUID */
@@ -7273,11 +6170,46 @@ export interface components {
             /** Format: double */
             importance: number;
         };
+        CreateChannelConnectionInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://api.sonz.ai/api/v1/schemas/CreateChannelConnectionInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Customer system-user access token; encrypted at rest; required for byo_app. */
+            access_token?: string;
+            /** @description Customer Meta app id; required for byo_app. */
+            app_id?: string;
+            /** @description Customer Meta app secret; encrypted at rest; required for byo_app. */
+            app_secret?: string;
+            /** @enum {string} */
+            channel_type: "whatsapp" | "messenger" | "instagram";
+            /** @description Embedded Signup OAuth code; required for embedded_signup. */
+            code?: string;
+            default_agent_id?: string;
+            display_name?: string;
+            ig_account_id?: string;
+            page_id?: string;
+            phone_number_id?: string;
+            /**
+             * @description Connection provider mode. Defaults to byo_app.
+             * @enum {string}
+             */
+            provider_mode?: "byo_app" | "embedded_signup";
+            templates?: unknown;
+            test_message?: string;
+            /** @description Optional channel recipient id for an immediate test send. */
+            test_to?: string;
+            /** @description Customer webhook verify token; required for byo_app. */
+            verify_token?: string;
+            waba_id?: string;
+        };
         CreateConstellationNodeInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateConstellationNodeInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateConstellationNodeInputBody.json
              */
             readonly $schema?: string;
             /** @description Human-readable description */
@@ -7298,7 +6230,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateCustomStateInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateCustomStateInputBody.json
              */
             readonly $schema?: string;
             /** @description Content type (text or json, defaults to text) */
@@ -7318,7 +6250,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateCustomToolInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateCustomToolInputBody.json
              */
             readonly $schema?: string;
             /** @description Tool description */
@@ -7332,7 +6264,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateEvalTemplateInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateEvalTemplateInputBody.json
              */
             readonly $schema?: string;
             /** @description Evaluation categories */
@@ -7362,7 +6294,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateFactInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateFactInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -7394,7 +6326,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateGoalInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateGoalInputBody.json
              */
             readonly $schema?: string;
             /** @description Goal description */
@@ -7417,7 +6349,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateHabitInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateHabitInputBody.json
              */
             readonly $schema?: string;
             /** @description Habit category (defaults to behavioral) */
@@ -7440,7 +6372,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateInstanceInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateInstanceInputBody.json
              */
             readonly $schema?: string;
             /** @description Optional description */
@@ -7452,7 +6384,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateInventoryItemHumaInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateInventoryItemHumaInputBody.json
              */
             readonly $schema?: string;
             /** @description Natural-language description used for KB search */
@@ -7474,7 +6406,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateProjectInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateProjectInputBody.json
              */
             readonly $schema?: string;
             /** @description When true, agents in this project default to autonomous KB editing (create/update/delete) unless their own knowledgeBaseWrite capability is set explicitly. null = not configured. */
@@ -7488,7 +6420,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateScheduleInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateScheduleInputBody.json
              */
             readonly $schema?: string;
             /** @description Optional quiet-hours/days filter: {hours:{start,end},days_of_week}. */
@@ -7508,7 +6440,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateScheduleOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateScheduleOutputBody.json
              */
             readonly $schema?: string;
             enabled: boolean;
@@ -7520,7 +6452,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateTicketRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateTicketRequest.json
              */
             readonly $schema?: string;
             description: string;
@@ -7532,7 +6464,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateUserPersonaInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateUserPersonaInputBody.json
              */
             readonly $schema?: string;
             /** @description Free-text persona description */
@@ -7546,7 +6478,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateWisdomAttributedBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateWisdomAttributedBody.json
              */
             readonly $schema?: string;
             category: string;
@@ -7566,7 +6498,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateWisdomAttributedOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateWisdomAttributedOutputBody.json
              */
             readonly $schema?: string;
             fact: components["schemas"]["AttributedFact"];
@@ -7575,7 +6507,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateWisdomRelationBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateWisdomRelationBody.json
              */
             readonly $schema?: string;
             edge_type: string;
@@ -7594,68 +6526,16 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CreateWisdomRelationOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/CreateWisdomRelationOutputBody.json
              */
             readonly $schema?: string;
             relation: components["schemas"]["AttributedRelation"];
-        };
-        CustomAgentDTO: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CustomAgentDTO.json
-             */
-            readonly $schema?: string;
-            agent_id: string;
-            /** Format: date-time */
-            created_at: string;
-            description?: string;
-            disable_tools: boolean;
-            findings_schema?: {
-                [key: string]: unknown;
-            };
-            /** Format: int64 */
-            max_tool_rounds: number;
-            model: string;
-            name: string;
-            project_id: string;
-            slug: string;
-            system: string;
-            tools: string[] | null;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        CustomAgentWriteBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CustomAgentWriteBody.json
-             */
-            readonly $schema?: string;
-            description?: string;
-            /** @description Disable the toolset entirely (pure reasoning) */
-            disable_tools?: boolean;
-            /** @description JSON Schema for the agent's structured return_findings output */
-            findings_schema?: {
-                [key: string]: unknown;
-            };
-            /** Format: int64 */
-            max_tool_rounds?: number;
-            /** @description Anthropic model: claude-sonnet-4-6 | claude-haiku-4-5 */
-            model: string;
-            name: string;
-            /** @description Project-scoped agent slug (referenced from pipeline steps) */
-            slug: string;
-            /** @description The agent's system prompt */
-            system: string;
-            /** @description Sandbox toolset tools to enable (empty = all) */
-            tools?: string[] | null;
         };
         CustomLLMConfigResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CustomLLMConfigResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/CustomLLMConfigResponse.json
              */
             readonly $schema?: string;
             api_key_prefix: string;
@@ -7669,7 +6549,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CustomState.json
+             * @example https://api.sonz.ai/api/v1/schemas/CustomState.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -7689,7 +6569,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/CustomToolDefinition.json
+             * @example https://api.sonz.ai/api/v1/schemas/CustomToolDefinition.json
              */
             readonly $schema?: string;
             description: string;
@@ -7703,39 +6583,11 @@ export interface components {
             /** Format: int64 */
             sessions: number;
         };
-        DecideMLNBARequest: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DecideMLNBARequest.json
-             */
-            readonly $schema?: string;
-            actions: components["schemas"]["BanditAction"][] | null;
-            context?: {
-                [key: string]: unknown;
-            };
-            explore?: boolean;
-        };
-        DecideResponse: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DecideResponse.json
-             */
-            readonly $schema?: string;
-            action_id: string;
-            explore: boolean;
-            /** Format: int64 */
-            model_n: number;
-            /** Format: double */
-            propensity: number;
-            scores: components["schemas"]["ActionScore"][] | null;
-        };
         DeleteAgentOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DeleteAgentOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/DeleteAgentOutputBody.json
              */
             readonly $schema?: string;
             /** @description Counts of deleted sub-resources */
@@ -7753,7 +6605,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DeleteCustomToolOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/DeleteCustomToolOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -7762,7 +6614,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DeleteEvalRunOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/DeleteEvalRunOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -7771,7 +6623,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DeleteEvalTemplateOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/DeleteEvalTemplateOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -7780,7 +6632,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DeleteInstanceOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/DeleteInstanceOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the instance was deleted */
@@ -7790,7 +6642,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DeleteProjectOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/DeleteProjectOutputBody.json
              */
             readonly $schema?: string;
             /** @description Deletion status — "deleted" on success */
@@ -7800,7 +6652,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DeleteUserPersonaOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/DeleteUserPersonaOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -7809,7 +6661,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DeleteWisdomResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/DeleteWisdomResponse.json
              */
             readonly $schema?: string;
             fact_id: string;
@@ -7842,7 +6694,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DiaryPolymorphicResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/DiaryPolymorphicResponse.json
              */
             readonly $schema?: string;
             entries?: components["schemas"]["DiaryEntry"][] | null;
@@ -7896,7 +6748,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DirectUpdateRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/DirectUpdateRequest.json
              */
             readonly $schema?: string;
             properties: {
@@ -7907,7 +6759,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/DirectUpdateResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/DirectUpdateResponse.json
              */
             readonly $schema?: string;
             error?: string;
@@ -7947,7 +6799,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EffectivePostProcessingModelOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/EffectivePostProcessingModelOutputBody.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -7961,7 +6813,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EndSessionInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/EndSessionInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -7997,7 +6849,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EndSessionOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/EndSessionOutputBody.json
              */
             readonly $schema?: string;
             /** @description Echo of the resolved agent_id. */
@@ -8015,110 +6867,11 @@ export interface components {
             /** @description Whether the session end was accepted */
             success: boolean;
         };
-        EnrichJobView: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EnrichJobView.json
-             */
-            readonly $schema?: string;
-            error?: string;
-            result?: unknown;
-            status: string;
-        };
-        EnrichLeadBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EnrichLeadBody.json
-             */
-            readonly $schema?: string;
-            lead: components["schemas"]["EnrichLeadBodyLeadStruct"];
-            /** @description Override delivery URL; defaults to the project's registered lead.enriched webhook */
-            webhook_url?: string;
-        };
-        EnrichLeadBodyLeadStruct: {
-            /** @description Preferred / hinted brand */
-            brand?: string;
-            company?: string;
-            email?: string;
-            /** @description Lead full name (minimum input) */
-            name: string;
-            /** @description Lead phone (minimum input) */
-            phone?: string;
-            /** @description Raw inquiry text, if any */
-            raw?: string;
-            /** @description Vertical key (default real_estate) */
-            vertical?: string;
-        };
-        EnrichLeadResp: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EnrichLeadResp.json
-             */
-            readonly $schema?: string;
-            job_id: string;
-            status: string;
-        };
-        EnrichPersonInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EnrichPersonInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description ISO country (e.g. PH) — coverage caveats apply outside US/EU */
-            country?: string;
-            /** @description Known email address (contact-resolution identifier) */
-            email?: string;
-            /** @description Current employer / company */
-            employer?: string;
-            /** @description LinkedIn profile URL — the Crustdata identifier; strongly preferred */
-            linkedin_url?: string;
-            /** @description Full name */
-            name?: string;
-            /** @description Contact fields desired: "email", "phone". Defaults to both. */
-            want?: string[] | null;
-        };
-        EnrichPersonOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EnrichPersonOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description True when served from the ScyllaDB cache (no vendor was billed). */
-            cache_hit: boolean;
-            /** @description Resolved contact points (Fiber/Apollo). null when unresolved. */
-            contact: components["schemas"]["ContactResult"];
-            /**
-             * Format: int64
-             * @description Best-effort estimate of vendor credits consumed (0 on cache hit).
-             */
-            credits_used: number;
-            /** @description Vendors actually invoked in this run. */
-            providers_used: string[] | null;
-            /** @description Person/company research (Crustdata). null when unresolved. */
-            research: components["schemas"]["EnrichResult"];
-            /** @description Per-step waterfall trace for transparency. */
-            steps: components["schemas"]["Step"][] | null;
-        };
-        EnrichResult: {
-            citations: string[] | null;
-            confidence: string;
-            coverage_note?: string;
-            employer_guess?: string;
-            role_signals: string[] | null;
-            summary: string;
-            tier: string;
-            wealth_signals: components["schemas"]["WealthSignal"][] | null;
-        };
         EnterpriseContract: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EnterpriseContract.json
+             * @example https://api.sonz.ai/api/v1/schemas/EnterpriseContract.json
              */
             readonly $schema?: string;
             autoRenew: boolean;
@@ -8166,16 +6919,6 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        EpochMetric: {
-            /** Format: double */
-            accuracy: number;
-            /** Format: double */
-            auc: number;
-            /** Format: int64 */
-            epoch: number;
-            /** Format: double */
-            log_loss: number;
-        };
         ErrorDetail: {
             /** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
             location?: string;
@@ -8188,7 +6931,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ErrorModel.json
+             * @example https://api.sonz.ai/api/v1/schemas/ErrorModel.json
              */
             readonly $schema?: string;
             /**
@@ -8262,7 +7005,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EvalOnlyRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/EvalOnlyRequest.json
              */
             readonly $schema?: string;
             /** @description Optional adaptation-eval template UUID */
@@ -8278,7 +7021,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EvalRun.json
+             * @example https://api.sonz.ai/api/v1/schemas/EvalRun.json
              */
             readonly $schema?: string;
             adaptation_result: unknown;
@@ -8323,7 +7066,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EvalRunEvent.json
+             * @example https://api.sonz.ai/api/v1/schemas/EvalRunEvent.json
              */
             readonly $schema?: string;
             /** @description Adaptation-evaluation result payload (final_status only) */
@@ -8341,7 +7084,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EvalTemplate.json
+             * @example https://api.sonz.ai/api/v1/schemas/EvalTemplate.json
              */
             readonly $schema?: string;
             categories: components["schemas"]["EvalCategory"][] | null;
@@ -8366,7 +7109,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EvaluateAcceptedBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/EvaluateAcceptedBody.json
              */
             readonly $schema?: string;
             /** @description Eval run UUID — poll GET /eval-runs/{runId} for the result */
@@ -8374,20 +7117,11 @@ export interface components {
             /** @description Initial run status (always "pending") */
             status: string;
         };
-        EvaluateMLOPERequest: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EvaluateMLOPERequest.json
-             */
-            readonly $schema?: string;
-            logged: components["schemas"]["LoggedTuple"][] | null;
-        };
         EvaluateRequest: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/EvaluateRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/EvaluateRequest.json
              */
             readonly $schema?: string;
             /** @description Optional adaptation-eval template UUID; defaults to tenant's first adaptation template */
@@ -8426,39 +7160,17 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/FactHistoryResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/FactHistoryResponse.json
              */
             readonly $schema?: string;
             current: components["schemas"]["AtomicFact"];
             previous_versions: components["schemas"]["AtomicFact"][] | null;
         };
-        FeatureWeight: {
-            name: string;
-            /** Format: double */
-            weight: number;
-        };
-        FeedbackResponse: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/FeedbackResponse.json
-             */
-            readonly $schema?: string;
-            bandit_error?: string;
-            /** Format: int64 */
-            bandit_n?: number;
-            bandit_updated: boolean;
-            converted: boolean;
-            message: string;
-            ok: boolean;
-            outcome_recorded: boolean;
-            use_case: string;
-        };
         ForkAgentInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ForkAgentInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ForkAgentInputBody.json
              */
             readonly $schema?: string;
             /** @description Display name for the forked agent */
@@ -8468,7 +7180,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ForkResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ForkResponse.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -8480,7 +7192,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ForkStatusResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ForkStatusResponse.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -8499,7 +7211,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GenerateAndCreateInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GenerateAndCreateInputBody.json
              */
             readonly $schema?: string;
             /** @description Pre-existing agent UUID (optional) */
@@ -8525,7 +7237,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GenerateBioInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GenerateBioInputBody.json
              */
             readonly $schema?: string;
             /** @description Current bio to improve upon */
@@ -8549,7 +7261,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GenerateBioOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GenerateBioOutputBody.json
              */
             readonly $schema?: string;
             /** @description Generated bio text */
@@ -8566,7 +7278,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GenerateCharacterInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GenerateCharacterInputBody.json
              */
             readonly $schema?: string;
             /** @description Pre-existing agent UUID (optional) */
@@ -8590,7 +7302,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GenerateImageInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GenerateImageInputBody.json
              */
             readonly $schema?: string;
             /** @description Model to use (default: gemini-3.1-flash-image-preview) */
@@ -8608,7 +7320,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GenerateImageOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GenerateImageOutputBody.json
              */
             readonly $schema?: string;
             /** @description GCS URI of the image */
@@ -8631,7 +7343,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GenerateSeedMemoriesInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GenerateSeedMemoriesInputBody.json
              */
             readonly $schema?: string;
             /** @description Agent display name */
@@ -8665,7 +7377,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GenerateSeedMemoriesOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GenerateSeedMemoriesOutputBody.json
              */
             readonly $schema?: string;
             /** @description Generated seed memories */
@@ -8675,7 +7387,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GetAgentModelsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GetAgentModelsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Default LLM model */
@@ -8685,27 +7397,11 @@ export interface components {
             /** @description Available provider/model combinations */
             providers: components["schemas"]["AgentModelsModelEntry"][] | null;
         };
-        GetBuiltinAgentSessionResponse: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GetBuiltinAgentSessionResponse.json
-             */
-            readonly $schema?: string;
-            /** Format: int64 */
-            billed_cache_creation_tokens: number;
-            /** Format: int64 */
-            billed_cache_read_tokens: number;
-            /** Format: int64 */
-            billed_input_tokens: number;
-            /** Format: int64 */
-            billed_output_tokens: number;
-        };
         GetSkillLoadCountOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GetSkillLoadCountOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GetSkillLoadCountOutputBody.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -8716,7 +7412,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GetToolSchemasOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/GetToolSchemasOutputBody.json
              */
             readonly $schema?: string;
             /** @description Available tools for this agent */
@@ -8726,7 +7422,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/Goal.json
+             * @example https://api.sonz.ai/api/v1/schemas/Goal.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -8750,7 +7446,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GoalsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/GoalsResponse.json
              */
             readonly $schema?: string;
             goals: components["schemas"]["Goal"][] | null;
@@ -8761,21 +7457,11 @@ export interface components {
                 [key: string]: unknown;
             };
         };
-        GuidanceOutput: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/GuidanceOutput.json
-             */
-            readonly $schema?: string;
-            active: components["schemas"]["AgentGuidance"];
-            history: components["schemas"]["AgentGuidance"][] | null;
-        };
         Habit: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/Habit.json
+             * @example https://api.sonz.ai/api/v1/schemas/Habit.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -8805,32 +7491,16 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/HabitsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/HabitsResponse.json
              */
             readonly $schema?: string;
             habits: components["schemas"]["Habit"][] | null;
-        };
-        HyperParams: {
-            /** Format: double */
-            gamma: number;
-            /** Format: double */
-            lambda: number;
-            /** Format: double */
-            learning_rate: number;
-            /** Format: int64 */
-            max_depth: number;
-            /** Format: double */
-            min_child_weight: number;
-            /** Format: int64 */
-            n_estimators: number;
-            /** Format: double */
-            subsample: number;
         };
         ImportJob: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ImportJob.json
+             * @example https://api.sonz.ai/api/v1/schemas/ImportJob.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -8868,16 +7538,11 @@ export interface components {
             /** Format: int64 */
             warmth_score: number;
         };
-        Importance: {
-            /** Format: double */
-            gain: number;
-            name: string;
-        };
         InitiateComposioConnectInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/InitiateComposioConnectInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/InitiateComposioConnectInputBody.json
              */
             readonly $schema?: string;
             /** @description Composio app slug (e.g. gmail, slack, github) */
@@ -8887,7 +7552,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/InitiateComposioConnectOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/InitiateComposioConnectOutputBody.json
              */
             readonly $schema?: string;
             connected_account_id: string;
@@ -8966,7 +7631,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/InterestsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/InterestsResponse.json
              */
             readonly $schema?: string;
             interests: components["schemas"]["Interest"][] | null;
@@ -8989,7 +7654,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/InventoryReadResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/InventoryReadResponse.json
              */
             readonly $schema?: string;
             groups?: components["schemas"]["GroupResult"][] | null;
@@ -9005,7 +7670,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/InventoryWriteRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/InventoryWriteRequest.json
              */
             readonly $schema?: string;
             action: string;
@@ -9022,7 +7687,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/InventoryWriteResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/InventoryWriteResponse.json
              */
             readonly $schema?: string;
             candidates?: components["schemas"]["KbCandidate"][] | null;
@@ -9031,20 +7696,6 @@ export interface components {
             inventory_item_id?: string;
             kb_resolution?: components["schemas"]["KbResolutionInfo"];
             status: string;
-        };
-        InvokeInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/InvokeInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Task payload passed verbatim to the agent (e.g. lead fields: name, linkedin_url, employer, country, inquiry) */
-            input: {
-                [key: string]: unknown;
-            };
-            /** @description Optional session title for traceability */
-            title?: string;
         };
         JobUser: {
             /** Format: date-time */
@@ -9068,7 +7719,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KBAnalyticsRule.json
+             * @example https://api.sonz.ai/api/v1/schemas/KBAnalyticsRule.json
              */
             readonly $schema?: string;
             config: unknown;
@@ -9109,16 +7760,11 @@ export interface components {
             /** Format: int64 */
             total_leads: number;
         };
-        KBDocType: {
-            expected_relationships?: string[] | null;
-            root_entity_type: string;
-            type: string;
-        };
         KBDocument: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KBDocument.json
+             * @example https://api.sonz.ai/api/v1/schemas/KBDocument.json
              */
             readonly $schema?: string;
             checksum: string;
@@ -9179,7 +7825,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KBEntitySchema.json
+             * @example https://api.sonz.ai/api/v1/schemas/KBEntitySchema.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -9194,18 +7840,11 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
         };
-        KBEntityType: {
-            aliases_field?: string;
-            is_root_candidate: boolean;
-            key_fields: string[] | null;
-            properties?: components["schemas"]["KBSchemaProperty"][] | null;
-            type: string;
-        };
         KBNode: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KBNode.json
+             * @example https://api.sonz.ai/api/v1/schemas/KBNode.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -9250,7 +7889,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KBNodeWithScope.json
+             * @example https://api.sonz.ai/api/v1/schemas/KBNodeWithScope.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -9305,47 +7944,6 @@ export interface components {
             };
             type: string;
         };
-        KBRelationType: {
-            from: string;
-            properties?: components["schemas"]["KBSchemaProperty"][] | null;
-            supersession_identity: string[] | null;
-            to: string;
-            type: string;
-        };
-        KBSchema: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KBSchema.json
-             */
-            readonly $schema?: string;
-            config: components["schemas"]["KBSchemaConfig"];
-            /** Format: date-time */
-            created_at: string;
-            created_by?: string;
-            doc_types: components["schemas"]["KBDocType"][] | null;
-            entity_types: components["schemas"]["KBEntityType"][] | null;
-            project_id: string;
-            relationship_types: components["schemas"]["KBRelationType"][] | null;
-            /** Format: int64 */
-            schema_version: number;
-            status: string;
-            template_lineage?: string;
-            vertical_template?: string;
-        };
-        KBSchemaConfig: {
-            /** Format: double */
-            abstain_below_confidence?: number;
-            /** Format: double */
-            classify_auto_threshold?: number;
-            classify_model?: string;
-            /** Format: double */
-            extract_min_provenance_confidence?: number;
-            extract_model?: string;
-            ingestion_verifier_model?: string;
-            schema_propose_model?: string;
-            use_document_ai_preprocessor?: boolean;
-        };
         KBSchemaField: {
             description?: string;
             enum_values?: string[] | null;
@@ -9354,17 +7952,11 @@ export interface components {
             required: boolean;
             type: string;
         };
-        KBSchemaProperty: {
-            description?: string;
-            name: string;
-            required: boolean;
-            type: string;
-        };
         KBSearchResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KBSearchResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/KBSearchResponse.json
              */
             readonly $schema?: string;
             query: string;
@@ -9432,7 +8024,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbAgentCreateNodeOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbAgentCreateNodeOutputBody.json
              */
             readonly $schema?: string;
             /** @description The created node */
@@ -9442,7 +8034,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbAgentDeleteNodeOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbAgentDeleteNodeOutputBody.json
              */
             readonly $schema?: string;
             /** @description True on successful soft-delete */
@@ -9452,7 +8044,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbAgentUpdateNodeOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbAgentUpdateNodeOutputBody.json
              */
             readonly $schema?: string;
             /** @description The updated node */
@@ -9462,7 +8054,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbBulkUpdateInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbBulkUpdateInputBody.json
              */
             readonly $schema?: string;
             /** @description Source identifier (defaults to 'bulk_api') */
@@ -9476,7 +8068,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbBulkUpdateOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbBulkUpdateOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -9514,49 +8106,11 @@ export interface components {
                 [key: string]: unknown;
             };
         };
-        KbCompareEntity: {
-            key: {
-                [key: string]: unknown;
-            };
-            type: string;
-        };
-        KbCompareInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbCompareInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Entities to compare (e.g. list of hospitals). */
-            entities: components["schemas"]["KbCompareEntity"][] | null;
-            /** @description Dot-path of the property to extract from each fact (e.g. 'price'). */
-            property_path: string;
-            /** @description Target entity all the listed entities should be related to (e.g. procedure 'MRI'). */
-            target_entity: components["schemas"]["KbCompareEntity"];
-            /** @description Relation type connecting the entities to the target (e.g. 'hospital_offers_procedure'). */
-            via_relation: string;
-        };
-        KbCompareOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbCompareOutputBody.json
-             */
-            readonly $schema?: string;
-            rows: components["schemas"]["KbCompareRow"][] | null;
-        };
-        KbCompareRow: {
-            entity: components["schemas"]["KbCompareEntity"];
-            fact?: components["schemas"]["KbFactDTO"];
-            missing: boolean;
-            missing_reason?: string;
-            value?: unknown;
-        };
         KbCreateAnalyticsRuleInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbCreateAnalyticsRuleInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbCreateAnalyticsRuleInputBody.json
              */
             readonly $schema?: string;
             /** @description Rule configuration object */
@@ -9574,7 +8128,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbCreateOrgNodeInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbCreateOrgNodeInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -9595,7 +8149,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbCreateSchemaInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbCreateSchemaInputBody.json
              */
             readonly $schema?: string;
             /** @description Human-readable description */
@@ -9621,7 +8175,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbDocCostOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbDocCostOutputBody.json
              */
             readonly $schema?: string;
             document_ai_rows: components["schemas"]["KbDocCostBreakdown"][] | null;
@@ -9630,33 +8184,11 @@ export interface components {
             /** Format: double */
             total_cost_usd: number;
         };
-        KbFactDTO: {
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            effective_date: string;
-            /** Format: double */
-            extraction_confidence: number;
-            fact_id: string;
-            from_node_id: string;
-            is_active: boolean;
-            properties: {
-                [key: string]: unknown;
-            };
-            relation_type: string;
-            source_document_id: string;
-            /** Format: int64 */
-            source_page: number;
-            source_snippet: string;
-            to_node_id: string;
-            /** Format: int64 */
-            version: number;
-        };
         KbGetConversionStatsOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetConversionStatsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbGetConversionStatsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Conversion statistics */
@@ -9667,44 +8199,11 @@ export interface components {
              */
             total: number;
         };
-        KbGetEntityOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetEntityOutputBody.json
-             */
-            readonly $schema?: string;
-            entity_key: {
-                [key: string]: unknown;
-            };
-            entity_node_id: string;
-            entity_type: string;
-            incoming_facts: components["schemas"]["KbFactDTO"][] | null;
-            outgoing_facts: components["schemas"]["KbFactDTO"][] | null;
-        };
-        KbGetFactHistoryOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetFactHistoryOutputBody.json
-             */
-            readonly $schema?: string;
-            versions: components["schemas"]["KbFactDTO"][] | null;
-        };
-        KbGetFactOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetFactOutputBody.json
-             */
-            readonly $schema?: string;
-            fact: components["schemas"]["KbFactDTO"];
-        };
         KbGetNodeHistoryOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetNodeHistoryOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbGetNodeHistoryOutputBody.json
              */
             readonly $schema?: string;
             /** @description Version history entries */
@@ -9719,7 +8218,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetNodeOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbGetNodeOutputBody.json
              */
             readonly $schema?: string;
             /** @description Version history (when requested) */
@@ -9735,7 +8234,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetRecommendationsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbGetRecommendationsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Scored recommendations */
@@ -9750,7 +8249,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetStatsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbGetStatsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Document counts by status */
@@ -9776,7 +8275,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetTrendRankingsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbGetTrendRankingsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Ranked trends */
@@ -9791,7 +8290,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbGetTrendsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbGetTrendsOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -9806,7 +8305,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbInsertFactsInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbInsertFactsInputBody.json
              */
             readonly $schema?: string;
             /** @description Entities to insert or update */
@@ -9820,7 +8319,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbInsertFactsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbInsertFactsOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -9847,7 +8346,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbListAnalyticsRulesOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbListAnalyticsRulesOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of analytics rules */
@@ -9862,7 +8361,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbListDocumentsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbListDocumentsOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of documents */
@@ -9873,21 +8372,11 @@ export interface components {
              */
             total: number;
         };
-        KbListFactsOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbListFactsOutputBody.json
-             */
-            readonly $schema?: string;
-            facts: components["schemas"]["KbFactDTO"][] | null;
-            next_page_token?: string;
-        };
         KbListNodesOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbListNodesOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbListNodesOutputBody.json
              */
             readonly $schema?: string;
             /** @description True when the underlying scan was truncated by limit */
@@ -9899,7 +8388,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbListOrgNodesOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbListOrgNodesOutputBody.json
              */
             readonly $schema?: string;
             nodes: components["schemas"]["KBNode"][] | null;
@@ -9910,7 +8399,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbListSchemasOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbListSchemasOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of schemas */
@@ -9921,59 +8410,11 @@ export interface components {
              */
             total: number;
         };
-        KbMultimodalSchemaActivateOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbMultimodalSchemaActivateOutputBody.json
-             */
-            readonly $schema?: string;
-            /** Format: int64 */
-            active_version: number;
-            status: string;
-        };
-        KbMultimodalSchemaCreateOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbMultimodalSchemaCreateOutputBody.json
-             */
-            readonly $schema?: string;
-            schema: components["schemas"]["KBSchema"];
-        };
-        KbMultimodalSchemaListOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbMultimodalSchemaListOutputBody.json
-             */
-            readonly $schema?: string;
-            schemas: components["schemas"]["KBSchema"][] | null;
-        };
-        KbPatchClassificationInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbPatchClassificationInputBody.json
-             */
-            readonly $schema?: string;
-            root_entity: components["schemas"]["RootEntityStruct"];
-        };
-        KbPatchClassificationOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbPatchClassificationOutputBody.json
-             */
-            readonly $schema?: string;
-            document_id: string;
-            status: string;
-        };
         KbPromoteNodeInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbPromoteNodeInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbPromoteNodeInputBody.json
              */
             readonly $schema?: string;
             /** @description Target tenant; server rejects if it does not match the authenticated tenant. */
@@ -9983,7 +8424,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbRecordFeedbackInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbRecordFeedbackInputBody.json
              */
             readonly $schema?: string;
             /** @description Feedback action enum: converted, dismissed, clicked, ignored, etc. */
@@ -10006,21 +8447,10 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbRecordFeedbackOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbRecordFeedbackOutputBody.json
              */
             readonly $schema?: string;
             /** @description Result status */
-            status: string;
-        };
-        KbReingestOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbReingestOutputBody.json
-             */
-            readonly $schema?: string;
-            document_id: string;
-            mode: string;
             status: string;
         };
         KbResolutionInfo: {
@@ -10035,7 +8465,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbRunAnalyticsRuleOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbRunAnalyticsRuleOutputBody.json
              */
             readonly $schema?: string;
             /** @description Human-readable message */
@@ -10049,7 +8479,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbSearchResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbSearchResponse.json
              */
             readonly $schema?: string;
             query: string;
@@ -10064,25 +8494,11 @@ export interface components {
             source?: string;
             type: string;
         };
-        KbTraverseOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbTraverseOutputBody.json
-             */
-            readonly $schema?: string;
-            facts: components["schemas"]["KbTraversedFact"][] | null;
-        };
-        KbTraversedFact: {
-            /** Format: int64 */
-            depth: number;
-            fact: components["schemas"]["KbFactDTO"];
-        };
         KbUpdateAnalyticsRuleInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbUpdateAnalyticsRuleInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbUpdateAnalyticsRuleInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated rule configuration */
@@ -10098,7 +8514,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbUpdateSchemaInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbUpdateSchemaInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated description */
@@ -10116,7 +8532,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/KbUploadDocumentOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/KbUploadDocumentOutputBody.json
              */
             readonly $schema?: string;
             /** @description SHA-256 hex digest */
@@ -10135,119 +8551,22 @@ export interface components {
             /** @description Processing status */
             status: string;
         };
-        LearnInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/LearnInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Optional evidence payload: recent critiques (research_grader/qualifier_critic outputs) and outcomes (won/lost). Required for agents without a server-side critique store. */
-            evidence?: {
-                [key: string]: unknown;
-            };
-            /**
-             * Format: double
-             * @description Optional metric value at activation (prior version's recent metric).
-             */
-            metric_baseline?: number;
-            /** @description Optional metric the new version is judged on (e.g. research_grade | won_rate | calibration_gap_abs). */
-            metric_name?: string;
-        };
-        LearnMLNBARequest: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/LearnMLNBARequest.json
-             */
-            readonly $schema?: string;
-            action_features?: {
-                [key: string]: unknown;
-            };
-            action_id: string;
-            context?: {
-                [key: string]: unknown;
-            };
-            /** Format: double */
-            propensity?: number;
-            /** Format: double */
-            reward: number;
-        };
-        LearnResponse: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/LearnResponse.json
-             */
-            readonly $schema?: string;
-            /** Format: int64 */
-            n: number;
-            ok: boolean;
-        };
-        LearnResult: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/LearnResult.json
-             */
-            readonly $schema?: string;
-            changed: boolean;
-            guidance?: components["schemas"]["AgentGuidance"];
-            reason?: string;
-            violations?: string[] | null;
-        };
         ListAllFactsResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListAllFactsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListAllFactsResponse.json
              */
             readonly $schema?: string;
             facts: components["schemas"]["StoredFact"][] | null;
             /** Format: int64 */
             total: number;
         };
-        ListBYOKKeysOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListBYOKKeysOutputBody.json
-             */
-            readonly $schema?: string;
-            keys: components["schemas"]["BYOKKeyResponse"][] | null;
-        };
-        ListBuiltinAgentSessionsResponse: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListBuiltinAgentSessionsResponse.json
-             */
-            readonly $schema?: string;
-            sessions: components["schemas"]["SessionBody"][] | null;
-        };
-        ListBuiltinAgentsResponse: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListBuiltinAgentsResponse.json
-             */
-            readonly $schema?: string;
-            agents: components["schemas"]["CatalogEntry"][] | null;
-        };
-        ListChannelsOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListChannelsOutputBody.json
-             */
-            readonly $schema?: string;
-            channels: components["schemas"]["ChannelDTO"][] | null;
-        };
         ListComposioAuditOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListComposioAuditOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListComposioAuditOutputBody.json
              */
             readonly $schema?: string;
             entries: components["schemas"]["ActionLogEntry"][] | null;
@@ -10256,7 +8575,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListComposioAvailableActionsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListComposioAvailableActionsOutputBody.json
              */
             readonly $schema?: string;
             apps: components["schemas"]["AvailableActionsApp"][] | null;
@@ -10265,25 +8584,42 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListComposioConnectionsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListComposioConnectionsOutputBody.json
              */
             readonly $schema?: string;
             connections: components["schemas"]["Connection"][] | null;
         };
-        ListCustomAgentsOutputBody: {
+        ListConversationMessagesOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListCustomAgentsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListConversationMessagesOutputBody.json
              */
             readonly $schema?: string;
-            agents: components["schemas"]["CustomAgentDTO"][] | null;
+            has_more: boolean;
+            items: components["schemas"]["OmnichannelMessageDTO"][] | null;
+            messages: components["schemas"]["OmnichannelMessageDTO"][] | null;
+            next_cursor?: string;
+        };
+        ListConversationsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://api.sonz.ai/api/v1/schemas/ListConversationsOutputBody.json
+             */
+            readonly $schema?: string;
+            conversations: components["schemas"]["ConversationBody"][] | null;
+            has_more: boolean;
+            items: components["schemas"]["ConversationBody"][] | null;
+            next_cursor?: string;
+            /** Format: int64 */
+            total: number;
         };
         ListCustomStatesOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListCustomStatesOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListCustomStatesOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of custom states */
@@ -10293,7 +8629,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListCustomToolsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListCustomToolsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Developer-defined custom tools */
@@ -10303,7 +8639,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListEnabledSkillsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListEnabledSkillsOutputBody.json
              */
             readonly $schema?: string;
             skills: string[] | null;
@@ -10312,7 +8648,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListEvalTemplatesOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListEvalTemplatesOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of eval templates */
@@ -10322,7 +8658,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListFactsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListFactsResponse.json
              */
             readonly $schema?: string;
             facts: components["schemas"]["StoredFact"][] | null;
@@ -10334,7 +8670,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListImportJobUsersOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListImportJobUsersOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -10349,7 +8685,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListImportJobsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListImportJobsOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -10364,7 +8700,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListInstancesOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListInstancesOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of agent instances */
@@ -10374,53 +8710,45 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListMCPCatalogOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListMCPCatalogOutputBody.json
              */
             readonly $schema?: string;
             /** @description Catalog entries */
             entries: components["schemas"]["MCPCatalogEntry"][] | null;
         };
-        ListPipelinesOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListPipelinesOutputBody.json
-             */
-            readonly $schema?: string;
-            pipelines: components["schemas"]["PipelineDTO"][] | null;
-        };
         ListProjectSkillsOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListProjectSkillsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListProjectSkillsOutputBody.json
              */
             readonly $schema?: string;
             skills: components["schemas"]["Skill"][] | null;
-        };
-        ListRunsOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListRunsOutputBody.json
-             */
-            readonly $schema?: string;
-            runs: components["schemas"]["PipelineRun"][] | null;
         };
         ListSchedulesOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListSchedulesOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListSchedulesOutputBody.json
              */
             readonly $schema?: string;
             schedules: components["schemas"]["ScheduleDTO"][] | null;
+        };
+        ListUserConversationsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://api.sonz.ai/api/v1/schemas/ListUserConversationsOutputBody.json
+             */
+            readonly $schema?: string;
+            messages: components["schemas"]["ConversationMessage"][] | null;
+            source: string;
         };
         ListUserPersonasOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListUserPersonasOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListUserPersonasOutputBody.json
              */
             readonly $schema?: string;
             /** @description Personas owned by the caller's tenant (auto-seeded with defaults) */
@@ -10430,7 +8758,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListVoicesResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListVoicesResponse.json
              */
             readonly $schema?: string;
             voices: components["schemas"]["VoiceInfo"][] | null;
@@ -10439,7 +8767,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListWebhooksOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListWebhooksOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of registered webhooks */
@@ -10449,7 +8777,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListWisdomAttributedOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListWisdomAttributedOutputBody.json
              */
             readonly $schema?: string;
             facts: components["schemas"]["AttributedFact"][] | null;
@@ -10458,7 +8786,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListWisdomAuditOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListWisdomAuditOutputBody.json
              */
             readonly $schema?: string;
             entries: components["schemas"]["DisclosureEntry"][] | null;
@@ -10467,7 +8795,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ListWisdomRelationsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ListWisdomRelationsOutputBody.json
              */
             readonly $schema?: string;
             relations: components["schemas"]["AttributedRelation"][] | null;
@@ -10482,16 +8810,6 @@ export interface components {
             content: string;
             name: string;
             when_to_use?: string;
-        };
-        LoggedTuple: {
-            action_id: string;
-            context?: {
-                [key: string]: unknown;
-            };
-            /** Format: double */
-            propensity: number;
-            /** Format: double */
-            reward: number;
         };
         MCPCatalogAuth: {
             /** @description sm:// reference (read only) */
@@ -10514,7 +8832,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/MCPCatalogCreateBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/MCPCatalogCreateBody.json
              */
             readonly $schema?: string;
             auth: components["schemas"]["MCPCatalogAuth"];
@@ -10532,7 +8850,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/MCPCatalogEntry.json
+             * @example https://api.sonz.ai/api/v1/schemas/MCPCatalogEntry.json
              */
             readonly $schema?: string;
             auth: components["schemas"]["MCPCatalogAuth"];
@@ -10549,7 +8867,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/MCPCatalogToolsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/MCPCatalogToolsResponse.json
              */
             readonly $schema?: string;
             tools: components["schemas"]["MCPToolDTO"][] | null;
@@ -10558,7 +8876,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/MCPCatalogUpdateBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/MCPCatalogUpdateBody.json
              */
             readonly $schema?: string;
             auth?: components["schemas"]["MCPCatalogAuth"];
@@ -10571,7 +8889,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/MCPCatalogUsagesResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/MCPCatalogUsagesResponse.json
              */
             readonly $schema?: string;
             agent_ids: string[] | null;
@@ -10589,7 +8907,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/MCPProbeResponseBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/MCPProbeResponseBody.json
              */
             readonly $schema?: string;
             error?: string;
@@ -10610,7 +8928,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/MeResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/MeResponse.json
              */
             readonly $schema?: string;
             email: string;
@@ -10656,7 +8974,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/MemoryResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/MemoryResponse.json
              */
             readonly $schema?: string;
             contents?: {
@@ -10679,26 +8997,11 @@ export interface components {
             topics?: string[] | null;
             user_id?: string;
         };
-        ModelView: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ModelView.json
-             */
-            readonly $schema?: string;
-            metrics?: components["schemas"]["EpochMetric"];
-            /** Format: int64 */
-            n: number;
-            /** Format: int64 */
-            pending: number;
-            trained: boolean;
-            weights: components["schemas"]["FeatureWeight"][] | null;
-        };
         MoodAggregateResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/MoodAggregateResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/MoodAggregateResponse.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -10741,7 +9044,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/MoodHistoryResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/MoodHistoryResponse.json
              */
             readonly $schema?: string;
             entries: components["schemas"]["MoodHistoryEntry"][] | null;
@@ -10750,7 +9053,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/MoodResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/MoodResponse.json
              */
             readonly $schema?: string;
             mood: components["schemas"]["MoodState"];
@@ -10792,37 +9095,11 @@ export interface components {
             /** Format: double */
             valence: number;
         };
-        NBAResult: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/NBAResult.json
-             */
-            readonly $schema?: string;
-            action_values: components["schemas"]["ActionValue"][] | null;
-            recommended_action: string;
-            /** Format: double */
-            score_0_100: number;
-            /** Format: double */
-            value: number;
-        };
-        NbaInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/NbaInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Lead facts (financing/budget/timeline known flags, engagement, value_tier, band, touchpoints, elapsed). */
-            features: {
-                [key: string]: unknown;
-            };
-        };
         Node: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/Node.json
+             * @example https://api.sonz.ai/api/v1/schemas/Node.json
              */
             readonly $schema?: string;
             AgentID: string;
@@ -10861,56 +9138,59 @@ export interface components {
             status: string;
             user_id?: string;
         };
-        OPEResponse: {
+        OmnichannelConversationDTO: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/OPEResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/OmnichannelConversationDTO.json
              */
             readonly $schema?: string;
-            /** Format: double */
-            ci_high: number;
-            /** Format: double */
-            ci_low: number;
-            /** Format: double */
-            dr: number;
-            /** Format: double */
-            ess: number;
-            estimator_ci: string;
-            /** Format: double */
-            ips: number;
+            agent_id: string;
+            channel_type: string;
+            connection_id?: string;
+            controller: string;
+            controller_operator_id?: string;
+            conversation_id: string;
+            /** Format: date-time */
+            created_at: string;
+            handoffs: unknown;
+            last_direction?: string;
+            /** Format: date-time */
+            last_message_at: string;
+            last_message_preview?: string;
+            meta: unknown;
+            project_id: string;
+            session_id?: string;
+            status: string;
+            /** Format: date-time */
+            takeover_started_at?: string;
             /** Format: int64 */
-            n: number;
-            /** Format: double */
-            snips: number;
+            unread_count: number;
+            /** Format: date-time */
+            updated_at: string;
+            user_id: string;
         };
-        OnboardProjectVerticalRequest: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/OnboardProjectVerticalRequest.json
-             */
-            readonly $schema?: string;
-            /** @description When true, seed per-vertical starter guidance for agents without active guidance. */
-            seed_guidance?: boolean;
-            /** @description Vertical slug (required): real_estate | insurance | auto. */
-            vertical: string;
-        };
-        OnboardSummary: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/OnboardSummary.json
-             */
-            readonly $schema?: string;
-            seeded_agents: string[] | null;
-            vertical_config: components["schemas"]["VerticalConfig"];
+        OmnichannelMessageDTO: {
+            attachments?: unknown;
+            author_id?: string;
+            author_type: string;
+            channel_message_id?: string;
+            content: string;
+            conversation_id: string;
+            /** Format: date-time */
+            created_at: string;
+            delivery_detail?: string;
+            delivery_status?: string;
+            direction: string;
+            message_id: string;
+            role: string;
+            session_id?: string;
         };
         OrgBillingCheckoutInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/OrgBillingCheckoutInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/OrgBillingCheckoutInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -10925,7 +9205,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/OrgBillingSubscribeInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/OrgBillingSubscribeInputBody.json
              */
             readonly $schema?: string;
             /** @description Enterprise contract UUID to subscribe to */
@@ -10935,7 +9215,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/OrgBillingURLBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/OrgBillingURLBody.json
              */
             readonly $schema?: string;
             url: string;
@@ -10944,7 +9224,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/OrgBillingVoucherInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/OrgBillingVoucherInputBody.json
              */
             readonly $schema?: string;
             /** @description Voucher code to redeem */
@@ -10970,7 +9250,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/OrgUsageSummaryBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/OrgUsageSummaryBody.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -11004,7 +9284,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PaginatedAgentsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/PaginatedAgentsResponse.json
              */
             readonly $schema?: string;
             has_more: boolean;
@@ -11017,7 +9297,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PaginatedDeliveryAttemptsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/PaginatedDeliveryAttemptsResponse.json
              */
             readonly $schema?: string;
             attempts: components["schemas"]["WebhookDeliveryAttempt"][] | null;
@@ -11028,7 +9308,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PaginatedEvalRunsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/PaginatedEvalRunsResponse.json
              */
             readonly $schema?: string;
             has_more: boolean;
@@ -11039,18 +9319,41 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PaginatedProjectsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/PaginatedProjectsResponse.json
              */
             readonly $schema?: string;
             has_more: boolean;
             items: components["schemas"]["Project"][] | null;
             next_cursor?: string;
         };
+        PatchChannelConnectionInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://api.sonz.ai/api/v1/schemas/PatchChannelConnectionInputBody.json
+             */
+            readonly $schema?: string;
+            default_agent_id?: string;
+            status?: string;
+            templates?: unknown;
+        };
+        PatchConversationInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://api.sonz.ai/api/v1/schemas/PatchConversationInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Reassign to agent id */
+            agent_id?: string;
+            /** @enum {string} */
+            status?: "open" | "snoozed" | "closed";
+        };
         PatchScheduleInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PatchScheduleInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/PatchScheduleInputBody.json
              */
             readonly $schema?: string;
             active_window?: unknown;
@@ -11147,7 +9450,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PersonalityResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/PersonalityResponse.json
              */
             readonly $schema?: string;
             evolution: components["schemas"]["PersonalityDelta"][] | null;
@@ -11162,124 +9465,6 @@ export interface components {
             timestamp?: string;
             trait_name: string;
             trigger_types: string[] | null;
-        };
-        PipelineDTO: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PipelineDTO.json
-             */
-            readonly $schema?: string;
-            /** Format: date-time */
-            created_at: string;
-            description?: string;
-            name: string;
-            pipeline_id: string;
-            project_id: string;
-            steps: components["schemas"]["PipelineStep"][] | null;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        PipelineRun: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PipelineRun.json
-             */
-            readonly $schema?: string;
-            completed: boolean;
-            /** Format: date-time */
-            created_at: string;
-            error?: string;
-            final_findings: unknown;
-            pipeline_id: string;
-            run_id: string;
-            status: string;
-            steps: components["schemas"]["PipelineStepResult"][] | null;
-            /** Format: double */
-            total_cost_usd: number;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        PipelineStep: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PipelineStep.json
-             */
-            readonly $schema?: string;
-            slug: string;
-            title?: string;
-        };
-        PipelineStepResult: {
-            /** Format: double */
-            cost_usd: number;
-            error?: string;
-            findings: unknown;
-            slug: string;
-            summary?: string;
-            title?: string;
-        };
-        PipelineWriteBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PipelineWriteBody.json
-             */
-            readonly $schema?: string;
-            description?: string;
-            name: string;
-            /** @description Ordered agent steps (each {slug, title?}); slug is a built-in or custom agent */
-            steps?: components["schemas"]["PipelineStep"][] | null;
-        };
-        PolicyEntry: {
-            archetype: string;
-            recommended_action: string;
-            /** Format: double */
-            value: number;
-        };
-        PolicyView: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PolicyView.json
-             */
-            readonly $schema?: string;
-            actions: string[] | null;
-            /** Format: double */
-            avg_return: number;
-            /** Format: int64 */
-            episodes: number;
-            features: string[] | null;
-            policy: components["schemas"]["PolicyEntry"][] | null;
-            trained: boolean;
-        };
-        PredictMLScoringRequest: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PredictMLScoringRequest.json
-             */
-            readonly $schema?: string;
-            features: {
-                [key: string]: unknown;
-            };
-        };
-        PredictResponse: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PredictResponse.json
-             */
-            readonly $schema?: string;
-            calibration_method: string;
-            /** Format: int64 */
-            model_version: number;
-            /** Format: double */
-            raw: number;
-            /** Format: double */
-            score: number;
-            served_from: string;
         };
         Preferences: {
             conversation_pace?: string;
@@ -11358,7 +9543,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PrimeUserRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/PrimeUserRequest.json
              */
             readonly $schema?: string;
             /** @description Raw content blocks for LLM fact extraction. */
@@ -11393,7 +9578,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ProactiveNotificationsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ProactiveNotificationsResponse.json
              */
             readonly $schema?: string;
             notifications: components["schemas"]["ProactiveNotificationEntry"][] | null;
@@ -11402,7 +9587,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ProcessInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ProcessInputBody.json
              */
             readonly $schema?: string;
             /** @description Agent instance scope */
@@ -11429,7 +9614,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ProcessResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ProcessResponse.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -11459,7 +9644,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/Project.json
+             * @example https://api.sonz.ai/api/v1/schemas/Project.json
              */
             readonly $schema?: string;
             business_name: string;
@@ -11494,7 +9679,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ProjectNotificationsListOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ProjectNotificationsListOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -11527,7 +9712,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ProjectSkillBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ProjectSkillBody.json
              */
             readonly $schema?: string;
             /** @description Full markdown playbook body */
@@ -11545,38 +9730,11 @@ export interface components {
             eff_date: string;
             source?: string;
         };
-        PutBYOKKeyInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/PutBYOKKeyInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Plaintext API key from the provider. Stored encrypted; never returned. */
-            api_key: string;
-        };
-        RLTrainResult: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RLTrainResult.json
-             */
-            readonly $schema?: string;
-            algo?: string;
-            /** Format: int64 */
-            episodes: number;
-            /** Format: double */
-            final_avg_return: number;
-            /** Format: double */
-            kl_divergence?: number;
-            policy: components["schemas"]["PolicyEntry"][] | null;
-            return_history: number[] | null;
-        };
         RecentShiftsResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RecentShiftsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/RecentShiftsResponse.json
              */
             readonly $schema?: string;
             shifts: components["schemas"]["PersonalityShift"][] | null;
@@ -11589,65 +9747,11 @@ export interface components {
             /** @description RFC3339 UTC timestamp of when /process received the turn */
             timestamp: string;
         };
-        RecordMLFeedbackRequest: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RecordMLFeedbackRequest.json
-             */
-            readonly $schema?: string;
-            action_features?: {
-                [key: string]: unknown;
-            };
-            action_id?: string;
-            context?: {
-                [key: string]: unknown;
-            };
-            converted: boolean;
-            features?: {
-                [key: string]: unknown;
-            };
-            note?: string;
-            /** Format: int64 */
-            predicted_score?: number;
-            /** Format: double */
-            propensity?: number;
-            /** Format: double */
-            reward?: number;
-            subject_id?: string;
-        };
-        RecordOutcomeInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RecordOutcomeInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Lead features used to derive the calibration segment (budget, financing, timeline, …) */
-            features?: {
-                [key: string]: unknown;
-            };
-            /** @description Stable lead identifier (primed user ID, CRM ref, …) */
-            lead_ref: string;
-            /** @description Optional human note */
-            note?: string;
-            /** @description Realized outcome, e.g. won | lost | site_visit | reserved */
-            outcome: string;
-            /** @description Band the agent assigned: Hot | Warm | Nurture */
-            predicted_band: string;
-            /**
-             * Format: int64
-             * @description Score the agent assigned at qualification time (0–100)
-             */
-            predicted_score: number;
-            /** @description Optional free-text signal note for the outcome */
-            score_signal?: string;
-        };
         RedeemVoucherResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RedeemVoucherResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/RedeemVoucherResponse.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -11661,7 +9765,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RegenerateAvatarInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/RegenerateAvatarInputBody.json
              */
             readonly $schema?: string;
             /** @description Avatar art style override */
@@ -11671,7 +9775,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RegenerateAvatarOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/RegenerateAvatarOutputBody.json
              */
             readonly $schema?: string;
             /** @description Public URL of generated avatar */
@@ -11699,7 +9803,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RelationshipsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/RelationshipsResponse.json
              */
             readonly $schema?: string;
             relationships: components["schemas"]["RelationshipEntry"][] | null;
@@ -11708,7 +9812,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ReplaceWisdomAttributedInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ReplaceWisdomAttributedInputBody.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -11725,7 +9829,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ReplaceWisdomAttributedOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ReplaceWisdomAttributedOutputBody.json
              */
             readonly $schema?: string;
             fact: components["schemas"]["AttributedFact"];
@@ -11734,7 +9838,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ResetInstanceOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ResetInstanceOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -11750,21 +9854,11 @@ export interface components {
              */
             nodes_deleted: number;
         };
-        ResetLearningResp: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ResetLearningResp.json
-             */
-            readonly $schema?: string;
-            /** @description Resources successfully cleared (subset of rl_policy, score_model, lead_outcomes, agent_guidance). */
-            reset: string[] | null;
-        };
         ResetMemoryResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ResetMemoryResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/ResetMemoryResponse.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -11784,37 +9878,16 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RevokeAPIKeyOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/RevokeAPIKeyOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
-        };
-        RlTrainInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RlTrainInputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * Format: int64
-             * @description Training episodes (default 3000, max 50000)
-             */
-            episodes?: number;
-        };
-        RootEntityStruct: {
-            /** @description Root entity key fields per schema entity_types[].key_fields. */
-            key: {
-                [key: string]: unknown;
-            };
-            /** @description Root entity type from the active schema. */
-            type: string;
         };
         RotateSigningSecretOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RotateSigningSecretOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/RotateSigningSecretOutputBody.json
              */
             readonly $schema?: string;
             /** @description The new HMAC signing secret */
@@ -11826,7 +9899,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RunEvalRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/RunEvalRequest.json
              */
             readonly $schema?: string;
             /** @description Optional adaptation-eval template UUID; defaults to the tenant's first adaptation template */
@@ -11846,23 +9919,11 @@ export interface components {
             /** @description Synthetic user persona */
             user_persona?: components["schemas"]["UserPersona"];
         };
-        RunPipelineInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RunPipelineInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Initial input passed to the first step */
-            input?: {
-                [key: string]: unknown;
-            };
-        };
         RunningBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/RunningBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/RunningBody.json
              */
             readonly $schema?: string;
             /** @description Eval run UUID — stream progress via GET /eval-runs/{runId}/events */
@@ -11874,7 +9935,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ScheduleDTO.json
+             * @example https://api.sonz.ai/api/v1/schemas/ScheduleDTO.json
              */
             readonly $schema?: string;
             active_window?: string;
@@ -11897,7 +9958,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ScheduleWakeupInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ScheduleWakeupInputBody.json
              */
             readonly $schema?: string;
             /** @description Type of check to perform on wakeup */
@@ -11924,7 +9985,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ScheduleWakeupOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ScheduleWakeupOutputBody.json
              */
             readonly $schema?: string;
             /** @description ISO 8601 timestamp when the wakeup is scheduled */
@@ -11936,7 +9997,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SearchResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/SearchResponse.json
              */
             readonly $schema?: string;
             results: components["schemas"]["SearchResult"][] | null;
@@ -11996,16 +10057,15 @@ export interface components {
             /** Format: double */
             importance: number;
         };
-        SegmentCal: {
-            /** Format: int64 */
-            adjust: number;
-            /** Format: int64 */
-            conversions: number;
-            /** Format: int64 */
-            n: number;
-            /** Format: double */
-            p_hat: number;
-            segment: string;
+        SendConversationMessageInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://api.sonz.ai/api/v1/schemas/SendConversationMessageInputBody.json
+             */
+            readonly $schema?: string;
+            attachments?: unknown;
+            content: string;
         };
         ServiceUsageByOp: {
             /** Format: double */
@@ -12020,7 +10080,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ServiceUsageSummary.json
+             * @example https://api.sonz.ai/api/v1/schemas/ServiceUsageSummary.json
              */
             readonly $schema?: string;
             byOperation: components["schemas"]["ServiceUsageByOp"][] | null;
@@ -12030,58 +10090,15 @@ export interface components {
             /** Format: int64 */
             totalEvents: number;
         };
-        SessionBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SessionBody.json
-             */
-            readonly $schema?: string;
-            agent: string;
-            byok: boolean;
-            /** Format: double */
-            cost_usd: number;
-            /** Format: date-time */
-            created_at: string;
-            id: string;
-            model: string;
-            status: string;
-            title: string;
-        };
         SessionConfig: {
             name: string;
             /** Format: int64 */
             time_gap_hours: number;
             turns: components["schemas"]["Turn"][] | null;
         };
-        SessionEndStatusOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SessionEndStatusOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Echo of the resolved agent_id. */
-            agent_id: string;
-            /**
-             * Format: int64
-             * @description 1-based attempt counter (bumps on JetStream redeliveries).
-             */
-            attempt?: number;
-            /** @description RFC3339 timestamp the handler saw the enqueue. */
-            enqueued_at: string;
-            /** @description Populated on state=failed with the dispatch or terminal reason. */
-            error?: string;
-            /** @description Present on terminal states (done/failed). */
-            finished_at?: string;
-            /** @description Echo of the session_id so callers can correlate. */
-            session_id: string;
-            /** @description Present once the worker has picked the message up. */
-            started_at?: string;
-            /** @description One of: pending | processing | done | failed. */
-            state: string;
-        };
         SessionMessage: {
+            /** @description Non-empty when this message was authored by a human operator */
+            author?: string;
             /** @description Message content; null for assistant messages that only call tools */
             content?: string;
             /**
@@ -12121,35 +10138,16 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SetAccountConfigOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/SetAccountConfigOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
-        };
-        SetAgentLearningEnabledRequest: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SetAgentLearningEnabledRequest.json
-             */
-            readonly $schema?: string;
-            /** @description true → closed loop enabled (default); false → auto-apply disabled. */
-            enabled: boolean;
-        };
-        SetAgentLearningEnabledResponse: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SetAgentLearningEnabledResponse.json
-             */
-            readonly $schema?: string;
-            enabled: boolean;
         };
         SetAgentStatusInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SetAgentStatusInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/SetAgentStatusInputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the agent should be active */
@@ -12159,27 +10157,18 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SetAgentStatusOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/SetAgentStatusOutputBody.json
              */
             readonly $schema?: string;
             agent_id: string;
             is_active: boolean;
             success: boolean;
         };
-        SetBYOKActiveInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SetBYOKActiveInputBody.json
-             */
-            readonly $schema?: string;
-            is_active: boolean;
-        };
         SetCustomLLMConfigInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SetCustomLLMConfigInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/SetCustomLLMConfigInputBody.json
              */
             readonly $schema?: string;
             /** @description Plaintext API key for the endpoint (encrypted at rest) */
@@ -12197,28 +10186,16 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SetProjectConfigOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/SetProjectConfigOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
-        };
-        SetProjectVerticalRequest: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SetProjectVerticalRequest.json
-             */
-            readonly $schema?: string;
-            /** @description Optional override merged onto the default config (non-empty fields win). */
-            config?: components["schemas"]["VerticalConfig"];
-            /** @description Vertical slug (real_estate | insurance | auto). */
-            slug: string;
         };
         SetSessionToolsOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SetSessionToolsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/SetSessionToolsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the tools were registered successfully */
@@ -12238,7 +10215,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SignificantMomentsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/SignificantMomentsResponse.json
              */
             readonly $schema?: string;
             moments: components["schemas"]["SignificantMoment"][] | null;
@@ -12260,24 +10237,11 @@ export interface components {
             /** Format: int64 */
             simulated_duration_hours: number;
         };
-        SimulateMLRoundsRequest: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SimulateMLRoundsRequest.json
-             */
-            readonly $schema?: string;
-            /** Format: int64 */
-            rounds?: number;
-            scenario?: string;
-            /** Format: int64 */
-            seed?: number;
-        };
         SimulateRequest: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SimulateRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/SimulateRequest.json
              */
             readonly $schema?: string;
             /** @description Simulator configuration (durations, proactivity, consolidation) */
@@ -12293,53 +10257,11 @@ export interface components {
             /** @description Synthetic user persona (defaults to DefaultUserPersona) */
             user_persona?: components["schemas"]["UserPersona"];
         };
-        SimulateRoundPoint: {
-            /** Format: double */
-            auc: number;
-            /** Format: double */
-            ci_high: number;
-            /** Format: double */
-            ci_low: number;
-            /** Format: int64 */
-            n: number;
-            /** Format: double */
-            nba_reward: number;
-            /** Format: double */
-            nba_value: number;
-            /** Format: double */
-            ope_dr: number;
-            /** Format: int64 */
-            round: number;
-        };
-        SimulateRoundsResponse: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SimulateRoundsResponse.json
-             */
-            readonly $schema?: string;
-            action_labels: {
-                [key: string]: string;
-            };
-            model: unknown;
-            ope: components["schemas"]["SimulateRoundsResponseOPEStruct"];
-            policy: unknown;
-            scenario: string;
-            series: components["schemas"]["SimulateRoundPoint"][] | null;
-        };
-        SimulateRoundsResponseOPEStruct: {
-            /** Format: double */
-            ci_high: number;
-            /** Format: double */
-            ci_low: number;
-            /** Format: double */
-            dr: number;
-        };
         SimulateRunningBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SimulateRunningBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/SimulateRunningBody.json
              */
             readonly $schema?: string;
             /** @description Eval run UUID — stream progress via GET /eval-runs/{runId}/events */
@@ -12351,7 +10273,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/Skill.json
+             * @example https://api.sonz.ai/api/v1/schemas/Skill.json
              */
             readonly $schema?: string;
             author: string;
@@ -12374,7 +10296,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SpeechToTextInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/SpeechToTextInputBody.json
              */
             readonly $schema?: string;
             /** @description Base64-encoded audio data */
@@ -12384,22 +10306,11 @@ export interface components {
             /** @description Language code for transcription */
             language?: string;
         };
-        StartChatInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/StartChatInputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Built-in agent slug */
-            agent: string;
-            title?: string;
-        };
         StartSessionInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/StartSessionInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/StartSessionInputBody.json
              */
             readonly $schema?: string;
             /** @description Optional agent instance identifier */
@@ -12421,15 +10332,11 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/StartSessionOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/StartSessionOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the session was started successfully */
             success: boolean;
-        };
-        Step: {
-            outcome: string;
-            step: string;
         };
         StoredFact: {
             /** Format: double */
@@ -12455,7 +10362,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/Storefront.json
+             * @example https://api.sonz.ai/api/v1/schemas/Storefront.json
              */
             readonly $schema?: string;
             accent_color: string;
@@ -12487,7 +10394,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/StorefrontAgent.json
+             * @example https://api.sonz.ai/api/v1/schemas/StorefrontAgent.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -12513,7 +10420,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/StorefrontGetOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/StorefrontGetOutputBody.json
              */
             readonly $schema?: string;
             slug: string;
@@ -12523,7 +10430,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/StorefrontListAgentsOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/StorefrontListAgentsOutputBody.json
              */
             readonly $schema?: string;
             agents: components["schemas"]["StorefrontAgent"][] | null;
@@ -12532,7 +10439,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/StorefrontUpdateInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/StorefrontUpdateInputBody.json
              */
             readonly $schema?: string;
             /** @description open | code | invite */
@@ -12561,7 +10468,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/StorefrontUpsertAgentInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/StorefrontUpsertAgentInputBody.json
              */
             readonly $schema?: string;
             /** @description Avatar image URL */
@@ -12592,7 +10499,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SummariesResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/SummariesResponse.json
              */
             readonly $schema?: string;
             summaries: components["schemas"]["MemorySummary"][] | null;
@@ -12601,7 +10508,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SupportTicket.json
+             * @example https://api.sonz.ai/api/v1/schemas/SupportTicket.json
              */
             readonly $schema?: string;
             assigned_to?: string;
@@ -12629,7 +10536,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/SupportTicketComment.json
+             * @example https://api.sonz.ai/api/v1/schemas/SupportTicketComment.json
              */
             readonly $schema?: string;
             author_email: string;
@@ -12657,7 +10564,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/Tenant.json
+             * @example https://api.sonz.ai/api/v1/schemas/Tenant.json
              */
             readonly $schema?: string;
             clerk_org_id?: string;
@@ -12693,7 +10600,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TenantBillingProfile.json
+             * @example https://api.sonz.ai/api/v1/schemas/TenantBillingProfile.json
              */
             readonly $schema?: string;
             billingMode: string;
@@ -12724,11 +10631,21 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        TestChannelConnectionInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example https://api.sonz.ai/api/v1/schemas/TestChannelConnectionInputBody.json
+             */
+            readonly $schema?: string;
+            message: string;
+            to: string;
+        };
         TextToSpeechInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TextToSpeechInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/TextToSpeechInputBody.json
              */
             readonly $schema?: string;
             /** @description Language code (e.g. en-US) */
@@ -12744,7 +10661,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TicketDetailResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/TicketDetailResponse.json
              */
             readonly $schema?: string;
             history?: components["schemas"]["SupportTicketHistory"][] | null;
@@ -12754,7 +10671,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TicketListResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/TicketListResponse.json
              */
             readonly $schema?: string;
             has_more: boolean;
@@ -12791,7 +10708,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TimeMachineResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/TimeMachineResponse.json
              */
             readonly $schema?: string;
             current_personality: components["schemas"]["Big5Assessment"];
@@ -12804,7 +10721,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TimelineResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/TimelineResponse.json
              */
             readonly $schema?: string;
             sessions: components["schemas"]["TimelineSession"][] | null;
@@ -12823,7 +10740,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ToggleEnabledSkillInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ToggleEnabledSkillInputBody.json
              */
             readonly $schema?: string;
             /** @description Target state — true = enabled, false = disabled */
@@ -12835,7 +10752,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/ToggleEnabledSkillOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/ToggleEnabledSkillOutputBody.json
              */
             readonly $schema?: string;
             enabled: boolean;
@@ -12853,83 +10770,6 @@ export interface components {
                 [key: string]: unknown;
             };
         };
-        TrainInputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TrainInputBody.json
-             */
-            readonly $schema?: string;
-            /**
-             * Format: int64
-             * @description Training epochs (default 50, max 1000)
-             */
-            epochs?: number;
-        };
-        TrainMLScoringRequest: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TrainMLScoringRequest.json
-             */
-            readonly $schema?: string;
-            /** Format: int64 */
-            optimize_budget?: number;
-            rows: components["schemas"]["TrainRow"][] | null;
-        };
-        TrainResponse: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TrainResponse.json
-             */
-            readonly $schema?: string;
-            /** Format: double */
-            auc: number;
-            best_params: {
-                [key: string]: unknown;
-            };
-            /** Format: double */
-            brier: number;
-            /** Format: double */
-            brier_baseline: number;
-            /** Format: double */
-            brier_uncalibrated: number;
-            calibration_method: string;
-            /** Format: double */
-            ece: number;
-            importances: components["schemas"]["Importance"][] | null;
-            /** Format: double */
-            logloss: number;
-            /** Format: int64 */
-            model_version: number;
-            /** Format: int64 */
-            n: number;
-            /** Format: int64 */
-            trials: number;
-        };
-        TrainResult: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TrainResult.json
-             */
-            readonly $schema?: string;
-            algo?: string;
-            final: components["schemas"]["EpochMetric"];
-            history: components["schemas"]["EpochMetric"][] | null;
-            /** Format: int64 */
-            n: number;
-            tuning?: components["schemas"]["TuningResult"];
-            weights: components["schemas"]["FeatureWeight"][] | null;
-        };
-        TrainRow: {
-            features: {
-                [key: string]: unknown;
-            };
-            /** Format: int64 */
-            label: number;
-        };
         TraitPrecision: {
             /** Format: date-time */
             last_updated_at: string;
@@ -12938,18 +10778,11 @@ export interface components {
             /** Format: double */
             precision: number;
         };
-        TrialResult: {
-            /** Format: double */
-            cv_auc: number;
-            /** Format: double */
-            cv_logloss: number;
-            params: components["schemas"]["HyperParams"];
-        };
         TriggerConsolidationInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TriggerConsolidationInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/TriggerConsolidationInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -12964,7 +10797,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TriggerConsolidationOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/TriggerConsolidationOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the consolidation was triggered successfully */
@@ -12974,7 +10807,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TriggerEventInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/TriggerEventInputBody.json
              */
             readonly $schema?: string;
             /** @description Human-readable event description */
@@ -12998,7 +10831,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TriggerEventOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/TriggerEventOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the event was accepted for processing */
@@ -13006,134 +10839,14 @@ export interface components {
             /** @description Unique identifier for the accepted event */
             event_id: string;
         };
-        TuningResult: {
-            /** Format: double */
-            best_cv_auc: number;
-            chosen: components["schemas"]["HyperParams"];
-            summary?: components["schemas"]["TrialResult"][] | null;
-            /** Format: int64 */
-            trials: number;
-        };
         Turn: {
             user_message: string;
-        };
-        TurnFetchNextContext: {
-            /** @description Optional language code (e.g. en, ja). */
-            language?: string;
-            /** @description Optional supplementary memory-search query used by the context builder. */
-            query?: string;
-            /** @description Optional IANA timezone. */
-            timezone?: string;
-        };
-        TurnMessage: {
-            /** @description Message content; null for assistant messages that only call tools */
-            content?: string;
-            /**
-             * @description Message role
-             * @enum {string}
-             */
-            role: "user" | "assistant" | "tool" | "system";
-            /** @description Set when role=tool to link the result to its assistant tool_calls entry */
-            tool_call_id?: string;
-            /** @description Set when an assistant message invokes tools */
-            tool_calls?: components["schemas"]["TurnToolCall"][] | null;
-        };
-        TurnMood: {
-            /**
-             * Format: double
-             * @description Proposed affiliation delta from this turn
-             */
-            affiliation: number;
-            /**
-             * Format: double
-             * @description Proposed arousal delta from this turn
-             */
-            arousal: number;
-            /** @description Free-text rationale from the analyzer */
-            reason?: string;
-            /**
-             * Format: double
-             * @description Proposed tension delta from this turn
-             */
-            tension: number;
-            /** @description Mood trigger type (e.g. emotional_response) */
-            trigger_type?: string;
-            /**
-             * Format: double
-             * @description Proposed valence delta from this turn
-             */
-            valence: number;
-        };
-        TurnRequestBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TurnRequestBody.json
-             */
-            readonly $schema?: string;
-            /** @description When set, /turn fetches an enriched context (same shape as GET /context) and includes it in the response under next_context. */
-            fetchNextContext?: components["schemas"]["TurnFetchNextContext"];
-            /** @description Optional agent instance scope */
-            instanceId?: string;
-            /** @description New-turn messages (just the latest exchange — not the full history). Tool messages allowed. */
-            messages: components["schemas"]["TurnMessage"][] | null;
-            /** @description Per-call caller-supplied LLM model paired with provider. */
-            model?: string;
-            /** @description Per-call caller-supplied LLM provider (e.g. anthropic). Both provider and model must be set together to take effect. */
-            provider?: string;
-            /** @description Optional user display name; threaded through to per-turn extraction */
-            userDisplayName?: string;
-            /** @description ID of the user submitting the turn */
-            userId: string;
-            /** @description Optional IANA timezone (e.g. America/Los_Angeles); threaded through to per-turn extraction */
-            userTimezone?: string;
-        };
-        TurnResponseBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TurnResponseBody.json
-             */
-            readonly $schema?: string;
-            /** @description Idempotency key for the deferred pipeline. Use it to poll GET /agents/{agentId}/turns/{extractionId}/status. */
-            extraction_id: string;
-            /** @description State of the deferred work item at response time. "queued" right after submit; the worker transitions through running → done|failed. */
-            extraction_status: string;
-            /** @description Sync mood-only extraction. nil when the analyzer didn't produce a mood update or wasn't wired. */
-            mood?: components["schemas"]["TurnMood"];
-            /** @description Enriched agent context. Only present when fetchNextContext was supplied on the request. */
-            next_context?: unknown;
-            /** @description Always true on a 200; failures surface as non-200 error responses. */
-            success: boolean;
-        };
-        TurnStatusOutputBody: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/TurnStatusOutputBody.json
-             */
-            readonly $schema?: string;
-            /** @description Populated on state=failed. */
-            error?: string;
-            /** @description Echo of the extraction_id. */
-            extraction_id: string;
-            /** @description queued | running | done | failed */
-            state: string;
-        };
-        TurnToolCall: {
-            function: components["schemas"]["TurnToolCallFunction"];
-            id: string;
-            type: string;
-        };
-        TurnToolCallFunction: {
-            arguments: string;
-            name: string;
         };
         UpcomingScheduleOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpcomingScheduleOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpcomingScheduleOutputBody.json
              */
             readonly $schema?: string;
             upcoming: string[] | null;
@@ -13142,7 +10855,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateAgentPostProcessingModelInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentPostProcessingModelInputBody.json
              */
             readonly $schema?: string;
             /** @description Model for post-processing. Empty string clears the override. */
@@ -13154,7 +10867,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateAgentPostProcessingModelOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentPostProcessingModelOutputBody.json
              */
             readonly $schema?: string;
             post_processing_model: string;
@@ -13165,7 +10878,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateAgentProfileInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentProfileInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated bio */
@@ -13185,7 +10898,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateAgentProfileOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentProfileOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -13194,7 +10907,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateAgentProjectInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentProjectInputBody.json
              */
             readonly $schema?: string;
             /** @description Project UUID to assign; null/omitted to detach */
@@ -13204,7 +10917,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateAgentProjectOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentProjectOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -13213,7 +10926,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateCapabilitiesInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateCapabilitiesInputBody.json
              */
             readonly $schema?: string;
             /** @description Enable/disable agent-authored skills (sonzai_create_skill / sonzai_update_skill tools). Requires skills to also be enabled — otherwise force-cleared to false. */
@@ -13260,7 +10973,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateConstellationNodeInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateConstellationNodeInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated description */
@@ -13279,7 +10992,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateCustomStateInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateCustomStateInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated content type */
@@ -13291,7 +11004,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateCustomToolInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateCustomToolInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated description */
@@ -13303,7 +11016,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateCustomToolOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateCustomToolOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -13312,7 +11025,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateEvalTemplateInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateEvalTemplateInputBody.json
              */
             readonly $schema?: string;
             /** @description Evaluation categories */
@@ -13340,7 +11053,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateFactInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateFactInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -13368,7 +11081,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateGoalInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateGoalInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated description */
@@ -13391,7 +11104,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateHabitInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateHabitInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated category */
@@ -13412,7 +11125,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateInstanceInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateInstanceInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated description */
@@ -13426,7 +11139,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateMetadataRequest.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateMetadataRequest.json
              */
             readonly $schema?: string;
             company?: string;
@@ -13442,7 +11155,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateMoodInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateMoodInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -13470,7 +11183,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdatePayload.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdatePayload.json
              */
             readonly $schema?: string;
             label?: components["schemas"]["CASPair"];
@@ -13482,7 +11195,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdatePersonalityBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdatePersonalityBody.json
              */
             readonly $schema?: string;
             /** @description Big Five personality scores to set */
@@ -13494,7 +11207,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdatePersonalityOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdatePersonalityOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the update was applied */
@@ -13504,7 +11217,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateProjectInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateProjectInputBody.json
              */
             readonly $schema?: string;
             /** @description Public-facing display name for this business / project. Replaces the legacy game_name field; either is accepted, business_name wins when both are set. */
@@ -13522,7 +11235,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateProjectSkillInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateProjectSkillInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated markdown body; unchanged if omitted */
@@ -13536,7 +11249,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateUserMetadataHumaOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateUserMetadataHumaOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -13551,7 +11264,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpdateUserPersonaInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpdateUserPersonaInputBody.json
              */
             readonly $schema?: string;
             /** @description Free-text description */
@@ -13565,7 +11278,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpsertCustomStateByKeyInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpsertCustomStateByKeyInputBody.json
              */
             readonly $schema?: string;
             /** @description Content type (text or json, defaults to text) */
@@ -13585,7 +11298,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpsertWebhookForTenantInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpsertWebhookForTenantInputBody.json
              */
             readonly $schema?: string;
             /** @description Optional Authorization header value sent with each delivery */
@@ -13597,7 +11310,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpsertWebhookInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpsertWebhookInputBody.json
              */
             readonly $schema?: string;
             /** @description Optional Authorization header value sent with each delivery */
@@ -13609,7 +11322,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UpsertWebhookOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/UpsertWebhookOutputBody.json
              */
             readonly $schema?: string;
             /** @description HMAC signing secret (only returned on first registration) */
@@ -13648,7 +11361,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UsageResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/UsageResponse.json
              */
             readonly $schema?: string;
             byProject: components["schemas"]["UsageByProject"][] | null;
@@ -13689,7 +11402,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UserOverlayDetailResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/UserOverlayDetailResponse.json
              */
             readonly $schema?: string;
             base: components["schemas"]["PersonalityProfile"];
@@ -13711,7 +11424,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UserOverlaysListResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/UserOverlaysListResponse.json
              */
             readonly $schema?: string;
             overlays: components["schemas"]["UserOverlayResponse"][] | null;
@@ -13725,7 +11438,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UserPersonaRecord.json
+             * @example https://api.sonz.ai/api/v1/schemas/UserPersonaRecord.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -13743,7 +11456,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UserPrimingMetadata.json
+             * @example https://api.sonz.ai/api/v1/schemas/UserPrimingMetadata.json
              */
             readonly $schema?: string;
             AgentID: string;
@@ -13777,28 +11490,12 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/UsersResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/UsersResponse.json
              */
             readonly $schema?: string;
             has_more: boolean;
             next_cursor?: string;
             users: components["schemas"]["UserEntry"][] | null;
-        };
-        VerticalConfig: {
-            /**
-             * Format: uri
-             * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/VerticalConfig.json
-             */
-            readonly $schema?: string;
-            brands?: string[] | null;
-            intent_signals: string[] | null;
-            label: string;
-            notes?: string;
-            qualify_fields: string[] | null;
-            segment_features: string[] | null;
-            slug: string;
-            value_signals: string[] | null;
         };
         VoiceConfig: {
             language?: string;
@@ -13812,7 +11509,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/VoiceLiveWSTokenInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/VoiceLiveWSTokenInputBody.json
              */
             readonly $schema?: string;
             /** @description Pre-compiled system prompt for the voice session */
@@ -13828,7 +11525,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/VoiceLiveWSTokenOutputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/VoiceLiveWSTokenOutputBody.json
              */
             readonly $schema?: string;
             /** @description Short-lived authentication token */
@@ -13856,16 +11553,10 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WakeupsResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/WakeupsResponse.json
              */
             readonly $schema?: string;
             wakeups: components["schemas"]["WakeupEntry"][] | null;
-        };
-        WealthSignal: {
-            signal: string;
-            source: string;
-            /** Format: double */
-            weight?: number;
         };
         Webhook: {
             auth_header?: string;
@@ -13900,7 +11591,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WisdomAuditResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/WisdomAuditResponse.json
              */
             readonly $schema?: string;
             content: string;
@@ -13936,7 +11627,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WisdomImportInputBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WisdomImportInputBody.json
              */
             readonly $schema?: string;
             /** @description JSON array or CSV string (verbatim). Column order for CSV: entity_type,entity_id,category,value,confidence,entity_display_name,source_ref */
@@ -13958,7 +11649,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WisdomImportResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/WisdomImportResponse.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -13971,7 +11662,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchAdvanceTimeJobBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchAdvanceTimeJobBody.json
              */
             readonly $schema?: string;
             agent_id?: string;
@@ -14001,7 +11692,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchGenerateBioBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchGenerateBioBody.json
              */
             readonly $schema?: string;
             bio: string;
@@ -14033,7 +11724,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchGenerateCharacterBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchGenerateCharacterBody.json
              */
             readonly $schema?: string;
             agent_id?: string;
@@ -14082,7 +11773,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchGenerateSeedMemoriesBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchGenerateSeedMemoriesBody.json
              */
             readonly $schema?: string;
             memories: components["schemas"]["WorkbenchSeedMemoryItem"][] | null;
@@ -14091,7 +11782,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchPrepareBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchPrepareBody.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -14103,7 +11794,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchResetAgentBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchResetAgentBody.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -14121,7 +11812,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchSessionEndBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchSessionEndBody.json
              */
             readonly $schema?: string;
             ok: boolean;
@@ -14130,7 +11821,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchSimulateUserBody.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchSimulateUserBody.json
              */
             readonly $schema?: string;
             end_session: boolean;
@@ -14219,7 +11910,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example /api/v1/schemas/WorkbenchStateResponse.json
+             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchStateResponse.json
              */
             readonly $schema?: string;
             big5?: components["schemas"]["WorkbenchStateBig5"];
@@ -18048,44 +15739,6 @@ export interface operations {
             };
         };
     };
-    submitTurn: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Agent UUID or URL-encoded agent name */
-                agentId: string;
-                /** @description Session identifier */
-                sessionId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TurnRequestBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TurnResponseBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
     simulateAgent: {
         parameters: {
             query?: never;
@@ -18540,40 +16193,6 @@ export interface operations {
             };
         };
     };
-    getTurnStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Agent UUID or URL-encoded agent name */
-                agentId: string;
-                /** @description Extraction ID returned by POST /turn */
-                extractionId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TurnStatusOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
     listUsers: {
         parameters: {
             query?: {
@@ -18778,6 +16397,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AddUserContentHumaOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listUserConversations: {
+        parameters: {
+            query?: {
+                /** @description Max messages (default 50, max 200) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                agentId: string;
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListUserConversationsOutputBody"];
                 };
             };
             /** @description Error */
@@ -20379,663 +18033,33 @@ export interface operations {
             };
         };
     };
-    listBuiltinAgents: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListBuiltinAgentsResponse"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    enqueueLeadEnrichment: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EnrichLeadBody"];
-            };
-        };
-        responses: {
-            /** @description Accepted */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EnrichLeadResp"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getLeadEnrichment: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Enrichment job id */
-                jobId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EnrichJobView"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getLeadScoreCalibration: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Calibration"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getLeadScoreModel: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ModelView"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    trainLeadScoreModel: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TrainInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TrainResult"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    recommendLeadScoreNBA: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["NbaInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["NBAResult"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    recordLeadScoreOutcome: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RecordOutcomeInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Calibration"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    resetLeadScoreLearning: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ResetLearningResp"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getLeadScoreRLPolicy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PolicyView"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    trainLeadScoreRLPolicy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RlTrainInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RLTrainResult"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    setAgentLearningEnabled: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetAgentLearningEnabledRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SetAgentLearningEnabledResponse"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    recordMLFeedback: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                use_case: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RecordMLFeedbackRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FeedbackResponse"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    decideMLNBA: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                use_case: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DecideMLNBARequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DecideResponse"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    learnMLNBA: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                use_case: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LearnMLNBARequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LearnResponse"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    evaluateMLOPE: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                use_case: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EvaluateMLOPERequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OPEResponse"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    predictMLScoring: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                use_case: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PredictMLScoringRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PredictResponse"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    trainMLScoring: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                use_case: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TrainMLScoringRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TrainResponse"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    simulateMLRounds: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                use_case: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SimulateMLRoundsRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SimulateRoundsResponse"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    onboardProjectVertical: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OnboardProjectVerticalRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OnboardSummary"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listBuiltinAgentSessions: {
+    listConversations: {
         parameters: {
             query?: {
+                /** @description Project UUID; defaults to authenticated project/default project */
+                project_id?: string;
+                /** @description Filter by channel type */
+                channel?: string;
+                /** @description Filter by agent id */
+                agent_id?: string;
+                /** @description Filter by user id */
+                user_id?: string;
+                /** @description Filter by controller: agent|human */
+                controller?: string;
+                /** @description Filter by status: open|snoozed|closed */
+                status?: string;
+                /** @description Search user, agent, or preview text */
+                q?: string;
+                /** @description Legacy alias for q */
+                search?: string;
+                /** @description Legacy alias for agent_id */
+                agent?: string;
+                /** @description Legacy memory-timeline tier filter */
+                tier?: string;
+                /** @description Max items (default 50, max 100) */
                 limit?: number;
+                /** @description Pagination cursor */
+                cursor?: string;
             };
             header?: never;
             path?: never;
@@ -21049,7 +18073,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListBuiltinAgentSessionsResponse"];
+                    "application/json": components["schemas"]["ListConversationsOutputBody"];
                 };
             };
             /** @description Error */
@@ -21063,16 +18087,83 @@ export interface operations {
             };
         };
     };
-    startBuiltinAgentSession: {
+    streamConversations: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Project UUID; defaults to authenticated project/default project */
+                project_id?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
         };
+        requestBody?: never;
+        responses: {
+            /** @description SSE stream of conversation events. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": unknown;
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Conversation UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationDetailBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    patchConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Conversation UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["StartChatInputBody"];
+                "application/json": components["schemas"]["PatchConversationInputBody"];
             };
         };
         responses: {
@@ -21082,7 +18173,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SessionBody"];
+                    "application/json": components["schemas"]["OmnichannelConversationDTO"];
                 };
             };
             /** @description Error */
@@ -21096,7 +18187,145 @@ export interface operations {
             };
         };
     };
-    getBuiltinAgentSession: {
+    listConversationMessages: {
+        parameters: {
+            query?: {
+                /** @description Max messages (default 50, max 200) */
+                limit?: number;
+                /** @description Pagination cursor */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Conversation UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListConversationMessagesOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    sendConversationMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendConversationMessageInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OmnichannelConversationDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    markConversationRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Conversation UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OmnichannelConversationDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    takeOverConversation: {
+        parameters: {
+            query?: {
+                force?: boolean;
+                operator_id?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OmnichannelConversationDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    releaseConversationTakeover: {
         parameters: {
             query?: never;
             header?: never;
@@ -21113,593 +18342,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["GetBuiltinAgentSessionResponse"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    sendBuiltinAgentMessage: {
-        parameters: {
-            query?: {
-                /** @description true → SSE of live agent events ending in a final result event */
-                stream?: boolean;
-            };
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChatMsgInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getProjectVertical: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VerticalConfig"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    setProjectVertical: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetProjectVerticalRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VerticalConfig"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getBuiltinAgentGuidance: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GuidanceOutput"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    rollbackBuiltinAgentGuidance: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AgentGuidance"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    invokeBuiltinAgent: {
-        parameters: {
-            query?: {
-                /** @description true → stream live agent progress as SSE; false → block and return JSON */
-                stream?: boolean;
-            };
-            header?: never;
-            path: {
-                /** @description Built-in agent slug, e.g. lead_research */
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["InvokeInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    learnBuiltinAgentGuidance: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Built-in agent slug to improve (lead_score | lead_research | lead_qualifier | …) */
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LearnInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LearnResult"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listChannels: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListChannelsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    createChannel: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChannelWriteBody"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChannelDTO"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getChannel: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Channel UUID */
-                channelId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChannelDTO"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    updateChannel: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Channel UUID */
-                channelId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChannelWriteBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChannelDTO"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deleteChannel: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Channel UUID */
-                channelId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listCustomAgents: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListCustomAgentsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    createCustomAgent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CustomAgentWriteBody"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CustomAgentDTO"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getCustomAgent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Custom agent UUID */
-                agentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CustomAgentDTO"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    updateCustomAgent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Custom agent UUID */
-                agentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CustomAgentWriteBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CustomAgentDTO"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deleteCustomAgent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Custom agent UUID */
-                agentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    enrichPerson: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EnrichPersonInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EnrichPersonOutputBody"];
+                    "application/json": components["schemas"]["OmnichannelConversationDTO"];
                 };
             };
             /** @description Error */
@@ -22058,72 +18701,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CachedModelsPayload"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    onboardingClaim: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ClaimInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ClaimResult"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    onboardingClaimLink: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ClaimLinkInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ClaimLinkOutputBody"];
                 };
             };
             /** @description Error */
@@ -22541,307 +19118,6 @@ export interface operations {
             };
         };
     };
-    listPipelines: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListPipelinesOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    createPipeline: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PipelineWriteBody"];
-            };
-        };
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PipelineDTO"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getPipeline: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Pipeline UUID */
-                pipelineId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PipelineDTO"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    updatePipeline: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Pipeline UUID */
-                pipelineId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PipelineWriteBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PipelineDTO"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deletePipeline: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Pipeline UUID */
-                pipelineId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    runPipeline: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Pipeline UUID */
-                pipelineId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RunPipelineInputBody"];
-            };
-        };
-        responses: {
-            /** @description Accepted */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PipelineRun"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listPipelineRuns: {
-        parameters: {
-            query?: {
-                /** @description Max runs to return (default 25) */
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                /** @description Pipeline UUID */
-                pipelineId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListRunsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getPipelineRun: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Pipeline UUID */
-                pipelineId: string;
-                /** @description Run UUID */
-                runId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PipelineRun"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    appendPipelineStep: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Pipeline UUID */
-                pipelineId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PipelineStep"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PipelineDTO"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
     listProjects: {
         parameters: {
             query?: {
@@ -23009,12 +19285,11 @@ export interface operations {
             };
         };
     };
-    listChannelsForProject: {
+    listChannelConnections: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description Project UUID */
                 projectId: string;
             };
             cookie?: never;
@@ -23027,7 +19302,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListChannelsOutputBody"];
+                    "application/json": components["schemas"]["ChannelConnectionsOutputBody"];
                 };
             };
             /** @description Error */
@@ -23041,29 +19316,28 @@ export interface operations {
             };
         };
     };
-    createChannelForProject: {
+    createChannelConnection: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description Project UUID */
                 projectId: string;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ChannelWriteBody"];
+                "application/json": components["schemas"]["CreateChannelConnectionInputBody"];
             };
         };
         responses: {
-            /** @description Created */
-            201: {
+            /** @description OK */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ChannelDTO"];
+                    "application/json": components["schemas"]["ChannelConnectionDTO"];
                 };
             };
             /** @description Error */
@@ -23077,15 +19351,13 @@ export interface operations {
             };
         };
     };
-    getChannelForProject: {
+    getChannelConnection: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description Project UUID */
                 projectId: string;
-                /** @description Channel UUID */
-                channelId: string;
+                id: string;
             };
             cookie?: never;
         };
@@ -23097,7 +19369,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ChannelDTO"];
+                    "application/json": components["schemas"]["ChannelConnectionDTO"];
                 };
             };
             /** @description Error */
@@ -23111,53 +19383,13 @@ export interface operations {
             };
         };
     };
-    updateChannelForProject: {
+    deleteChannelConnection: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description Project UUID */
                 projectId: string;
-                /** @description Channel UUID */
-                channelId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChannelWriteBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChannelDTO"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deleteChannelForProject: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Project UUID */
-                projectId: string;
-                /** @description Channel UUID */
-                channelId: string;
+                id: string;
             };
             cookie?: never;
         };
@@ -23169,6 +19401,78 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    patchChannelConnection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatchChannelConnectionInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelConnectionDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    testChannelConnection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TestChannelConnectionInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelConnectionDTO"];
+                };
             };
             /** @description Error */
             default: {
@@ -23949,42 +20253,6 @@ export interface operations {
             };
         };
     };
-    kbCompare: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Project UUID. */
-                projectId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["KbCompareInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["KbCompareOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
     kbListDocuments: {
         parameters: {
             query?: {
@@ -24125,44 +20393,6 @@ export interface operations {
             };
         };
     };
-    kbPatchDocumentClassification: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Project UUID. */
-                projectId: string;
-                /** @description Document UUID. */
-                documentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["KbPatchClassificationInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["KbPatchClassificationOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
     kbGetDocumentCost: {
         parameters: {
             query?: never;
@@ -24184,113 +20414,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["KbDocCostOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    kbReingestDocument: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Project UUID. */
-                projectId: string;
-                /** @description Document UUID. */
-                documentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["KbReingestOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    kbGetEntity: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Project UUID. */
-                projectId: string;
-                /** @description Entity type (e.g. 'hospital'). */
-                entityType: string;
-                /** @description URL-encoded JSON of the entity's key fields (e.g. '%7B%22name%22%3A%22Mt+Elizabeth%22%7D'). */
-                entityKey: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["KbGetEntityOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    kbListFacts: {
-        parameters: {
-            query?: {
-                /** @description Max facts to return (default 50, max 500). */
-                limit?: number;
-                /** @description Opaque pagination cursor returned by the previous response. */
-                page_token?: string;
-            };
-            header?: never;
-            path: {
-                /** @description Project UUID. */
-                projectId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["KbListFactsOutputBody"];
                 };
             };
             /** @description Error */
@@ -24327,186 +20450,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["KbInsertFactsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    kbGetActiveFact: {
-        parameters: {
-            query?: {
-                /** @description Fact tuple component. */
-                from_node_id?: string;
-                /** @description Fact tuple component. */
-                to_node_id?: string;
-                /** @description Fact tuple component. */
-                relation_type?: string;
-            };
-            header?: never;
-            path: {
-                /** @description Project UUID. */
-                projectId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["KbGetFactOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    kbGetFactHistory: {
-        parameters: {
-            query?: {
-                /** @description Fact tuple component. */
-                from_node_id?: string;
-                /** @description Fact tuple component. */
-                to_node_id?: string;
-                /** @description Fact tuple component. */
-                relation_type?: string;
-            };
-            header?: never;
-            path: {
-                /** @description Project UUID. */
-                projectId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["KbGetFactHistoryOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    kbListMultimodalSchemas: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Project UUID. */
-                projectId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["KbMultimodalSchemaListOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    kbCreateMultimodalSchema: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Project UUID. */
-                projectId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["KBSchema"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["KbMultimodalSchemaCreateOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    kbActivateMultimodalSchema: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Project UUID. */
-                projectId: string;
-                /** @description Schema version to activate. */
-                version: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["KbMultimodalSchemaActivateOutputBody"];
                 };
             };
             /** @description Error */
@@ -25030,49 +20973,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["KbGetStatsOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    kbTraverse: {
-        parameters: {
-            query?: {
-                /** @description Starting entity type. */
-                from_type?: string;
-                /** @description Starting entity key (URL-encoded JSON). */
-                from_key?: string;
-                /** @description Relation to traverse. */
-                relation_type?: string;
-                /** @description outbound | inbound | both (default outbound). */
-                direction?: string;
-                /** @description Traversal depth (default 1, max 3). */
-                max_depth?: number;
-            };
-            header?: never;
-            path: {
-                /** @description Project UUID. */
-                projectId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["KbTraverseOutputBody"];
                 };
             };
             /** @description Error */
@@ -25845,205 +21745,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RotateSigningSecretOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    listBYOKKeys: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Project UUID */
-                project_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ListBYOKKeysOutputBody"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    putBYOKKey: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                project_id: string;
-                /** @description Provider name */
-                provider: "openai" | "gemini" | "xai" | "openrouter" | "anthropic";
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PutBYOKKeyInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BYOKKeyResponse"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    deleteBYOKKey: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                project_id: string;
-                provider: "openai" | "gemini" | "xai" | "openrouter" | "anthropic";
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    setBYOKActive: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                project_id: string;
-                provider: "openai" | "gemini" | "xai" | "openrouter" | "anthropic";
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetBYOKActiveInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BYOKKeyResponse"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    testBYOKKey: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                project_id: string;
-                provider: "openai" | "gemini" | "xai" | "openrouter" | "anthropic";
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BYOKKeyResponse"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ErrorModel"];
-                };
-            };
-        };
-    };
-    getSessionEndStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description UUID returned by POST /sessions/end when the server is in async=true mode. */
-                processingId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionEndStatusOutputBody"];
                 };
             };
             /** @description Error */
