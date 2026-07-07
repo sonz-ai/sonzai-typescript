@@ -448,8 +448,30 @@ export type {
 	SimulateRoundsResult,
 	RecordFeedbackParams,
 	RecordFeedbackResult,
+	// Lead Assignments (client.leadAssignments)
+	LeadAssignment,
+	OfferLeadAssignmentParams,
+	OfferLeadAssignmentResult,
+	ListLeadAssignmentsOptions,
+	ListLeadAssignmentsResult,
+	// Adapter ingestion (client.ingest)
+	IngestEventType,
+	IngestEventParams,
+	IngestEventResult,
+	IngestContactParams,
+	IngestContact,
+	IngestedEvent,
+	ListIngestEventsOptions,
+	ListIngestEventsResult,
+	// Conversation push (client.conversations.push)
+	ConversationPushOptions,
+	ConversationPushResult,
 } from "./types.js";
 
 // Runtime value exports (non-type)
 export { KBScope, DEFAULT_DETACHED_TIMEOUT_MS } from "./types.js";
-export { CHANNEL_EVENTS, CONVERSATION_WEBHOOK_EVENTS } from "./types.js";
+export {
+	CHANNEL_EVENTS,
+	CONVERSATION_WEBHOOK_EVENTS,
+	INGEST_EVENT_TYPES,
+} from "./types.js";

@@ -4142,3 +4142,220 @@ export interface UpdatePersonalityOptions {
 export interface UpdatePersonalityResponse {
 	success: boolean;
 }
+
+// ---------------------------------------------------------------------------
+// Lead Assignments (client.leadAssignments) — Wave-3 rep-copilot follow-up
+// ---------------------------------------------------------------------------
+//
+// The tenant-generic work-distribution primitive (any vertical — leads,
+// tickets, shifts): offer a unit of work to one rep from a candidate roster,
+// structurally dedup (one active assignment per lead_ref), and re-offer on
+// SLA expiry. Endpoints live under /api/v1/lead-assignments*.
+
+/** One row of the assignment ledger. */
+export interface LeadAssignment {
+	assignment_id: string;
+	/** Caller-owned external key for the unit of work (CRM lead id, ticket id, shift id, ...). */
+	lead_ref: string;
+	rep_user_id: string;
+	/** offered | claimed | expired | reassigned | released | completed. */
+	state: string;
+	/** The distribution policy that chose rep_user_id (round_robin, load_balanced). */
+	policy: string;
+	propensity?: number;
+	features?: Record<string, unknown>;
+	offered_at: string;
+	sla_expires_at: string;
+	claimed_at?: string;
+	completed_at?: string;
+	/** Links a re-offered assignment back to the expired one it replaced. */
+	prior_assignment_id?: string;
+}
+
+/** Request body for offering a unit of work to a rep. */
+export interface OfferLeadAssignmentParams {
+	/** Caller-owned external key for the unit of work. Required. */
+	lead_ref: string;
+	/** Eligible rep user ids to distribute among. Required, at least one. */
+	candidates: string[];
+	/** Distribution policy: round_robin (default) or load_balanced. */
+	policy?: string;
+	/** Optional context/ML signals captured at offer time. */
+	features?: Record<string, unknown>;
+	/** Offer window in seconds before re-offer to the next candidate (platform default 900). */
+	sla_seconds?: number;
+}
+
+/**
+ * Outcome of an offer call. `deduplicated` is true when the lead already had
+ * an active assignment; `assignment` is then the pre-existing one.
+ */
+export interface OfferLeadAssignmentResult {
+	assignment: LeadAssignment;
+	deduplicated: boolean;
+}
+
+/** Filters for listing lead assignments. */
+export interface ListLeadAssignmentsOptions {
+	/** Only assignments offered to this rep. */
+	repUserId?: string;
+	/** Only assignments in this state (offered, claimed, expired, reassigned, released, completed). */
+	state?: string;
+	/** Max rows (platform default 50, max 200). */
+	limit?: number;
+}
+
+/** A page of the project's assignment ledger, newest offer first. */
+export interface ListLeadAssignmentsResult {
+	assignments: LeadAssignment[];
+}
+
+// ---------------------------------------------------------------------------
+// Adapter ingestion (client.ingest) — Wave-3 rep-copilot follow-up
+// ---------------------------------------------------------------------------
+//
+// A customer-owned adapter (e.g. a CRM sidecar under app-runtime) normalizes
+// its own events/contacts and POSTs them here, so the platform's pipelines,
+// lead-assignment ledger, and outbound webhooks can react — without the
+// platform ever holding CRM tables. Endpoints live under /api/v1/ingest/*.
+
+/** DomainEvent v1 closed event-type enum (POST /ingest/events' `type` field). */
+export const INGEST_EVENT_TYPES = {
+	LEAD_CREATED: "lead.created",
+	LEAD_UPDATED: "lead.updated",
+	LEAD_STAGE_CHANGED: "lead.stage_changed",
+	INVENTORY_UPDATED: "inventory.updated",
+	PRICE_CHANGED: "price.changed",
+	MESSAGE_RECEIVED: "message.received",
+	OUTCOME_RECORDED: "outcome.recorded",
+} as const;
+
+export type IngestEventType =
+	(typeof INGEST_EVENT_TYPES)[keyof typeof INGEST_EVENT_TYPES];
+
+/** Request body for storing one normalized DomainEvent v1. */
+export interface IngestEventParams {
+	/** Adapter-chosen idempotency key (UUID); replaying the same event_id into the same project is a no-op. Required. */
+	event_id: string;
+	/** One of the closed DomainEvent v1 types. Required. */
+	type: IngestEventType | string;
+	/** When the event happened in the source system (RFC 3339). Required. */
+	occurred_at: string;
+	/** Stable external lead identifier (CRM record id, ...). */
+	lead_ref?: string;
+	/** Stable external contact identifier (see Ingest.upsertContact). */
+	contact_ref?: string;
+	/** Type-specific event body, stored verbatim and fanned out to subscribers. */
+	payload?: Record<string, unknown>;
+}
+
+/**
+ * Outcome of storing one domain event. `duplicate` is true when this
+ * event_id was already stored for the project — the replay was a no-op and
+ * no fan-out happened.
+ */
+export interface IngestEventResult {
+	event_id: string;
+	type: string;
+	duplicate: boolean;
+}
+
+/** Request body for upserting a contact/rep registry entry. */
+export interface IngestContactParams {
+	/** Stable external identifier the adapter owns; upsert key within the project. Required. */
+	contact_ref: string;
+	/** "rep" (the tenant's own salesperson) or "lead_contact" (an end customer). Required. */
+	kind: "rep" | "lead_contact";
+	display_name?: string;
+	/** E.164 phone number, e.g. +639171234567. */
+	phone_e164?: string;
+	email?: string;
+	/** CRM-side owner/user id (e.g. Salesforce OwnerId) for write-back routing. */
+	crm_owner_id?: string;
+	/** Free-form registry metadata (channel identities, desk, brand assignments, ...). */
+	metadata?: Record<string, unknown>;
+}
+
+/** A stored contact/rep registry entry. */
+export interface IngestContact {
+	id: string;
+	contact_ref: string;
+	kind: string;
+	display_name?: string;
+	phone_e164?: string;
+	email?: string;
+	crm_owner_id?: string;
+	metadata?: Record<string, unknown>;
+	created_at: string;
+	updated_at: string;
+}
+
+/**
+ * One row of the listEvents read path — the envelope minus the payload body
+ * (a completeness/gap check needs the keys, not the verbatim body).
+ */
+export interface IngestedEvent {
+	event_id: string;
+	type: string;
+	occurred_at: string;
+	lead_ref?: string;
+	contact_ref?: string;
+	created_at: string;
+}
+
+/** Options for listing stored domain events. */
+export interface ListIngestEventsOptions {
+	/** RFC 3339 lower bound: return events stored at/after this time. Required. */
+	since: string;
+	/** Max events per page (platform default 200, max 1000). */
+	limit?: number;
+	/** Opaque pagination cursor from a prior page's next_cursor (overrides since when set). */
+	cursor?: string;
+}
+
+/**
+ * A page of stored domain events. `next_cursor` is set only when a full page
+ * was returned; feed it back as `cursor` to fetch the next page.
+ */
+export interface ListIngestEventsResult {
+	events: IngestedEvent[];
+	next_cursor?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Conversation push (client.conversations.push) — Wave-3 rep-copilot follow-up
+// ---------------------------------------------------------------------------
+
+/** Options for pushing a proactive agent message to a user's channel. */
+export interface ConversationPushOptions {
+	/** Agent UUID or name authoring the message. Required. */
+	agentId: string;
+	/** Platform user id to deliver to (channel identity owner). Required. */
+	userId: string;
+	/** Message text. Required. */
+	content: string;
+	/** Project UUID; defaults to the authenticated project/default project. */
+	projectId?: string;
+	/** Restrict delivery to one channel (whatsapp, messenger, instagram); defaults to the first identity found. */
+	channelType?: "whatsapp" | "messenger" | "instagram";
+	/** Pin the outbound channel connection UUID. */
+	connectionId?: string;
+}
+
+/** Outcome of a proactive channel push. */
+export interface ConversationPushResult {
+	/** Durable conversation the message was recorded under. */
+	conversation_id?: string;
+	/** Channel the message was delivered on. */
+	channel_type: string;
+	/** Channel-native recipient id (e.g. WhatsApp phone). */
+	external_id: string;
+	/** Provider message id. */
+	channel_message_id?: string;
+	/** Provider delivery status (sent | delivered | read | failed). */
+	delivery_status: string;
+	/** Conversation session the outbound turn was recorded under. */
+	session_id?: string;
+	/** True when the 24h window was closed and the send used the connection's approved re-engagement template. */
+	used_template: boolean;
+}

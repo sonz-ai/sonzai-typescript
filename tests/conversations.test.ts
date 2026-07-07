@@ -265,6 +265,49 @@ describe("Conversations", () => {
 			},
 		]);
 	});
+
+	it("pushes a proactive message to a user's channel", async () => {
+		let captured: Record<string, unknown> | null = null;
+		server.use(
+			http.post(
+				`${BASE_URL}/api/v1/conversations/push`,
+				async ({ request }) => {
+					captured = (await request.json()) as Record<string, unknown>;
+					return HttpResponse.json({
+						conversation_id: "conv-1",
+						channel_type: "whatsapp",
+						external_id: "+639171234567",
+						delivery_status: "sent",
+						session_id: "sess-1",
+						used_template: true,
+					});
+				},
+			),
+		);
+
+		const res = await client().conversations.push({
+			agentId: "agent-1",
+			userId: "user-1",
+			content: "New lead: score 82 Hot",
+			channelType: "whatsapp",
+		});
+
+		expect(captured).toEqual({
+			agent_id: "agent-1",
+			user_id: "user-1",
+			content: "New lead: score 82 Hot",
+			channel_type: "whatsapp",
+		});
+		expect(res.conversation_id).toBe("conv-1");
+		expect(res.delivery_status).toBe("sent");
+		expect(res.used_template).toBe(true);
+	});
+
+	it("push rejects missing required fields", async () => {
+		await expect(
+			client().conversations.push({ agentId: "", userId: "u", content: "x" }),
+		).rejects.toThrow("agentId must be a non-empty string");
+	});
 });
 
 describe("ChannelConnections", () => {

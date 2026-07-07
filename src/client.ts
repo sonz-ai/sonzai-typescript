@@ -12,7 +12,9 @@ import { CustomLLM } from "./resources/custom-llm.js";
 import { Pipelines } from "./resources/pipelines.js";
 import { EvalRuns } from "./resources/eval-runs.js";
 import { EvalTemplates } from "./resources/eval-templates.js";
+import { Ingest } from "./resources/ingest.js";
 import { Knowledge } from "./resources/knowledge.js";
+import { LeadAssignments } from "./resources/lead-assignments.js";
 import { MCPCatalog } from "./resources/mcp-catalog.js";
 import { Ml } from "./resources/ml.js";
 import { AccountConfig } from "./resources/account-config.js";
@@ -136,6 +138,18 @@ export class Sonzai {
    * single unified feedback call.
    */
   readonly ml: Ml;
+  /**
+   * Lead Assignments — the tenant-generic work-distribution primitive:
+   * offer/claim/release/complete a unit of work to a rep from a candidate
+   * roster, with structural dedup and SLA re-offer.
+   */
+  readonly leadAssignments: LeadAssignments;
+  /**
+   * Adapter ingestion — customer-owned adapters POST normalized
+   * DomainEvents/contacts here so the platform's pipelines, lead-assignment
+   * ledger, and outbound webhooks can react.
+   */
+  readonly ingest: Ingest;
   /** Usage, cost, and real-time analytics for the current project. */
   readonly analytics: Analytics;
   /** Project-scoped knowledge base (documents, graph, schemas, search, analytics). */
@@ -234,6 +248,8 @@ export class Sonzai {
     this.agents = new Agents(this.http);
     this.builtinAgents = new BuiltinAgents(this.http);
     this.ml = new Ml(this.http);
+    this.leadAssignments = new LeadAssignments(this.http);
+    this.ingest = new Ingest(this.http);
     this.analytics = new Analytics(this.http);
     this.knowledge = new Knowledge(this.http);
     this.evalTemplates = new EvalTemplates(this.http);

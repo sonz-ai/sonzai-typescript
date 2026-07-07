@@ -3,6 +3,8 @@ import type {
 	ConversationDetailBody,
 	ConversationListOptions,
 	ConversationMessageListOptions,
+	ConversationPushOptions,
+	ConversationPushResult,
 	ConversationSendAsAgentOptions,
 	ConversationStreamEvent,
 	ConversationStreamOptions,
@@ -134,6 +136,33 @@ export class Conversations {
 		if (options.status) body.status = options.status;
 		return this.http.patch<OmnichannelConversationDTO>(
 			`/api/v1/conversations/${conversationId}`,
+			body,
+		);
+	}
+
+	/**
+	 * Push a proactive agent-authored message to a user's connected messaging
+	 * channel (WhatsApp/Messenger/Instagram) without waiting for an inbound
+	 * message. Honours the WhatsApp 24h customer-service window: outside it,
+	 * the connection's approved re-engagement template is used, and the call
+	 * fails with 422 when no template is configured.
+	 */
+	async push(
+		options: ConversationPushOptions,
+	): Promise<ConversationPushResult> {
+		requireNonEmpty(options.agentId, "agentId");
+		requireNonEmpty(options.userId, "userId");
+		requireNonEmpty(options.content, "content");
+		const body: Record<string, unknown> = {
+			agent_id: options.agentId,
+			user_id: options.userId,
+			content: options.content,
+		};
+		if (options.projectId) body.project_id = options.projectId;
+		if (options.channelType) body.channel_type = options.channelType;
+		if (options.connectionId) body.connection_id = options.connectionId;
+		return this.http.post<ConversationPushResult>(
+			"/api/v1/conversations/push",
 			body,
 		);
 	}
