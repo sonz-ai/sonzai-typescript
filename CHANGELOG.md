@@ -3,6 +3,57 @@
 All notable changes to `@sonzai-labs/agents` are documented here. The project
 follows [Semantic Versioning](https://semver.org/). Dates are `YYYY-MM-DD`.
 
+## 1.8.0 — 2026-07-10
+
+### Added
+
+- Built-in agent additions:
+  - `enrichLead({lead, webhookUrl?})` enqueues an asynchronous lead-enrichment
+    job and `getEnrichment(jobId)` polls it through completion.
+  - `recordLeadOutcome(...)` and `getLeadCalibration()` provide the lead-score
+    feedback loop. `learnAgent`, `getAgentGuidance`,
+    `rollbackAgentGuidance`, and `setAgentLearning` provide learned-guidance
+    management and its project-level kill switch.
+- New `ml` resource (`client.ml`) for tenant-scoped scoring and reinforcement
+  learning: `trainScoring`, `predictScore`, `decideNba`, `learnNba`,
+  `evaluateOpe`, `simulateRounds`, and unified `recordFeedback` operations,
+  each keyed by a free-form use case.
+- Knowledge Base parity additions: document classification patching, re-ingest
+  and cost lookup; fact list, active-fact, and history lookups; entity lookup,
+  graph traversal, and comparison; and multimodal schema list/create/activate
+  operations. `client.agents.updatePersonality(...)` is also available.
+- New `channels` resource (`client.channels`) for project notification-channel
+  CRUD, with typed channel events via `CHANNEL_EVENTS`.
+- New `customAgents` and `pipelines` resources for defining custom backend
+  agents and chaining built-in or custom agents into pipelines. Pipelines
+  support CRUD and `appendStep`.
+- Omnichannel conversation support: `client.conversations` can list and read
+  conversations and messages, stream events, take over or release a
+  conversation, send as an agent, mark it read, and update it. New
+  `client.channelConnections` provides project-scoped Meta channel-connection
+  CRUD and connection testing.
+- Lead-distribution adapter surface:
+  - `client.leadAssignments` supports offer, list, get, claim, release, and
+    complete operations.
+  - `client.ingest` supports normalized event submission, contact upsert, and
+    event listing; `INGEST_EVENT_TYPES` exposes the DomainEvent v1 values.
+  - `client.conversations.push(...)` pushes an external conversation into the
+    omnichannel inbox.
+- New runtime-local CRM resource (`client.crm`) for a deployed app-runtime
+  instance. It targets the configured `runtimeBaseUrl` under `/api/rt/crm/*`,
+  not `api.sonz.ai`, and requires a separate runtime `ADAPTER_TOKEN` via
+  `runtimeApiKey` (with optional `runtimeTenantId` sent as
+  `X-Sonzai-Tenant-ID`). The adapter-token surface provides idempotent bulk
+  contact upsert through `import` / `importContacts` and cursor-based change
+  events through `events` / `iterateEvents`; this release does not expose
+  separate runtime CRM CRUD methods.
+
+### Changed
+
+- Pipeline runs are asynchronous. `client.pipelines.run(...)` returns the
+  queued run; use `getRun` or `listRuns` to poll, or `runAndWait` to wait for a
+  terminal result.
+
 ## 1.7.0 — 2026-06-10
 
 ### Added
