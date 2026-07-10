@@ -107,10 +107,7 @@ function resolveRuntimeBaseUrl(config?: SonzaiConfig): string | undefined {
   return undefined;
 }
 
-function resolveRuntimeApiKey(
-  config: SonzaiConfig | undefined,
-  apiKey: string,
-): string {
+function resolveRuntimeApiKey(config?: SonzaiConfig): string | undefined {
   if (config?.runtimeApiKey) return config.runtimeApiKey;
 
   if (typeof process !== "undefined" && process.env) {
@@ -127,7 +124,7 @@ function resolveRuntimeApiKey(
     }
   }
 
-  return apiKey;
+  return undefined;
 }
 
 // Deno type shim for TypeScript compilation
@@ -286,7 +283,7 @@ export class Sonzai {
     const apiKey = resolveApiKey(config);
     const baseUrl = resolveBaseUrl(config);
     const runtimeBaseUrl = resolveRuntimeBaseUrl(config);
-    const runtimeApiKey = resolveRuntimeApiKey(config, apiKey);
+    const runtimeApiKey = resolveRuntimeApiKey(config);
 
     this.http = new HTTPClient({
       baseUrl,
@@ -302,7 +299,7 @@ export class Sonzai {
         ? { "X-Sonzai-Tenant-ID": config.runtimeTenantId }
         : {}),
     };
-    const runtimeHttp = runtimeBaseUrl
+    const runtimeHttp = runtimeBaseUrl && runtimeApiKey
       ? new HTTPClient({
           baseUrl: runtimeBaseUrl,
           apiKey: runtimeApiKey,

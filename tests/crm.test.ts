@@ -116,11 +116,17 @@ describe("Crm", () => {
 		expect(res.imported).toBe(1);
 	});
 
-	it("fetches CRM events with cursor pagination", async () => {
-		let captured: URL | null = null;
+	it("fetches CRM events with cursor pagination and adapter auth", async () => {
+		let captured:
+			| { url: URL; auth: string | null; tenant: string | null }
+			| null = null;
 		server.use(
 			http.get(`${RUNTIME_BASE_URL}/api/rt/crm/events`, ({ request }) => {
-				captured = new URL(request.url);
+				captured = {
+					url: new URL(request.url),
+					auth: request.headers.get("authorization"),
+					tenant: request.headers.get("x-sonzai-tenant-id"),
+				};
 				return HttpResponse.json({
 					events: [
 						{
@@ -140,28 +146,24 @@ describe("Crm", () => {
 
 		const res = await client().crm.events({ cursor: "1", limit: 25 });
 
-		expect(captured?.searchParams.get("cursor")).toBe("1");
-		expect(captured?.searchParams.get("limit")).toBe("25");
+		expect(captured?.url.searchParams.get("cursor")).toBe("1");
+		expect(captured?.url.searchParams.get("limit")).toBe("25");
+		expect(captured?.auth).toBe("Bearer adapter-token");
+		expect(captured?.tenant).toBe("tenant-1");
 		expect(res.events[0]?.event).toBe("crm.contact.upserted");
 		expect(res.next_cursor).toBe("2");
 	});
 
-	it("iterates CRM event pages until next_cursor is absent", async () => {
+	it("iterates CRM event pages until the runtime repeats the exhausted cursor", async () => {
 		const cursors: Array<string | null> = [];
 		server.use(
 			http.get(`${RUNTIME_BASE_URL}/api/rt/crm/events`, ({ request }) => {
 				const url = new URL(request.url);
 				cursors.push(url.searchParams.get("cursor"));
-				if (url.searchParams.get("cursor") === "2") {
+				if (url.searchParams.get("cursor") === "1") {
 					return HttpResponse.json({
-						events: [
-							{
-								cursor: "3",
-								event: "crm.deal.updated",
-								payload: {},
-								at: "2026-07-10T00:00:03Z",
-							},
-						],
+						events: [],
+						next_cursor: "1",
 					});
 				}
 				return HttpResponse.json({
@@ -173,7 +175,7 @@ describe("Crm", () => {
 							at: "2026-07-10T00:00:01Z",
 						},
 					],
-					next_cursor: "2",
+					next_cursor: "1",
 				});
 			}),
 		);
@@ -183,18 +185,33 @@ describe("Crm", () => {
 			events.push(event);
 		}
 
-		expect(cursors).toEqual([null, "2"]);
+		expect(cursors).toEqual([null, "1"]);
 		expect(events.map((event) => event.event)).toEqual([
 			"crm.contact.upserted",
-			"crm.deal.updated",
 		]);
 	});
 
 	it("fails clearly when runtimeBaseUrl is not configured", async () => {
-		const c = new Sonzai({ apiKey: "adapter-token", baseUrl: PLATFORM_BASE_URL });
+		const c = new Sonzai({
+			apiKey: "platform-key",
+			baseUrl: PLATFORM_BASE_URL,
+			runtimeApiKey: "adapter-token",
+		});
 
 		await expect(
 			c.crm.import({ contacts: [{ external_ref: "sf-contact-1" }] }),
-		).rejects.toThrow("runtimeBaseUrl must be provided");
+		).rejects.toThrow("runtimeBaseUrl and runtimeApiKey");
+	});
+
+	it("requires a separate runtime adapter token", async () => {
+		const c = new Sonzai({
+			apiKey: "platform-key",
+			baseUrl: PLATFORM_BASE_URL,
+			runtimeBaseUrl: RUNTIME_BASE_URL,
+		});
+
+		await expect(c.crm.events()).rejects.toThrow(
+			"runtimeBaseUrl and runtimeApiKey (ADAPTER_TOKEN) must be provided",
+		);
 	});
 });

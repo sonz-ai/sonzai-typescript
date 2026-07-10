@@ -10,7 +10,7 @@ import type {
 function requireRuntime(http: HTTPClient | undefined): HTTPClient {
 	if (!http) {
 		throw new Error(
-			"runtimeBaseUrl must be provided to use client.crm runtime CRM methods",
+			"runtimeBaseUrl and runtimeApiKey (ADAPTER_TOKEN) must be provided to use client.crm runtime CRM methods",
 		);
 	}
 	return http;
@@ -49,7 +49,8 @@ export class Crm {
 
 	/**
 	 * Fetch one page of runtime CRM change events. Feed `next_cursor` back as
-	 * `cursor` to continue from the previous page.
+	 * a non-empty `next_cursor` back as `cursor` to continue from the previous
+	 * page.
 	 */
 	async events(options: CrmEventsOptions = {}): Promise<CrmEventsPage> {
 		return requireRuntime(this.http).get<CrmEventsPage>("/api/rt/crm/events", {
@@ -59,8 +60,8 @@ export class Crm {
 	}
 
 	/**
-	 * Iterate CRM change events across cursor pages until the runtime returns
-	 * no `next_cursor`.
+	 * Iterate CRM change events across cursor pages until the runtime returns an
+	 * empty page or an empty/non-advancing `next_cursor`.
 	 */
 	async *iterateEvents(
 		options: CrmEventsOptions = {},
@@ -73,7 +74,13 @@ export class Crm {
 				yield event;
 			}
 
-			if (!page.next_cursor) return;
+			if (
+				page.events.length === 0 ||
+				!page.next_cursor ||
+				page.next_cursor === cursor
+			) {
+				return;
+			}
 			cursor = page.next_cursor;
 		}
 	}

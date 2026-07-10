@@ -52,7 +52,7 @@ const client = new Sonzai({
   apiKey: "sk-...",              // or SONZAI_API_KEY env var
   baseUrl: "https://api.sonz.ai", // or SONZAI_BASE_URL env var
   runtimeBaseUrl: "https://app-runtime.example.com", // or SONZAI_RUNTIME_BASE_URL
-  runtimeApiKey: "adapter-token", // or SONZAI_RUNTIME_API_KEY; defaults to apiKey
+  runtimeApiKey: "adapter-token", // or SONZAI_RUNTIME_API_KEY; required for client.crm
   runtimeTenantId: "tenant-id",   // sent as X-Sonzai-Tenant-ID to runtime routes
   timeout: 30_000,               // request timeout (ms)
   maxRetries: 2,                 // retries for idempotent failures

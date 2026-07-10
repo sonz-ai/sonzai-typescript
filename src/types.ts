@@ -4497,7 +4497,7 @@ export interface CrmEventsOptions {
 
 export interface CrmEventsPage {
 	events: CrmEvent[];
-	next_cursor?: string;
+	next_cursor: string;
 }
 
 // ---------------------------------------------------------------------------
