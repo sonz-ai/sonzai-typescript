@@ -476,6 +476,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/agents/{agentId}/contacts/{contactId}/depth": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get relationship depth for a contact
+         * @description Returns the relationship-depth score for a specific contact. The depth score (0–1) quantifies how much the agent has learned about this person and how warm the relationship is.
+         */
+        get: operations["getContactDepth"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/agents/{agentId}/context": {
         parameters: {
             query?: never;
@@ -567,6 +587,26 @@ export interface paths {
          * @description Deletes a custom state by its UUID.
          */
         delete: operations["deleteCustomState"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/depth-distribution": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get depth distribution for an agent
+         * @description Returns the aggregate depth distribution across all contacts for an agent — the moat view.
+         */
+        get: operations["getAgentDepthDistribution"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -1640,6 +1680,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/agents/{agentId}/sessions/{sessionId}/turn": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit a conversation turn
+         * @description Standalone-memory realtime API entry point. Runs sync mood-only extraction inline and publishes the rest of the post-processing (facts, personality, habits, etc.) as a deferred work item. Returns the extraction_id for status polling. Sessions are not auto-created — call POST /agents/{agentId}/sessions/start first when you need session-level tool definitions or provider/model defaults; otherwise /turn operates against the path-supplied session_id directly.
+         */
+        post: operations["submitTurn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/agents/{agentId}/simulate": {
         parameters: {
             query?: never;
@@ -1831,6 +1891,26 @@ export interface paths {
          * @description Removes a developer-defined custom tool. Sonzai platform tools (prefixed sonzai_) cannot be deleted.
          */
         delete: operations["deleteCustomTool"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/agents/{agentId}/turns/{extractionId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Poll deferred-turn processing status
+         * @description Returns the lifecycle state of a deferred-turn job. Callers should poll with exponential backoff until state is "done" or "failed". The CRDB row is the source of truth.
+         */
+        get: operations["getTurnStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -2578,6 +2658,687 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/approvals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List pending approval items
+         * @description Returns pending approval items for the authenticated tenant. Optional type filter (message/goal/handoff).
+         */
+        get: operations["listApprovals"];
+        put?: never;
+        /**
+         * Create a pending approval item
+         * @description Creates a new pending approval item. Used by agents or integrations to flag high-stakes actions for human review.
+         */
+        post: operations["createApproval"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/approvals/{id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Resolve an approval item (approve/reject/take_over)
+         * @description Resolves a pending approval item. Action must be one of: approve, reject, take_over.
+         */
+        post: operations["resolveApproval"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Sonzai built-in backend agents
+         * @description Vertical task agents (deep lead research, market intel, …) run on Anthropic managed agents and billed per token + runtime. Invoke directly or let your Sonzai agents call them as tools.
+         */
+        get: operations["listBuiltinAgents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead/enrich": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List lead-enrichment jobs
+         * @description Returns the most recent enrichment jobs for the project, newest first. Tenant/project scoped.
+         */
+        get: operations["listLeadEnrichmentJobs"];
+        put?: never;
+        /**
+         * Enqueue an async lead-enrichment job
+         * @description Persists a minimal lead (name+phone) and enriches it in the background (research → score → Next-Best-Action), delivering the result to the project's registered webhook (or the supplied webhook_url). Returns a job_id immediately; poll GET /builtin-agents/lead/enrich/{jobId} for status.
+         */
+        post: operations["enqueueLeadEnrichment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead/enrich/{jobId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get an async lead-enrichment job
+         * @description Returns the status (queued | processing | done | error), and the assembled enrichment result when done. Tenant/project scoped.
+         */
+        get: operations["getLeadEnrichment"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead_score/calibration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the current lead-scoring calibration
+         * @description Returns the Beta-Bernoulli calibration computed from all recorded outcomes for the project: per-segment score adjustments and per-band predicted-vs-actual accuracy.
+         */
+        get: operations["getLeadScoreCalibration"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead_score/model": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the current lead-scoring model
+         * @description Returns the current trained model's learned weights (per feature), online sample count, and last training metrics. Empty when the model is untrained.
+         */
+        get: operations["getLeadScoreModel"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead_score/model/train": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Train the lead-scoring model (batch)
+         * @description Fits a logistic-regression lead-conversion model from scratch over all recorded outcomes for the project, recording a per-epoch loss curve. Persists the model and returns the full training result (history + learned weights + final metrics).
+         */
+        post: operations["trainLeadScoreModel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead_score/nba": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Recommend the Next-Best-Action for a lead
+         * @description Builds an MDP state from the lead's feature map and returns the policy's recommended action, every action's Q-value, and the state value V(s) (the lead's RL score, also mapped to 0-100).
+         */
+        post: operations["recommendLeadScoreNBA"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead_score/outcome": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record a realized lead-scoring outcome
+         * @description Logs the won/lost result of a previously scored lead and recomputes the Beta-Bernoulli calibration the lead_score agent applies to future leads in the same segment.
+         */
+        post: operations["recordLeadScoreOutcome"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead_score/reset-learning": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reset all learned lead-scoring state (demo blank-slate)
+         * @description DESTRUCTIVE, project-scoped: deletes the project's RL policy, trained score model, all recorded lead outcomes, and all agent-guidance versions, returning the learning loop to a clean slate. Best-effort per resource; returns the list of resources actually cleared.
+         */
+        post: operations["resetLeadScoreLearning"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead_score/rl/policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the current Next-Best-Action RL policy
+         * @description Returns the current trained policy's recommended action + value for canonical lead archetypes, plus training metrics (episodes, average return). Empty when untrained.
+         */
+        get: operations["getLeadScoreRLPolicy"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/lead_score/rl/train": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Train the Next-Best-Action RL policy
+         * @description Trains an episodic Q-learning policy on the lead-nurture MDP simulator. Warm-starts from the global prior on first train (cold-start), persists the policy, and returns the full training result (return-history curve + per-archetype policy + final average return).
+         */
+        post: operations["trainLeadScoreRLPolicy"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/learning": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Enable or disable closed-loop agent learning
+         * @description Sets the per-project kill switch for closed-loop auto-apply of learned guidance. Default ON; setting enabled=false stops new distillation cycles from changing guidance.
+         */
+        put: operations["setAgentLearningEnabled"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/ml/{use_case}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record a realized outcome — improves the scoring model + the bandit in one call
+         * @description The single feedback call for the self-learning loop. Persists the labeled outcome (features + converted) so the per-tenant scoring model retrains automatically on the platform schedule, and — when action_id is supplied — feeds the realized reward to the contextual bandit immediately. Reward defaults to 1.0/0.0 from `converted` when omitted. Non-technical clients just keep reporting conversions; the models improve on their own. `event` (§8.7-B4) is an alternative to `converted`/`reward`: when supplied, converted/reward are derived from the tenant manifest's `objective.success_events` — explicit `converted`/`reward` still win when also supplied. Requires the tenant manifest to declare an objective; 422 otherwise. `value` (P1 EV ranking) captures the realized deal value for this outcome — supply it explicitly, or omit it and let the tenant manifest's `objective.value_field` auto-extract it from `features`; once ≥20 value-labeled outcomes accrue for use_case lead_score, the platform automatically trains a paired deal_value regression model (see POST /ml/ev).
+         */
+        post: operations["recordMLFeedback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/ml/{use_case}/nba/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Next-best-action over a per-tenant variable action set
+         * @description Contextual-bandit decision over the supplied (possibly per-request-varying) action set with per-action features. Returns the chosen action and its propensity — LOG the action_id + propensity so the decision can later feed /nba/learn and off-policy evaluation.
+         */
+        post: operations["decideMLNBA"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/ml/{use_case}/nba/learn": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Teach the bandit a realized (action, propensity, reward) */
+        post: operations["learnMLNBA"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/ml/{use_case}/ope/evaluate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Off-policy evaluation (IPS / SNIPS / doubly-robust + CI)
+         * @description Estimates a policy's value from logged (context, action, propensity, reward) decisions without exposing customers — the honest basis for 'the policy improved over time'.
+         */
+        post: operations["evaluateMLOPE"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/ml/{use_case}/scoring/predict": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Score a record with the per-tenant model (falls back to the global prior) */
+        post: operations["predictMLScoring"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/ml/{use_case}/scoring/train": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Train the per-tenant scoring model (CatBoost + Optuna, calibrated)
+         * @description Auto-trains and tunes a calibrated conversion-scoring model for this tenant + use_case on the supplied labelled rows, pooling into the cross-tenant global prior. Returns AUC/logloss/Brier/ECE, gain-based feature importances, and the chosen hyperparameters.
+         */
+        post: operations["trainMLScoring"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/ml/{use_case}/simulate-rounds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Single-call self-learning simulation (train → decide → learn → OPE over rounds)
+         * @description Runs a synthetic scenario through multiple rounds of training, next-best-action decisions, reward learning, and off-policy evaluation server-side, returning the per-round learning curve plus the final model and policy. One call demonstrates the engine improving over time.
+         */
+        post: operations["simulateMLRounds"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/ml/{use_case}/simulate-rounds/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Stream self-learning simulation rounds as they complete
+         * @description Runs the same synthetic scenario as simulate-rounds, but streams an SSE frame after each completed train → decide → learn → OPE round. Each frame is a JSON object with `type` (`start`, `round`, `result`, or `error`). Clients can render the measured learning curves one round at a time without fabricating intermediate metrics.
+         */
+        post: operations["streamMLRounds"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/onboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Onboard a project onto a vertical
+         * @description Sets the project's vertical config and (optionally) seeds per-vertical STARTER GUIDANCE as version 1 active for each agent that has no active guidance yet — so a new org isn't cold-start. Idempotent: existing active guidance is never overwritten.
+         */
+        post: operations["onboardProjectVertical"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List built-in agent chat sessions */
+        get: operations["listBuiltinAgentSessions"];
+        put?: never;
+        /**
+         * Start a chat session with a built-in agent
+         * @description Opens a persistent managed-agent session (sandbox + conversation state held by Anthropic, checkpointed 30 days). Each subsequent message bills the usage delta.
+         */
+        post: operations["startBuiltinAgentSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/sessions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a built-in agent session (status, billed usage, cost) */
+        get: operations["getBuiltinAgentSession"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/sessions/{id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a chat message to a built-in agent session
+         * @description Streams the agent's work (messages, tool use) live when stream=true. Bills the token-usage delta for the turn at the tenant's billing mode.
+         */
+        post: operations["sendBuiltinAgentMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/vertical": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the project's vertical config
+         * @description Returns the per-tenant vertical config injected into every built-in agent's input. Falls back to the real_estate default when unset.
+         */
+        get: operations["getProjectVertical"];
+        /**
+         * Set the project's vertical config
+         * @description Resolves the built-in default config for the given vertical slug (merged with any override) and persists it. 400 on unknown slug.
+         */
+        put: operations["setProjectVertical"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/{slug}/guidance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get an agent's learned guidance
+         * @description Returns the active learned-guidance version plus recent version history for the project.
+         */
+        get: operations["getBuiltinAgentGuidance"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/{slug}/guidance/rollback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Roll back an agent's learned guidance
+         * @description Retires the active learned-guidance version and reinstates the most recent prior version as active (audit-safe).
+         */
+        post: operations["rollbackBuiltinAgentGuidance"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/{slug}/invoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run a built-in agent task
+         * @description Spins up an isolated managed-agent session, runs the task with real web research tools, and returns structured findings. With stream=true the response is an SSE stream of live progress events ending in a `result` event.
+         */
+        post: operations["invokeBuiltinAgent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/builtin-agents/{slug}/learn": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run one agent self-improvement cycle
+         * @description Distills the agent's recent mistakes (critiques) and outcomes into bounded, additive learned guidance and activates it as the next version. Respects the per-project kill switch.
+         */
+        post: operations["learnBuiltinAgentGuidance"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/channels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List notification channels */
+        get: operations["listChannels"];
+        put?: never;
+        /** Create a notification channel */
+        post: operations["createChannel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/channels/deliver": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Deliver an event to notification channels
+         * @description Synchronously delivers a structured event to all active notification channels subscribed to event_type and returns per-channel delivery results. Use this for explicit actions such as sending an already-composed outreach email.
+         */
+        post: operations["deliverToChannels"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/channels/{channelId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a notification channel */
+        get: operations["getChannel"];
+        /** Update a notification channel */
+        put: operations["updateChannel"];
+        post?: never;
+        /** Delete a notification channel */
+        delete: operations["deleteChannel"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/conversations": {
         parameters: {
             query?: never;
@@ -2592,6 +3353,26 @@ export interface paths {
         get: operations["listConversations"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/push": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Push a proactive agent message to a user's connected channel
+         * @description Delivers an agent-authored message to the user's connected messaging channel (WhatsApp/Messenger/Instagram) outside the reply-to-inbound flow. Honours the WhatsApp 24h customer-service window: outside it the connection's approved re-engagement template is used, and the request fails with 422 when no template is configured.
+         */
+        post: operations["pushConversationMessage"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2681,6 +3462,63 @@ export interface paths {
         post: operations["takeOverConversation"];
         /** Release conversation takeover */
         delete: operations["releaseConversationTakeover"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/custom-agents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List custom agents */
+        get: operations["listCustomAgents"];
+        put?: never;
+        /** Create a custom agent */
+        post: operations["createCustomAgent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/custom-agents/{agentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a custom agent */
+        get: operations["getCustomAgent"];
+        /** Update a custom agent */
+        put: operations["updateCustomAgent"];
+        post?: never;
+        /** Delete a custom agent */
+        delete: operations["deleteCustomAgent"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/enrichment/person": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enrich a person (cost-ordered vendor waterfall)
+         * @description Runs a cache-first, cost-ordered vendor waterfall (Crustdata → Fiber → Apollo) to research a person and resolve contact points. Results are cached per tenant+identifier so a vendor is never re-billed for a cached lookup. Contact data is best-effort and PH/OFW coverage is limited.
+         */
+        post: operations["enrichPerson"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -2802,6 +3640,222 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/ingest/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upsert a contact/rep registry entry
+         * @description Creates or replaces a contact registry entry keyed by contact_ref within the project (last write wins). The rep registry links external CRM identities (crm_owner_id) to the platform.
+         */
+        post: operations["upsertIngestContact"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ingest/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List recent DomainEvents (reconcile gap check)
+         * @description Returns a project's stored events in keyset (created_at, id) order at/after `since`, paged by `cursor`. Read-only completeness/gap check for write-back adapters: webhook delivery is best-effort, so an adapter reconciles by listing platform-known leads and re-applying any it has not yet synced.
+         */
+        get: operations["listDomainEvents"];
+        put?: never;
+        /**
+         * Ingest a DomainEvent v1
+         * @description Stores a typed adapter event (idempotent on event_id per project) and fans it out to the project's notification channels under the event's own type. Storage + fan-out is the whole v1 contract; downstream consumers subscribe via notification channels.
+         */
+        post: operations["ingestDomainEvent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List jobs for the caller's tenant */
+        get: operations["listJobs"];
+        put?: never;
+        /**
+         * Enqueue an async job
+         * @description Enqueues a job and returns immediately with {job_id, status:"queued"}. Poll GET /jobs/{id} for progress and results.
+         */
+        post: operations["enqueueJob"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{jobId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a job (poll for status + results) */
+        get: operations["getJob"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{jobId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Best-effort cancel a queued or running job */
+        post: operations["cancelJob"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lead-assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List lead assignments
+         * @description Lists the project's assignment ledger rows, newest offer first. Filter by rep (`rep_user_id`) for a rep's "my leads" view and/or by `state` (offered, claimed, expired, reassigned, released, completed).
+         */
+        get: operations["listLeadAssignments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lead-assignments/offer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Offer a unit of work to a rep
+         * @description Distributes a unit of work (identified by the caller-owned `lead_ref`) to one rep from the candidate roster, chosen by the named policy (`round_robin` default, or `load_balanced`). At most one active assignment can exist per lead: offering a lead that already has an active (offered/claimed) assignment returns the existing assignment with `deduplicated: true` instead of creating a second one. The offer expires after `sla_seconds` (default 900); the background sweep then re-offers it to the next candidate who hasn't had it yet, or expires it when the roster is exhausted.
+         */
+        post: operations["offerLeadAssignment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lead-assignments/{assignmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one lead assignment */
+        get: operations["getLeadAssignment"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lead-assignments/{assignmentId}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Claim an offered lead
+         * @description Transitions an offered assignment to claimed — the rep accepted the work before the SLA lapsed. rep_user_id in the body must match the assignment's rep; a mismatch returns 403. 409 when the assignment is not in the offered state (already claimed, expired, reassigned, released, or completed).
+         */
+        post: operations["claimLeadAssignment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lead-assignments/{assignmentId}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Complete a claimed lead
+         * @description Transitions a claimed assignment to completed — the work is finished. rep_user_id in the body must match the assignment's rep; a mismatch returns 403. 409 when the assignment is not in the claimed state.
+         */
+        post: operations["completeLeadAssignment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lead-assignments/{assignmentId}/release": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Release an active lead back to the pool
+         * @description Transitions an offered or claimed assignment to released — the rep (or an operator acting as that rep) hands the work back. The lead's active slot frees up, so it can be offered again. rep_user_id in the body must match the assignment's rep; a mismatch returns 403. 409 when the assignment is already terminal.
+         */
+        post: operations["releaseLeadAssignment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/me": {
         parameters: {
             query?: never;
@@ -2814,6 +3868,226 @@ export interface paths {
          * @description Returns the authenticated user ID, email, and the list of organizations they belong to (with member counts and the caller's role). Does NOT return 401 when email is missing — some Clerk session templates omit it; userID lookup is used as a fallback.
          */
         get: operations["getMyOrg"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ml/contact_timing/suggest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send-time & channel suggestion: next-best daypart/day-type/channel to contact (P3)
+         * @description Builds the {daypart × day_type × channel} action set from the supplied channels and asks the contact_timing contextual bandit — the SAME engine and code path as POST /builtin-agents/ml/{use_case}/nba/decide — for the next-best send bucket + channel. LOG the returned action_id + propensity: report whether the contact replied via POST /builtin-agents/ml/contact_timing/feedback with that action_id so the bandit learns. The ML service being disabled makes this whole endpoint 404 (route not registered), same posture as the other generalized ML ops.
+         */
+        post: operations["suggestMLContactTiming"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ml/ev": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Expected-value ranking: P(convert) × predicted deal value (P1)
+         * @description Combines the tenant's lead_score classification model with its deal_value regression model (trained automatically once ≥20 outcomes carry a value label — see POST /builtin-agents/ml/lead_score/feedback's `value` field / the tenant manifest's objective.value_field) to rank leads by expected revenue rather than raw conversion probability. 404 when the ML service is disabled (route not registered) or no model is trained yet anywhere in the tenant→vertical→global fallback chain.
+         */
+        post: operations["predictMLExpectedValue"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ml/forecast": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pipeline revenue forecast: Monte Carlo over open-pipeline expected value (P4)
+         * @description Sums calibrated P(convert) × predicted deal value over the project's open pipeline (use_case lead_score) and runs a 2000-draw Monte Carlo over the per-lead Bernoulli×value draws for uncertainty bands. Pure Go — no ml-service call. lead_outcomes has no explicit pending/status column today, so 'open pipeline' is defined as rows not yet converted, created within a lookback window: window_days if supplied, else the tenant manifest's objective.attribution_window_days, else 90 days (docs/design/ml-product-suite.md P4). Per-lead value comes from the lead's own value label if present, else the project's mean won-deal value, else 1.0 — see `assumptions` in the response for which fallbacks were used this request.
+         */
+        get: operations["forecastMLPipeline"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ml/handoff/suggest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Human-handoff timing: bandit over {escalate_now, wait_one_day, keep_automated} (P7)
+         * @description Contextual-bandit decision over the fixed handoff-timing action set — the SAME engine as POST /builtin-agents/ml/{use_case}/nba/decide, use_case handoff_timing. MACHINERY ONLY, volume-gated (docs/design/ml-product-suite.md P7): below HANDOFF_MIN_OUTCOMES recorded outcomes for use_case handoff_timing (default 200, override via project_config key "handoff_config": {"min_outcomes": N}), returns 200 {gated:true, needed, have} with no action_id. When the bandit picks escalate_now and the approval-queue service is wired, best-effort enqueues a pending approval item ("Suggested human handoff: <contact_id>") as the execution rail — a failure to enqueue is WARN-logged and never blocks this response. Report the outcome via POST /builtin-agents/ml/handoff_timing/feedback with the returned action_id so the bandit learns.
+         */
+        post: operations["suggestMLHandoffTiming"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ml/lookalike/rank": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lookalike prospecting rank: non-converted leads ranked by similarity to the won-deal centroid (P6)
+         * @description Scores the project's non-converted lead_outcomes leads that have a resolvable cached enrichment dossier against the won-deal centroid and returns the top `limit` by lookalike_score descending. 404 when the project has fewer than 3 won profiles with a resolvable cached dossier.
+         */
+        get: operations["rankLookalike"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ml/lookalike/score": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Lookalike prospecting score: similarity to the project's won-deal centroid (P6)
+         * @description Embeds the given lead (by lead_ref's cached enrichment dossier) or explicit profile and returns its cosine similarity to the project's won-deal centroid (converted lead_outcomes whose lead_ref resolves to a cached enrichment dossier), mapped to [0,1]. 404 when the project has fewer than 3 won profiles with a resolvable cached dossier ("not enough won-deal history") or, for lead_ref, when that lead has no cached dossier.
+         */
+        post: operations["scoreLookalike"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ml/offers/suggest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Offer suggestion: bandit over the tenant manifest's offer-type actions, margin-weighted (P7)
+         * @description Filters the tenant manifest's action catalog to type=="offer" entries and asks the offer_optimization contextual bandit — the SAME engine as POST /builtin-agents/ml/{use_case}/nba/decide — for the next-best offer. 404 when the tenant manifest declares no offer-type actions. MACHINERY ONLY, volume-gated (docs/design/ml-product-suite.md P7): below OFFER_MIN_OUTCOMES recorded outcomes for use_case offer_optimization (default 500, override via project_config key "offer_config": {"min_outcomes": N}), this returns 200 {gated:true, needed, have, suggestion:null} rather than ever risking margin on thin data. Report the outcome via POST /builtin-agents/ml/offer_optimization/feedback with the returned action_id + a `value` — the feedback handler computes a margin-weighted reward (converted × (value − value×cost_hint), cost_hint resolved from this same manifest action) instead of the plain converted/not-converted reward.
+         */
+        post: operations["suggestMLOffer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ml/revival-queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Latest computed dead-lead revival queue (P2)
+         * @description Returns the project's most recently computed revival queue — the ranked list of dormant contacts worth reviving this week, from the weekly background sweep or the last POST /ml/revival-queue/compute call. 404 when no queue has ever been computed for this project yet (call POST /ml/revival-queue/compute, or configure project_config key `revival_config` and wait for the next weekly sweep).
+         */
+        get: operations["getMLRevivalQueue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ml/revival-queue/compute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Trigger an on-demand revival-queue sweep for this project (P2)
+         * @description Synchronously (re)computes the project's revival queue right now — same scoring path as the weekly background sweep (Ring-0 behavioral features + a trained revival model when one exists, else the cold-start engagement-decay heuristic) — persists it, and returns the result. Bounded to the project's revival_config.queue_size (default 20).
+         */
+        post: operations["computeMLRevivalQueue"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ml/winloss/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate the Win/Loss Intelligence report (P5)
+         * @description LLM aggregation over the WON (converted) vs. LOST (unconverted, older than the attribution window) lead cohorts' conversation evidence: objection taxonomy, stall points, phrasing that survived objections vs. phrasing that lost, and prioritized recommendations. SYNCHRONOUS — makes one Sonnet-class LLM call over a bounded (~20k-char) evidence pack, so expect ~10-40s latency (more if the first attempt is non-conformant and retries). Idempotent per (project, window): re-calling within the same day returns the same report unless force=true. 422 when neither cohort has a lead with a resolvable (agent,user) identity in the window. Strict-tier BYOK privacy is honored automatically — the invocation flows through the standard built-in-agents path, which already routes to the project's own Anthropic key when configured.
+         */
+        post: operations["generateMLWinLossReport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ml/winloss/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Latest persisted Win/Loss Intelligence report (P5)
+         * @description Returns the most recently generated win/loss report for the project. 404 when none has been generated yet (call POST /ml/winloss/generate first). Read-only — no LLM call.
+         */
+        get: operations["getMLWinLossLatest"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2836,6 +4110,66 @@ export interface paths {
         get: operations["listModels"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/models/{useCase}/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export the tenant's trained model artifact
+         * @description Tenant-scoped. useCase="lead_score" is the only supported use case today. Default format is "sonzai-gbdt-v1" (the in-process Go GBDT trained via POST /builtin-agents/lead_score/model/train); 404 when the tenant has no trained model. format=onnx proxies the ml-service's ONNX-exported artifact instead; 404 when ml-service isn't configured, or when useCase is anything else.
+         */
+        get: operations["exportModel"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/onboarding/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Claim a trial tenant into your account
+         * @description Binds a trial tenant to a freshly created Clerk organization owned by the signed-in user. The agent and its memory are preserved; agent_id does not change.
+         */
+        post: operations["onboardingClaim"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/onboarding/claim-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get a claim link for the caller's trial tenant
+         * @description Returns a fresh claim URL the trial-key holder can hand to a human to bind the trial to a real account. Only valid for trial tenants.
+         */
+        post: operations["onboardingClaimLink"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3102,6 +4436,114 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/pipelines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List pipelines */
+        get: operations["listPipelines"];
+        put?: never;
+        /** Create a pipeline */
+        post: operations["createPipeline"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pipelines/{pipelineId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a pipeline */
+        get: operations["getPipeline"];
+        /** Update a pipeline */
+        put: operations["updatePipeline"];
+        post?: never;
+        /** Delete a pipeline */
+        delete: operations["deletePipeline"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pipelines/{pipelineId}/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start a pipeline run (async)
+         * @description Enqueues a run and returns immediately with {run_id, status:"queued"}. The run executes in the background, threading each step's findings into the next; poll GET /pipelines/{id}/runs/{runId} for progress + results. Each step bills like any agent invocation.
+         */
+        post: operations["runPipeline"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pipelines/{pipelineId}/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List recent runs for a pipeline */
+        get: operations["listPipelineRuns"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pipelines/{pipelineId}/runs/{runId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a pipeline run (poll for status + results) */
+        get: operations["getPipelineRun"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pipelines/{pipelineId}/steps": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Append a step to a pipeline */
+        post: operations["appendPipelineStep"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/projects": {
         parameters: {
             query?: never;
@@ -3154,6 +4596,281 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/projects/{projectId}/at-risk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get at-risk contacts with recommended actions
+         * @description Returns the top N contacts whose depth is declining or who have gone silent, with a recommended action for each.
+         */
+        get: operations["getProjectAtRiskContacts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/catalog/bookings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List catalog bookings */
+        get: operations["catalogListBookings"];
+        put?: never;
+        /**
+         * Create a booking hold against a catalog item (and slot, for a viewing)
+         * @description Always created as a TTL'd hold — never directly confirmed. In `external` sync mode (the default), the tenant confirms or cancels via the confirm/cancel endpoints after receiving the catalog.booking.requested webhook; an unconfirmed hold expires automatically.
+         */
+        post: operations["catalogCreateBooking"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/catalog/bookings/{bookingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a catalog booking */
+        get: operations["catalogGetBooking"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/catalog/bookings/{bookingId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel a booking
+         * @description Decrements the slot's booked_count (when the booking carries a slot) in the same transaction as the cancellation.
+         */
+        post: operations["catalogCancelBooking"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/catalog/bookings/{bookingId}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm a booking hold
+         * @description Tenant-API action (external sync mode): the tenant's own booking system decides whether to confirm. Records a lead_outcomes row for NBA/scoring training.
+         */
+        post: operations["catalogConfirmBooking"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/catalog/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import catalog items from a CSV or XLSX file
+         * @description Two-step: dry_run=true returns a proposed column mapping + preview rows for the import wizard; dry_run=false (with a confirmed mapping) commits the upsert by external_ref. Requires a catalog_schemas entry for item_type — otherwise returns 409 schema_required.
+         */
+        post: operations["catalogImport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/catalog/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List catalog items */
+        get: operations["catalogListItems"];
+        put?: never;
+        /** Create a catalog item */
+        post: operations["catalogCreateItem"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/catalog/items/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Idempotently upsert a batch of catalog items keyed by external_ref
+         * @description Cap of 500 items per call — larger batches return 413. When remove_missing is true, active items of the item_types present in this batch, but absent from it, are soft-deactivated.
+         */
+        put: operations["catalogSyncItems"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/catalog/items/{itemId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a catalog item */
+        get: operations["catalogGetItem"];
+        put?: never;
+        post?: never;
+        /**
+         * Deactivate a catalog item
+         * @description Soft-delete: sets is_active=false. The item row is retained.
+         */
+        delete: operations["catalogDeleteItem"];
+        options?: never;
+        head?: never;
+        /**
+         * Update a catalog item
+         * @description Optimistic concurrency: pass the item's current version; a stale version returns 409.
+         */
+        patch: operations["catalogUpdateItem"];
+        trace?: never;
+    };
+    "/projects/{projectId}/catalog/items/{itemId}/slots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List an item's viewing slots */
+        get: operations["catalogListSlots"];
+        put?: never;
+        /** Create a viewing slot for an item */
+        post: operations["catalogCreateSlot"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/catalog/items/{itemId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update a catalog item's status
+         * @description The hot path for single-field status transitions (e.g. a unit just sold).
+         */
+        patch: operations["catalogPatchItemStatus"];
+        trace?: never;
+    };
+    "/projects/{projectId}/catalog/schemas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List catalog schemas */
+        get: operations["catalogListSchemas"];
+        put?: never;
+        /** Define the attribute schema for an item_type */
+        post: operations["catalogCreateSchema"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/catalog/schemas/{schemaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a catalog schema */
+        get: operations["catalogGetSchema"];
+        put?: never;
+        post?: never;
+        /** Delete a catalog schema */
+        delete: operations["catalogDeleteSchema"];
+        options?: never;
+        head?: never;
+        /** Update a catalog schema's fields */
+        patch: operations["catalogUpdateSchema"];
+        trace?: never;
+    };
+    "/projects/{projectId}/catalog/slots/{slotId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a catalog slot */
+        get: operations["catalogGetSlot"];
+        put?: never;
+        post?: never;
+        /** Delete a catalog slot */
+        delete: operations["catalogDeleteSlot"];
+        options?: never;
+        head?: never;
+        /** Update a catalog slot */
+        patch: operations["catalogUpdateSlot"];
+        trace?: never;
+    };
     "/projects/{projectId}/channel-connections": {
         parameters: {
             query?: never;
@@ -3202,6 +4919,83 @@ export interface paths {
         put?: never;
         /** Test channel connection */
         post: operations["testChannelConnection"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/channels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List notification channels for a project */
+        get: operations["listChannelsForProject"];
+        put?: never;
+        /** Create a notification channel for a project */
+        post: operations["createChannelForProject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/channels/deliver": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Deliver an event to project notification channels
+         * @description Project-scoped variant of POST /channels/deliver.
+         */
+        post: operations["deliverToChannelsForProject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/channels/{channelId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a notification channel for a project */
+        get: operations["getChannelForProject"];
+        /** Update a notification channel for a project */
+        put: operations["updateChannelForProject"];
+        post?: never;
+        /** Delete a notification channel for a project */
+        delete: operations["deleteChannelForProject"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/cohorts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get cohort retention data for a project
+         * @description Groups contacts by entry-week and tracks average depth over time (week 1, 2, 4, 8, 12). Shows whether the moat is compounding or churning.
+         */
+        get: operations["getProjectCohorts"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3279,6 +5073,100 @@ export interface paths {
          * @description Removes the project's custom LLM config. The project reverts to the default LLM routing on the next chat.
          */
         delete: operations["deleteCustomLLMConfig"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/depth-scores": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List all depth scores for a project
+         * @description Returns per-contact depth scores for a project, ordered by depth descending. Used by the Conversations page and at-risk detection.
+         */
+        get: operations["listProjectDepthScores"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/fleet-activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the live fleet activity feed for a project
+         * @description Returns recent agent actions (messages sent, enrichments run, classifications) for the live activity feed on Home.
+         */
+        get: operations["getProjectFleetActivity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/grounding/availability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Batch-check live availability for a set of items */
+        post: operations["groundingBatchAvailability"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/grounding/items/{itemId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get one item with live availability */
+        get: operations["groundingItemDetail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/grounding/query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Query live inventory: hybrid KB search + structured catalog filters + availability
+         * @description The choke point every surface (chat tools, context builder, managed agents, NBA/scoring, qualifier loop) calls for tenant inventory. Joins KB hits to catalog items via kb_node_id/catalog_item_id, RRF-fused, then stamps live availability. Never caches availability ahead of time.
+         */
+        post: operations["groundingQuery"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -3520,6 +5408,26 @@ export interface paths {
         patch: operations["kbBulkUpdateProperties"];
         trace?: never;
     };
+    "/projects/{projectId}/knowledge/compare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Compare a property across entities via a shared relation
+         * @description Given a list of source entities, a relation type, a shared target entity, and a property path, returns each source's value for that property. Backs the kb_compare agent tool.
+         */
+        post: operations["kbCompare"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/projects/{projectId}/knowledge/documents": {
         parameters: {
             query?: never;
@@ -3568,6 +5476,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/projects/{projectId}/knowledge/documents/{documentId}/classification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Resolve a needs_classification document
+         * @description Records the human-confirmed root entity for a document in the needs_classification queue and publishes kb.work.document.extract.
+         */
+        patch: operations["kbPatchDocumentClassification"];
+        trace?: never;
+    };
     "/projects/{projectId}/knowledge/documents/{documentId}/cost": {
         parameters: {
             query?: never;
@@ -3588,7 +5516,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/projects/{projectId}/knowledge/facts": {
+    "/projects/{projectId}/knowledge/documents/{documentId}/reingest": {
         parameters: {
             query?: never;
             header?: never;
@@ -3598,10 +5526,138 @@ export interface paths {
         get?: never;
         put?: never;
         /**
+         * Re-ingest a previously uploaded document
+         * @description Republishes a kb.work.document.classify (multimodal) or kb.work.document.parse (legacy) work item for an existing document. Useful after schema changes or model updates. Costs the project the same as a fresh ingest.
+         */
+        post: operations["kbReingestDocument"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/knowledge/entities/{entityType}/{entityKey}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Direct entity lookup by (type, key)
+         * @description Returns the entity plus all active facts attached to it (both outgoing and incoming relationships). Backs the kb_get_entity agent tool.
+         */
+        get: operations["kbGetEntity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/knowledge/facts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List active KB facts for a project
+         * @description Paginates active kb_facts rows. Each fact carries verbatim source provenance (source_document_id, source_page, source_snippet, extraction_confidence) plus effective_date + version.
+         */
+        get: operations["kbListFacts"];
+        put?: never;
+        /**
          * Insert facts into the knowledge base
          * @description Resolves entities against existing nodes by label+type, creates or updates nodes with version history, and optionally creates edges between them.
          */
         post: operations["kbInsertFacts"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/knowledge/facts/active": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the active KB fact for a (from, to, relation) tuple
+         * @description Returns the currently-active fact for the given tuple, or null if none exists. Same shape as items in the list endpoint.
+         */
+        get: operations["kbGetActiveFact"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/knowledge/facts/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the version chain for a KB fact tuple
+         * @description Returns every version of the fact for (from_node_id, to_node_id, relation_type), newest first. Includes archived and quarantined versions.
+         */
+        get: operations["kbGetFactHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/knowledge/multimodal-schemas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List multimodal KB schema versions for a project
+         * @description Returns every version of the project's multimodal KB schema, newest first. Distinct from /knowledge/schemas (per-entity legacy schemas).
+         */
+        get: operations["kbListMultimodalSchemas"];
+        put?: never;
+        /**
+         * Create a new multimodal KB schema version
+         * @description Creates a new schema row (status defaults to 'draft' if not specified). To activate it, POST /multimodal-schemas/{version}/activate which atomically demotes the prior active schema to 'superseded'.
+         */
+        post: operations["kbCreateMultimodalSchema"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/knowledge/multimodal-schemas/{version}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Activate a draft multimodal schema version
+         * @description Atomically promotes the given draft schema to 'active' and demotes the prior active to 'superseded'. After activation, UploadDocument on a multimodal-pipeline project will accept uploads against this schema.
+         */
+        post: operations["kbActivateMultimodalSchema"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3808,6 +5864,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/projects/{projectId}/knowledge/traverse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Graph traversal from a starting entity
+         * @description Walks the project graph from (from_type, from_key) along relation_type up to max_depth. Returns facts encountered with their depth. Backs the kb_traverse agent tool.
+         */
+        get: operations["kbTraverse"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/projects/{projectId}/mcp/catalog": {
         parameters: {
             query?: never;
@@ -3937,6 +6013,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/projects/{projectId}/moat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the moat — aggregate relationship depth for a project
+         * @description Returns the aggregate relationship-depth distribution for a project. This is the moat: how many relationships deepened, how many are warm, how many are at risk.
+         */
+        get: operations["getProjectMoat"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/moat-index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the composite Moat Index for a project
+         * @description Returns the composite Moat Index (0.00-1.00) — the hero of the Home screen. Derived from depth quality, trend, risk, and breadth. Includes prev/delta for the trend arrow and last-month/last-quarter comparison.
+         */
+        get: operations["getProjectMoatIndex"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/projects/{projectId}/notifications": {
         parameters: {
             query?: never;
@@ -3991,6 +6107,94 @@ export interface paths {
          * @description Marks all pending notifications for a project as acknowledged. Can be scoped by agent ID and/or event type.
          */
         post: operations["acknowledgeAllProjectNotifications"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/permanent-routes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List permanently routed contacts
+         * @description Returns all contacts that have been classified by the guide agent and permanently routed to a tier-specific agent.
+         */
+        get: operations["listPermanentRoutes"];
+        put?: never;
+        /**
+         * Classify a contact and set permanent route
+         * @description The guide agent classifies a contact into a tier and permanently routes them to the matching tier-specific agent. All future sessions skip the guide.
+         */
+        post: operations["classifyContact"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/permanent-routes/{userId}/override": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Override a contact's permanent route
+         * @description Manually override the guide agent's classification, routing the contact to a different agent.
+         */
+        post: operations["overridePermanentRoute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/pipeline-flow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the real pipeline flow for a project
+         * @description Returns real pipeline stage counts (new to qualified to routed to nurtured to closed) from lead_outcomes + permanent_routes + relationship_depth. Not derived from depth bands.
+         */
+        get: operations["getProjectPipelineFlow"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/routing-config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get routing configuration for a project
+         * @description Returns the tier definitions, guide-agent criteria, and handoff declarations for a project. If no config is saved, returns vertical-specific defaults.
+         */
+        get: operations["getRoutingConfig"];
+        /**
+         * Update routing configuration for a project
+         * @description Saves the tier definitions, guide-agent criteria, and handoff declarations. The product owner configures routing from the UI.
+         */
+        put: operations["putRoutingConfig"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -4127,6 +6331,91 @@ export interface paths {
          * @description Generates a new HMAC signing secret for the given webhook. The old secret is immediately invalidated.
          */
         post: operations["rotateWebhookSigningSecret"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{project_id}/byok-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List BYOK keys for a project
+         * @description Returns configured BYOK providers for the project. Key material is never returned — only the prefix and health status.
+         */
+        get: operations["listBYOKKeys"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{project_id}/byok-keys/{provider}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Create or replace a BYOK key
+         * @description Stores an encrypted-at-rest BYOK key for a provider. Validates the key against the provider before saving; rejects invalid keys with 400 invalid_api_key.
+         */
+        put: operations["putBYOKKey"];
+        post?: never;
+        /**
+         * Delete a BYOK key
+         * @description Removes the stored key. Subsequent LLM calls fall back to standard pricing.
+         */
+        delete: operations["deleteBYOKKey"];
+        options?: never;
+        head?: never;
+        /** Enable or disable a BYOK key without rotating it */
+        patch: operations["setBYOKActive"];
+        trace?: never;
+    };
+    "/projects/{project_id}/byok-keys/{provider}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Re-test a stored BYOK key against the provider
+         * @description Issues a probe call to the provider with the stored key and updates health_status. Useful after a suspected key rotation upstream.
+         */
+        post: operations["testBYOKKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sessions/end/status/{processingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Poll async session-end processing status
+         * @description Returns the lifecycle state of an async session-end job (enqueued via POST /sessions/end when ENABLE_ASYNC_SESSION_END=true). Callers should poll with exponential backoff until state is "done" or "failed". Redis is a hot cache (1h TTL); CockroachDB is the durable source of truth (30d retention).
+         */
+        get: operations["getSessionEndStatus"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -4339,6 +6628,108 @@ export interface paths {
         get: operations["listTenants"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tenants/{id}/domains": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List a tenant's hostnames */
+        get: operations["listTenantDomains"];
+        put?: never;
+        /**
+         * Claim a hostname for a tenant
+         * @description domain_type=subdomain validates the label against the reserved list + ^[a-z0-9-]{3,40}$ and suffixes TENANT_BASE_DOMAIN (created verified). domain_type=custom registers an unverified FQDN and returns a verification_token to publish as a TXT record.
+         */
+        post: operations["createTenantDomain"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tenants/{id}/domains/{domain}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a tenant hostname */
+        delete: operations["deleteTenantDomain"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tenants/{id}/domains/{domain}/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Verify custom-domain ownership via TXT record
+         * @description Looks up TXT _sonzai-verify.<domain>; if any record equals the domain's verification_token, stamps verified_at and busts the host cache.
+         */
+        post: operations["verifyTenantDomain"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tenants/{id}/manifest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a tenant's manifest
+         * @description Returns the tenant's branding/module/terminology manifest. 404 when no manifest has been set.
+         */
+        get: operations["getTenantManifest"];
+        /**
+         * Create or update a tenant's manifest
+         * @description Validates the manifest (schema_version, module registry, hex colors, font allowlist; unknown top-level keys are rejected), bumps the version, and busts the host cache.
+         */
+        put: operations["putTenantManifest"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tenants/{id}/workspace-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mint a short-lived workspace handoff session
+         * @description Clerk-authed; caller must be a member of tenant {id}. Mints a 5-minute one-time HS256 JWT (purpose=workspace-handoff, claims sub/tid/jti) and returns it alongside the tenant's primary-domain workspace URL, for the tenant-host auth hop (Phase 1.5). 409 when the tenant has no domain yet.
+         */
+        post: operations["mintWorkspaceSession"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4773,7 +7164,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AcknowledgeAllProjectNotificationsOutputBody.json
+             * @example /api/v1/schemas/AcknowledgeAllProjectNotificationsOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -4786,7 +7177,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AcknowledgeProjectNotificationsInputBody.json
+             * @example /api/v1/schemas/AcknowledgeProjectNotificationsInputBody.json
              */
             readonly $schema?: string;
             /** @description IDs of notifications to acknowledge */
@@ -4796,7 +7187,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AcknowledgeProjectNotificationsOutputBody.json
+             * @example /api/v1/schemas/AcknowledgeProjectNotificationsOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -4821,11 +7212,24 @@ export interface components {
             turn_id: string;
             user_id: string;
         };
+        ActionScore: {
+            action_id: string;
+            /** Format: double */
+            propensity: number;
+            /** Format: double */
+            score: number;
+        };
+        ActionValue: {
+            masked?: boolean;
+            name: string;
+            /** Format: double */
+            q: number;
+        };
         ActiveCharacterSummary: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ActiveCharacterSummary.json
+             * @example /api/v1/schemas/ActiveCharacterSummary.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -4842,7 +7246,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AddCommentRequest.json
+             * @example /api/v1/schemas/AddCommentRequest.json
              */
             readonly $schema?: string;
             content: string;
@@ -4852,7 +7256,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AddContentRequest.json
+             * @example /api/v1/schemas/AddContentRequest.json
              */
             readonly $schema?: string;
             content: components["schemas"]["PrimeContentBlock"][] | null;
@@ -4862,7 +7266,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AddUserContentHumaOutputBody.json
+             * @example /api/v1/schemas/AddUserContentHumaOutputBody.json
              */
             readonly $schema?: string;
             /** @description Import job UUID for tracking */
@@ -4888,10 +7292,12 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AgentCapabilities.json
+             * @example /api/v1/schemas/AgentCapabilities.json
              */
             readonly $schema?: string;
             autoLearnSkills?: boolean;
+            catalogBooking?: boolean;
+            catalogGrounding?: boolean;
             composio?: boolean;
             customTools?: components["schemas"]["CustomToolDefinition"][] | null;
             imageGeneration: boolean;
@@ -4910,6 +7316,7 @@ export interface components {
             pendingCapabilities?: components["schemas"]["PendingCapability"][] | null;
             proactiveMode?: string;
             rememberName?: boolean;
+            repCopilot?: boolean;
             sharedMemory?: boolean;
             skills?: boolean;
             videoGeneration: boolean;
@@ -4928,7 +7335,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AgentCreateRequest.json
+             * @example /api/v1/schemas/AgentCreateRequest.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -4943,7 +7350,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AgentDeleteRequest.json
+             * @example /api/v1/schemas/AgentDeleteRequest.json
              */
             readonly $schema?: string;
             expected_label: string;
@@ -4953,7 +7360,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AgentDetailResponse.json
+             * @example /api/v1/schemas/AgentDetailResponse.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -4989,7 +7396,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AgentDialogueInputBody.json
+             * @example /api/v1/schemas/AgentDialogueInputBody.json
              */
             readonly $schema?: string;
             /** @description Pre-built enriched context JSON */
@@ -5011,13 +7418,37 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AgentDialogueOutputBody.json
+             * @example /api/v1/schemas/AgentDialogueOutputBody.json
              */
             readonly $schema?: string;
             /** @description Agent dialogue response */
             response: string;
             /** @description Side effects produced by the agent */
             side_effects?: unknown;
+        };
+        AgentGuidance: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/AgentGuidance.json
+             */
+            readonly $schema?: string;
+            /** Format: date-time */
+            activated_at?: string;
+            agent_slug: string;
+            /** Format: date-time */
+            created_at: string;
+            evidence?: unknown;
+            guidance: unknown;
+            id: string;
+            /** Format: double */
+            metric_baseline?: number;
+            metric_name?: string;
+            project_id: string;
+            status: string;
+            tenant_id: string;
+            /** Format: int64 */
+            version: number;
         };
         AgentIndex: {
             agent_id: string;
@@ -5041,7 +7472,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AgentInstance.json
+             * @example /api/v1/schemas/AgentInstance.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -5059,7 +7490,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AgentKBSearchInputBody.json
+             * @example /api/v1/schemas/AgentKBSearchInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -5082,7 +7513,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AnalyticsOverview.json
+             * @example /api/v1/schemas/AnalyticsOverview.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -5100,17 +7531,47 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AnalyticsRealtimeResponse.json
+             * @example /api/v1/schemas/AnalyticsRealtimeResponse.json
              */
             readonly $schema?: string;
             daily: components["schemas"]["DailyStatsEntry"][] | null;
             overview: components["schemas"]["AnalyticsOverview"];
         };
+        ApprovalItemBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ApprovalItemBody.json
+             */
+            readonly $schema?: string;
+            agent_id: string;
+            agent_name: string;
+            approval_id: string;
+            channel: string;
+            /** Format: double */
+            confidence: number;
+            contact_name: string;
+            context: string;
+            created_at: string;
+            payload: unknown;
+            resolved_at?: string;
+            resolved_by?: string;
+            status: string;
+            tags: string[] | null;
+            type: string;
+            user_id: string;
+        };
+        ArtifactCalibration: {
+            method: string;
+            params: {
+                [key: string]: unknown;
+            };
+        };
         AsyncChatResultOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AsyncChatResultOutputBody.json
+             * @example /api/v1/schemas/AsyncChatResultOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -5140,7 +7601,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AsyncChatStartOutputBody.json
+             * @example /api/v1/schemas/AsyncChatStartOutputBody.json
              */
             readonly $schema?: string;
             /** @description Opaque ID to poll via /chat/result/{processing_id} */
@@ -5148,11 +7609,37 @@ export interface components {
             /** @description Initial status — always 'queued' on success */
             status: string;
         };
+        AtRiskContact: {
+            agent_id: string;
+            band: string;
+            contact_name: string;
+            /** Format: int64 */
+            days_since: number;
+            /** Format: double */
+            depth: number;
+            /** Format: date-time */
+            last_interaction: string | null;
+            recommended_action: string;
+            /** Format: double */
+            trend: number;
+            user_id: string;
+        };
+        AtRiskContactsBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/AtRiskContactsBody.json
+             */
+            readonly $schema?: string;
+            contacts: components["schemas"]["AtRiskContact"][] | null;
+            /** Format: int64 */
+            total: number;
+        };
         AtomicFact: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/AtomicFact.json
+             * @example /api/v1/schemas/AtomicFact.json
              */
             readonly $schema?: string;
             agent_framing?: string;
@@ -5264,11 +7751,51 @@ export interface components {
             app: string;
             connected_account_label?: string;
         };
+        BYOKKeyResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/BYOKKeyResponse.json
+             */
+            readonly $schema?: string;
+            api_key_prefix: string;
+            health_status: string;
+            is_active: boolean;
+            /** Format: date-time */
+            last_health_check_at?: string;
+            last_health_error?: string;
+            /** Format: date-time */
+            last_used_at?: string;
+            provider: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        BandAccuracy: {
+            /** Format: double */
+            actual_rate: number;
+            /** Format: double */
+            avg_score: number;
+            band: string;
+            /** Format: double */
+            calibration_gap: number;
+            /** Format: int64 */
+            conversions: number;
+            /** Format: int64 */
+            n: number;
+            /** Format: double */
+            predicted_rate: number;
+        };
+        BanditAction: {
+            features?: {
+                [key: string]: unknown;
+            };
+            id: string;
+        };
         BatchGetPersonalitiesInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/BatchGetPersonalitiesInputBody.json
+             * @example /api/v1/schemas/BatchGetPersonalitiesInputBody.json
              */
             readonly $schema?: string;
             /** @description List of agent IDs (max 50) */
@@ -5278,7 +7805,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/BatchImportRequest.json
+             * @example /api/v1/schemas/BatchImportRequest.json
              */
             readonly $schema?: string;
             source?: string;
@@ -5298,7 +7825,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/BatchImportUsersHumaOutputBody.json
+             * @example /api/v1/schemas/BatchImportUsersHumaOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -5329,7 +7856,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/BatchInventoryRequest.json
+             * @example /api/v1/schemas/BatchInventoryRequest.json
              */
             readonly $schema?: string;
             items: components["schemas"]["BatchInventoryItem"][] | null;
@@ -5339,7 +7866,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/BatchInventoryResponse.json
+             * @example /api/v1/schemas/BatchInventoryResponse.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -5360,7 +7887,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/BatchPersonalityResponse.json
+             * @example /api/v1/schemas/BatchPersonalityResponse.json
              */
             readonly $schema?: string;
             personalities: {
@@ -5441,7 +7968,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/BreakthroughsResponse.json
+             * @example /api/v1/schemas/BreakthroughsResponse.json
              */
             readonly $schema?: string;
             breakthroughs: components["schemas"]["Breakthrough"][] | null;
@@ -5476,7 +8003,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/BulkCreateFactsInputBody.json
+             * @example /api/v1/schemas/BulkCreateFactsInputBody.json
              */
             readonly $schema?: string;
             /** @description Facts to create in a single request (1-1000) */
@@ -5488,7 +8015,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/BulkCreateFactsOutputBody.json
+             * @example /api/v1/schemas/BulkCreateFactsOutputBody.json
              */
             readonly $schema?: string;
             /** @description The created facts, in input order */
@@ -5514,17 +8041,365 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CachedModelsPayload.json
+             * @example /api/v1/schemas/CachedModelsPayload.json
              */
             readonly $schema?: string;
             default_model: string;
             providers: unknown[] | null;
         };
+        Calibration: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/Calibration.json
+             */
+            readonly $schema?: string;
+            bands: components["schemas"]["BandAccuracy"][] | null;
+            /** Format: double */
+            base_rate: number;
+            segments: components["schemas"]["SegmentCal"][] | null;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        CatalogBooking: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogBooking.json
+             */
+            readonly $schema?: string;
+            agent_id?: string;
+            booking_id: string;
+            conversation_id?: string;
+            /** Format: date-time */
+            created_at: string;
+            external_ref?: string;
+            /** Format: date-time */
+            hold_expires_at?: string;
+            item_id: string;
+            kind: string;
+            metadata: {
+                [key: string]: unknown;
+            };
+            project_id: string;
+            slot_id?: string;
+            status: string;
+            tenant_id: string;
+            /** Format: date-time */
+            updated_at: string;
+            user_id: string;
+        };
+        CatalogBookingWriteBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogBookingWriteBody.json
+             */
+            readonly $schema?: string;
+            /** @description Omnichannel conversation this booking was made in. */
+            conversation_id?: string;
+            /** @description RFC3339 timestamp. Defaults to now()+24h. */
+            hold_expires_at?: string;
+            item_id: string;
+            /** @description 'viewing' (default) or 'reservation'. */
+            kind?: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /** @description Viewing slot to hold. Omit for a plain unit reservation (kind=reservation). */
+            slot_id?: string;
+            /** @description End-user identity (matches the context engine's user_id space). */
+            user_id: string;
+        };
+        CatalogConfirmBookingInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogConfirmBookingInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Tenant-side booking id to stamp on confirmation. */
+            external_ref?: string;
+        };
+        CatalogEntry: {
+            description: string;
+            model: string;
+            name: string;
+            provisioned: boolean;
+            slug: string;
+        };
+        CatalogImportOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogImportOutputBody.json
+             */
+            readonly $schema?: string;
+            mapping: components["schemas"]["ColumnMapping"][] | null;
+            /** @description First rows as they would be written — only populated on dry_run */
+            preview?: components["schemas"]["CatalogItem"][] | null;
+            /** @description Only populated when dry_run=false */
+            result?: components["schemas"]["CatalogSyncResult"];
+            row_errors?: components["schemas"]["ImportRowError"][] | null;
+        };
+        CatalogItem: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogItem.json
+             */
+            readonly $schema?: string;
+            attributes: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            created_at: string;
+            currency?: string;
+            description?: string;
+            external_ref?: string;
+            is_active: boolean;
+            item_id: string;
+            item_type: string;
+            kb_node_id?: string;
+            media: components["schemas"]["CatalogMedia"][] | null;
+            name: string;
+            parent_item_id?: string;
+            /** Format: double */
+            price?: number;
+            price_unit?: string;
+            /** Format: date-time */
+            price_updated_at?: string;
+            project_id: string;
+            status: string;
+            tenant_id: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** Format: int64 */
+            version: number;
+        };
+        CatalogItemWriteBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogItemWriteBody.json
+             */
+            readonly $schema?: string;
+            attributes?: {
+                [key: string]: unknown;
+            };
+            currency?: string;
+            description?: string;
+            external_ref?: string;
+            item_type: string;
+            media?: components["schemas"]["CatalogMedia"][] | null;
+            name: string;
+            parent_item_id?: string;
+            /** Format: double */
+            price?: number;
+            price_unit?: string;
+            status?: string;
+        };
+        CatalogListBookingsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogListBookingsOutputBody.json
+             */
+            readonly $schema?: string;
+            bookings: components["schemas"]["CatalogBooking"][] | null;
+        };
+        CatalogListItemsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogListItemsOutputBody.json
+             */
+            readonly $schema?: string;
+            items: components["schemas"]["CatalogItem"][] | null;
+        };
+        CatalogListSchemasOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogListSchemasOutputBody.json
+             */
+            readonly $schema?: string;
+            schemas: components["schemas"]["CatalogSchema"][] | null;
+        };
+        CatalogListSlotsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogListSlotsOutputBody.json
+             */
+            readonly $schema?: string;
+            slots: components["schemas"]["CatalogSlot"][] | null;
+        };
+        CatalogMedia: {
+            gcs_uri: string;
+            kb_document_id?: string;
+            kind: string;
+        };
+        CatalogPatchStatusInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogPatchStatusInputBody.json
+             */
+            readonly $schema?: string;
+            status: string;
+        };
+        CatalogSchema: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogSchema.json
+             */
+            readonly $schema?: string;
+            /** Format: date-time */
+            created_at: string;
+            fields: components["schemas"]["CatalogSchemaField"][] | null;
+            item_type: string;
+            project_id: string;
+            schema_id: string;
+            tenant_id: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** Format: int64 */
+            version: number;
+        };
+        CatalogSchemaField: {
+            description?: string;
+            enum_values?: string[] | null;
+            filterable?: boolean;
+            key: string;
+            required?: boolean;
+            type: string;
+            unit?: string;
+        };
+        CatalogSchemaWriteBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogSchemaWriteBody.json
+             */
+            readonly $schema?: string;
+            fields: components["schemas"]["CatalogSchemaField"][] | null;
+            item_type: string;
+        };
+        CatalogSlot: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogSlot.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            booked_count: number;
+            /** Format: int64 */
+            capacity: number;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            ends_at: string;
+            item_id: string;
+            project_id: string;
+            slot_id: string;
+            /** Format: date-time */
+            starts_at: string;
+            status: string;
+            tenant_id: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        CatalogSlotWriteBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogSlotWriteBody.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            capacity?: number;
+            /** @description RFC3339 timestamp */
+            ends_at: string;
+            /** @description RFC3339 timestamp */
+            starts_at: string;
+        };
+        CatalogSyncInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogSyncInputBody.json
+             */
+            readonly $schema?: string;
+            items: components["schemas"]["CatalogSyncItemBody"][] | null;
+            /** @description Soft-deactivate active items (of the item_types in this batch) whose external_ref is absent from it */
+            remove_missing?: boolean;
+        };
+        CatalogSyncItemBody: {
+            attributes?: {
+                [key: string]: unknown;
+            };
+            currency?: string;
+            description?: string;
+            external_ref: string;
+            item_type: string;
+            media?: components["schemas"]["CatalogMedia"][] | null;
+            name: string;
+            /** Format: double */
+            price?: number;
+            price_unit?: string;
+            status?: string;
+        };
+        CatalogSyncResult: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogSyncResult.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            created: number;
+            /** Format: int64 */
+            deactivated: number;
+            item_ids: string[] | null;
+            /** Format: int64 */
+            updated: number;
+        };
+        CatalogUpdateSchemaInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogUpdateSchemaInputBody.json
+             */
+            readonly $schema?: string;
+            fields: components["schemas"]["CatalogSchemaField"][] | null;
+        };
+        CatalogUpdateSlotInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CatalogUpdateSlotInputBody.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            capacity: number;
+            ends_at: string;
+            starts_at: string;
+            status: string;
+        };
+        ChannelBinding: {
+            agent_id: string;
+            channel_type?: string;
+            connection_id?: string;
+            use_guide: boolean;
+        };
         ChannelConnectionDTO: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ChannelConnectionDTO.json
+             * @example /api/v1/schemas/ChannelConnectionDTO.json
              */
             readonly $schema?: string;
             app_id?: string;
@@ -5553,11 +8428,98 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ChannelConnectionsOutputBody.json
+             * @example /api/v1/schemas/ChannelConnectionsOutputBody.json
              */
             readonly $schema?: string;
             connections: components["schemas"]["ChannelConnectionDTO"][] | null;
             items: components["schemas"]["ChannelConnectionDTO"][] | null;
+        };
+        ChannelDTO: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ChannelDTO.json
+             */
+            readonly $schema?: string;
+            active: boolean;
+            channel_id: string;
+            /** @description Type-specific config; secret fields are returned masked */
+            config: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            created_at: string;
+            /** @description Subscribed event types (empty = all) */
+            events: string[] | null;
+            /** @description Optional delivery predicate, e.g. {agents, min_score} */
+            filter?: {
+                [key: string]: unknown;
+            };
+            name: string;
+            project_id: string;
+            /** @description Delivery backend: webhook | email | composio */
+            type: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        ChannelDeliverBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ChannelDeliverBody.json
+             */
+            readonly $schema?: string;
+            /** @description Event type to deliver, e.g. lead.outreach.send */
+            event_type: string;
+            /** @description Structured event payload used by channel templates and filters */
+            payload?: {
+                [key: string]: unknown;
+            };
+        };
+        ChannelDeliverOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ChannelDeliverOutputBody.json
+             */
+            readonly $schema?: string;
+            deliveries: components["schemas"]["DeliveryResult"][] | null;
+        };
+        ChannelWriteBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ChannelWriteBody.json
+             */
+            readonly $schema?: string;
+            /** @description Whether the channel is active (default true) */
+            active?: boolean;
+            /** @description Type-specific config (url / api_key+from / agent_id+action ...) */
+            config?: {
+                [key: string]: unknown;
+            };
+            /** @description Event types to subscribe to (empty = all events) */
+            events?: string[] | null;
+            /** @description Optional delivery predicate, e.g. {"agents":["lead_research"],"min_score":80} */
+            filter?: {
+                [key: string]: unknown;
+            };
+            /** @description Human-readable channel name */
+            name: string;
+            /**
+             * @description Delivery backend
+             * @enum {string}
+             */
+            type: "webhook" | "email" | "composio";
+        };
+        ChatMsgInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ChatMsgInputBody.json
+             */
+            readonly $schema?: string;
+            text: string;
         };
         ChatSSEChoice: {
             /** @description Incremental delta for this chunk */
@@ -5574,7 +8536,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ChatSSEChunk.json
+             * @example /api/v1/schemas/ChatSSEChunk.json
              */
             readonly $schema?: string;
             /**
@@ -5618,7 +8580,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CheckpointEvalRequest.json
+             * @example /api/v1/schemas/CheckpointEvalRequest.json
              */
             readonly $schema?: string;
             /** @description Workbench instance ID */
@@ -5630,6 +8592,91 @@ export interface components {
              * @description Session index for checkpoint
              */
             sessionIndex: number;
+        };
+        ClaimInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ClaimInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The claim token from the claim link */
+            claim_token: string;
+        };
+        ClaimLinkInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ClaimLinkInputBody.json
+             */
+            readonly $schema?: string;
+        };
+        ClaimLinkOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ClaimLinkOutputBody.json
+             */
+            readonly $schema?: string;
+            claim_url: string;
+            expires_at: string;
+        };
+        ClaimResult: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ClaimResult.json
+             */
+            readonly $schema?: string;
+            agent_id: string;
+            agent_name: string;
+            clerk_org_id: string;
+            status: string;
+            tenant_id: string;
+        };
+        ClassifyContactRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ClassifyContactRequest.json
+             */
+            readonly $schema?: string;
+            /** @description The tier-specific agent ID to route to */
+            agent_id: string;
+            /** @description The contact's display name */
+            contact_name: string;
+            /** @description The classified tier (e.g. Premier, VIP, Value) */
+            tier: string;
+            /** @description The contact's user ID */
+            user_id: string;
+        };
+        Cohort: {
+            cohort_label: string;
+            entry_week: string;
+            points: components["schemas"]["CohortPoint"][] | null;
+            /** Format: int64 */
+            size: number;
+        };
+        CohortPoint: {
+            /** Format: double */
+            avg_depth: number;
+            /** Format: int64 */
+            count: number;
+            /** Format: int64 */
+            week: number;
+        };
+        CohortsBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CohortsBody.json
+             */
+            readonly $schema?: string;
+            cohorts: components["schemas"]["Cohort"][] | null;
+        };
+        ColumnMapping: {
+            column: string;
+            field: string;
         };
         ColumnMappingSpec: {
             is_label?: boolean;
@@ -5647,7 +8694,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ComposioConnectCallbackInputBody.json
+             * @example /api/v1/schemas/ComposioConnectCallbackInputBody.json
              */
             readonly $schema?: string;
             account_label?: string;
@@ -5659,7 +8706,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ComposioConnectCallbackOutputBody.json
+             * @example /api/v1/schemas/ComposioConnectCallbackOutputBody.json
              */
             readonly $schema?: string;
             connection?: components["schemas"]["Connection"];
@@ -5669,7 +8716,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ComposioUsageResponse.json
+             * @example /api/v1/schemas/ComposioUsageResponse.json
              */
             readonly $schema?: string;
             by_app: components["schemas"]["ComposioAppUsage"][] | null;
@@ -5685,6 +8732,18 @@ export interface components {
             total_calls: number;
             /** Format: double */
             total_cost_usd: number;
+        };
+        Config: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/Config.json
+             */
+            readonly $schema?: string;
+            channel_bindings: components["schemas"]["ChannelBinding"][] | null;
+            guide_agent: components["schemas"]["GuideAgent"];
+            handoffs: components["schemas"]["Handoff"][] | null;
+            tiers: components["schemas"]["Tier"][] | null;
         };
         Connection: {
             account_label: string;
@@ -5702,7 +8761,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ConstellationResponse.json
+             * @example /api/v1/schemas/ConstellationResponse.json
              */
             readonly $schema?: string;
             edges: components["schemas"]["Edge"][] | null;
@@ -5713,11 +8772,55 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ConsumeNotificationOutputBody.json
+             * @example /api/v1/schemas/ConsumeNotificationOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the notification was consumed */
             success: boolean;
+        };
+        ContactPoint: {
+            e164?: string;
+            type: string;
+            value: string;
+            verified: boolean;
+        };
+        ContactResult: {
+            confidence: string;
+            /** Format: int64 */
+            credits_used: number;
+            emails: components["schemas"]["ContactPoint"][] | null;
+            ph_resolved: boolean;
+            phones: components["schemas"]["ContactPoint"][] | null;
+            provider: string;
+        };
+        ContactTimingSuggestBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ContactTimingSuggestBody.json
+             */
+            readonly $schema?: string;
+            /** @description Candidate send channels for this contact (e.g. whatsapp, sms, email). Required, nonempty. */
+            channels: string[] | null;
+            /** @description Stable contact/lead identifier — report replies via /builtin-agents/ml/contact_timing/feedback with the returned action_id. */
+            contact_id: string;
+            /** @description Optional bandit context features (e.g. this contact's engagement signals). */
+            context?: {
+                [key: string]: unknown;
+            };
+        };
+        ContactTimingSuggestResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ContactTimingSuggestResponse.json
+             */
+            readonly $schema?: string;
+            action_id: string;
+            channel: string;
+            /** Format: double */
+            propensity: number;
+            send_bucket: components["schemas"]["SendBucket"];
         };
         ContextEngineEventByType: {
             /** Format: double */
@@ -5732,7 +8835,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ContextEngineEventSummary.json
+             * @example /api/v1/schemas/ContextEngineEventSummary.json
              */
             readonly $schema?: string;
             byType: components["schemas"]["ContextEngineEventByType"][] | null;
@@ -5778,7 +8881,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ConversationDetailBody.json
+             * @example /api/v1/schemas/ConversationDetailBody.json
              */
             readonly $schema?: string;
             conversation: components["schemas"]["OmnichannelConversationDTO"];
@@ -5814,7 +8917,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CostBreakdownResponse.json
+             * @example /api/v1/schemas/CostBreakdownResponse.json
              */
             readonly $schema?: string;
             byAgent: components["schemas"]["CostBreakdownEntry"][] | null;
@@ -5918,7 +9021,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CostResponse.json
+             * @example /api/v1/schemas/CostResponse.json
              */
             readonly $schema?: string;
             byBillingMode?: components["schemas"]["CostByBillingMode"][] | null;
@@ -5964,7 +9067,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateAPIKeyInputBody.json
+             * @example /api/v1/schemas/CreateAPIKeyInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -5981,7 +9084,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateAPIKeyOutputBody.json
+             * @example /api/v1/schemas/CreateAPIKeyOutputBody.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -6003,7 +9106,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateAgentBody.json
+             * @example /api/v1/schemas/CreateAgentBody.json
              */
             readonly $schema?: string;
             /** @description Optional pre-set agent UUID */
@@ -6118,6 +9221,10 @@ export interface components {
         CreateAgentBodyToolCapabilitiesStruct: {
             /** @description Enable agent-authored skills (sonzai_create_skill / sonzai_update_skill). Requires skills. */
             auto_learn_skills?: boolean;
+            /** @description Enable the catalog_book_viewing tool (creates a TTL'd booking hold against a catalog item/slot). Off by default. */
+            catalog_booking?: boolean;
+            /** @description Enable the sales-inventory grounding layer: the proactive context-builder block plus the catalog_search/catalog_item_details tools. Off by default. */
+            catalog_grounding?: boolean;
             /** @description Enable per-agent Composio SaaS integrations. */
             composio?: boolean;
             image_generation: boolean;
@@ -6170,11 +9277,42 @@ export interface components {
             /** Format: double */
             importance: number;
         };
+        CreateApprovalRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CreateApprovalRequest.json
+             */
+            readonly $schema?: string;
+            /** @description The agent proposing the action */
+            agent_id: string;
+            /** @description Display name of the agent */
+            agent_name: string;
+            /** @description Channel: app, WhatsApp, web, goal, handoff */
+            channel: string;
+            /**
+             * Format: double
+             * @description Agent confidence score (0-1)
+             */
+            confidence: number;
+            /** @description Display name of the contact */
+            contact_name: string;
+            /** @description Human-readable context summary */
+            context: string;
+            /** @description Action-specific payload (message text, goal spec, etc.) */
+            payload: unknown;
+            /** @description Tags for categorization */
+            tags: string[] | null;
+            /** @description Type: message, goal, or handoff */
+            type: string;
+            /** @description The end-user/contact ID */
+            user_id: string;
+        };
         CreateChannelConnectionInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateChannelConnectionInputBody.json
+             * @example /api/v1/schemas/CreateChannelConnectionInputBody.json
              */
             readonly $schema?: string;
             /** @description Customer system-user access token; encrypted at rest; required for byo_app. */
@@ -6209,7 +9347,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateConstellationNodeInputBody.json
+             * @example /api/v1/schemas/CreateConstellationNodeInputBody.json
              */
             readonly $schema?: string;
             /** @description Human-readable description */
@@ -6230,7 +9368,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateCustomStateInputBody.json
+             * @example /api/v1/schemas/CreateCustomStateInputBody.json
              */
             readonly $schema?: string;
             /** @description Content type (text or json, defaults to text) */
@@ -6250,7 +9388,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateCustomToolInputBody.json
+             * @example /api/v1/schemas/CreateCustomToolInputBody.json
              */
             readonly $schema?: string;
             /** @description Tool description */
@@ -6264,7 +9402,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateEvalTemplateInputBody.json
+             * @example /api/v1/schemas/CreateEvalTemplateInputBody.json
              */
             readonly $schema?: string;
             /** @description Evaluation categories */
@@ -6294,7 +9432,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateFactInputBody.json
+             * @example /api/v1/schemas/CreateFactInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -6326,7 +9464,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateGoalInputBody.json
+             * @example /api/v1/schemas/CreateGoalInputBody.json
              */
             readonly $schema?: string;
             /** @description Goal description */
@@ -6349,7 +9487,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateHabitInputBody.json
+             * @example /api/v1/schemas/CreateHabitInputBody.json
              */
             readonly $schema?: string;
             /** @description Habit category (defaults to behavioral) */
@@ -6372,7 +9510,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateInstanceInputBody.json
+             * @example /api/v1/schemas/CreateInstanceInputBody.json
              */
             readonly $schema?: string;
             /** @description Optional description */
@@ -6384,7 +9522,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateInventoryItemHumaInputBody.json
+             * @example /api/v1/schemas/CreateInventoryItemHumaInputBody.json
              */
             readonly $schema?: string;
             /** @description Natural-language description used for KB search */
@@ -6402,11 +9540,25 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        CreateJobInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CreateJobInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Handler-specific parameters */
+            params?: {
+                [key: string]: unknown;
+            };
+            /** @description Job type: train_scoring | train_bandit */
+            type: string;
+        };
         CreateProjectInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateProjectInputBody.json
+             * @example /api/v1/schemas/CreateProjectInputBody.json
              */
             readonly $schema?: string;
             /** @description When true, agents in this project default to autonomous KB editing (create/update/delete) unless their own knowledgeBaseWrite capability is set explicitly. null = not configured. */
@@ -6420,7 +9572,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateScheduleInputBody.json
+             * @example /api/v1/schemas/CreateScheduleInputBody.json
              */
             readonly $schema?: string;
             /** @description Optional quiet-hours/days filter: {hours:{start,end},days_of_week}. */
@@ -6440,7 +9592,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateScheduleOutputBody.json
+             * @example /api/v1/schemas/CreateScheduleOutputBody.json
              */
             readonly $schema?: string;
             enabled: boolean;
@@ -6448,11 +9600,29 @@ export interface components {
             next_fire_at_local: string;
             schedule_id: string;
         };
+        CreateTenantDomainRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CreateTenantDomainRequest.json
+             */
+            readonly $schema?: string;
+            /** @description For domain_type=custom: the full FQDN, e.g. 'crm.ayala.com'. */
+            domain?: string;
+            /**
+             * @description 'subdomain' (a label under the base domain) or 'custom' (a full customer-owned FQDN).
+             * @enum {string}
+             */
+            domain_type: "subdomain" | "custom";
+            is_primary?: boolean;
+            /** @description For domain_type=subdomain: the label, e.g. 'ayala'. */
+            subdomain?: string;
+        };
         CreateTicketRequest: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateTicketRequest.json
+             * @example /api/v1/schemas/CreateTicketRequest.json
              */
             readonly $schema?: string;
             description: string;
@@ -6464,7 +9634,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateUserPersonaInputBody.json
+             * @example /api/v1/schemas/CreateUserPersonaInputBody.json
              */
             readonly $schema?: string;
             /** @description Free-text persona description */
@@ -6478,7 +9648,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateWisdomAttributedBody.json
+             * @example /api/v1/schemas/CreateWisdomAttributedBody.json
              */
             readonly $schema?: string;
             category: string;
@@ -6498,7 +9668,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateWisdomAttributedOutputBody.json
+             * @example /api/v1/schemas/CreateWisdomAttributedOutputBody.json
              */
             readonly $schema?: string;
             fact: components["schemas"]["AttributedFact"];
@@ -6507,7 +9677,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateWisdomRelationBody.json
+             * @example /api/v1/schemas/CreateWisdomRelationBody.json
              */
             readonly $schema?: string;
             edge_type: string;
@@ -6526,16 +9696,68 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CreateWisdomRelationOutputBody.json
+             * @example /api/v1/schemas/CreateWisdomRelationOutputBody.json
              */
             readonly $schema?: string;
             relation: components["schemas"]["AttributedRelation"];
+        };
+        CustomAgentDTO: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CustomAgentDTO.json
+             */
+            readonly $schema?: string;
+            agent_id: string;
+            /** Format: date-time */
+            created_at: string;
+            description?: string;
+            disable_tools: boolean;
+            findings_schema?: {
+                [key: string]: unknown;
+            };
+            /** Format: int64 */
+            max_tool_rounds: number;
+            model: string;
+            name: string;
+            project_id: string;
+            slug: string;
+            system: string;
+            tools: string[] | null;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        CustomAgentWriteBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/CustomAgentWriteBody.json
+             */
+            readonly $schema?: string;
+            description?: string;
+            /** @description Disable the toolset entirely (pure reasoning) */
+            disable_tools?: boolean;
+            /** @description JSON Schema for the agent's structured return_findings output */
+            findings_schema?: {
+                [key: string]: unknown;
+            };
+            /** Format: int64 */
+            max_tool_rounds?: number;
+            /** @description Anthropic model: claude-sonnet-4-6 | claude-haiku-4-5 */
+            model: string;
+            name: string;
+            /** @description Project-scoped agent slug (referenced from pipeline steps) */
+            slug: string;
+            /** @description The agent's system prompt */
+            system: string;
+            /** @description Sandbox toolset tools to enable (empty = all) */
+            tools?: string[] | null;
         };
         CustomLLMConfigResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CustomLLMConfigResponse.json
+             * @example /api/v1/schemas/CustomLLMConfigResponse.json
              */
             readonly $schema?: string;
             api_key_prefix: string;
@@ -6549,7 +9771,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CustomState.json
+             * @example /api/v1/schemas/CustomState.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -6569,7 +9791,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/CustomToolDefinition.json
+             * @example /api/v1/schemas/CustomToolDefinition.json
              */
             readonly $schema?: string;
             description: string;
@@ -6583,11 +9805,39 @@ export interface components {
             /** Format: int64 */
             sessions: number;
         };
+        DecideMLNBARequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/DecideMLNBARequest.json
+             */
+            readonly $schema?: string;
+            actions: components["schemas"]["BanditAction"][] | null;
+            context?: {
+                [key: string]: unknown;
+            };
+            explore?: boolean;
+        };
+        DecideResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/DecideResponse.json
+             */
+            readonly $schema?: string;
+            action_id: string;
+            explore: boolean;
+            /** Format: int64 */
+            model_n: number;
+            /** Format: double */
+            propensity: number;
+            scores: components["schemas"]["ActionScore"][] | null;
+        };
         DeleteAgentOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/DeleteAgentOutputBody.json
+             * @example /api/v1/schemas/DeleteAgentOutputBody.json
              */
             readonly $schema?: string;
             /** @description Counts of deleted sub-resources */
@@ -6605,7 +9855,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/DeleteCustomToolOutputBody.json
+             * @example /api/v1/schemas/DeleteCustomToolOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -6614,7 +9864,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/DeleteEvalRunOutputBody.json
+             * @example /api/v1/schemas/DeleteEvalRunOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -6623,7 +9873,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/DeleteEvalTemplateOutputBody.json
+             * @example /api/v1/schemas/DeleteEvalTemplateOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -6632,7 +9882,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/DeleteInstanceOutputBody.json
+             * @example /api/v1/schemas/DeleteInstanceOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the instance was deleted */
@@ -6642,7 +9892,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/DeleteProjectOutputBody.json
+             * @example /api/v1/schemas/DeleteProjectOutputBody.json
              */
             readonly $schema?: string;
             /** @description Deletion status — "deleted" on success */
@@ -6652,7 +9902,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/DeleteUserPersonaOutputBody.json
+             * @example /api/v1/schemas/DeleteUserPersonaOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -6661,11 +9911,67 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/DeleteWisdomResponse.json
+             * @example /api/v1/schemas/DeleteWisdomResponse.json
              */
             readonly $schema?: string;
             fact_id: string;
             success: boolean;
+        };
+        DeliveryResult: {
+            channel_id: string;
+            error?: string;
+            status: string;
+            type: string;
+        };
+        DepthBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/DepthBody.json
+             */
+            readonly $schema?: string;
+            agent_id: string;
+            at_risk: boolean;
+            band: string;
+            /** Format: date-time */
+            computed_at: string;
+            contact_name: string;
+            /** Format: double */
+            depth: number;
+            /** Format: date-time */
+            last_interaction: string | null;
+            /** Format: double */
+            trend: number;
+            user_id: string;
+        };
+        DepthDistributionBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/DepthDistributionBody.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            at_risk: number;
+            /** Format: double */
+            avg_depth: number;
+            bands: {
+                [key: string]: number;
+            };
+            /** Format: int64 */
+            declining: number;
+            /** Format: int64 */
+            deepened: number;
+            /** Format: int64 */
+            total: number;
+            trend: components["schemas"]["DepthTrend"][] | null;
+        };
+        DepthTrend: {
+            /** Format: double */
+            avg_depth: number;
+            /** Format: int64 */
+            count: number;
+            date: string;
         };
         DialogueMsgHuma: {
             /** @description Message content */
@@ -6694,7 +10000,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/DiaryPolymorphicResponse.json
+             * @example /api/v1/schemas/DiaryPolymorphicResponse.json
              */
             readonly $schema?: string;
             entries?: components["schemas"]["DiaryEntry"][] | null;
@@ -6748,7 +10054,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/DirectUpdateRequest.json
+             * @example /api/v1/schemas/DirectUpdateRequest.json
              */
             readonly $schema?: string;
             properties: {
@@ -6759,7 +10065,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/DirectUpdateResponse.json
+             * @example /api/v1/schemas/DirectUpdateResponse.json
              */
             readonly $schema?: string;
             error?: string;
@@ -6780,6 +10086,21 @@ export interface components {
             turn_id: string;
             user_id?: string;
         };
+        DomainBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/DomainBody.json
+             */
+            readonly $schema?: string;
+            domain: string;
+            domain_type: string;
+            is_primary: boolean;
+            verification_token?: string;
+            verified: boolean;
+            /** Format: date-time */
+            verified_at?: string;
+        };
         Edge: {
             AgentID: string;
             /** Format: int64 */
@@ -6799,7 +10120,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/EffectivePostProcessingModelOutputBody.json
+             * @example /api/v1/schemas/EffectivePostProcessingModelOutputBody.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -6813,7 +10134,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/EndSessionInputBody.json
+             * @example /api/v1/schemas/EndSessionInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -6849,7 +10170,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/EndSessionOutputBody.json
+             * @example /api/v1/schemas/EndSessionOutputBody.json
              */
             readonly $schema?: string;
             /** @description Echo of the resolved agent_id. */
@@ -6867,11 +10188,123 @@ export interface components {
             /** @description Whether the session end was accepted */
             success: boolean;
         };
+        EnrichJobListItem: {
+            /** Format: int64 */
+            attempts: number;
+            /** Format: date-time */
+            created_at: string;
+            error?: string;
+            id: string;
+            input: unknown;
+            result?: unknown;
+            status: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        EnrichJobView: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/EnrichJobView.json
+             */
+            readonly $schema?: string;
+            error?: string;
+            result?: unknown;
+            status: string;
+        };
+        EnrichLeadBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/EnrichLeadBody.json
+             */
+            readonly $schema?: string;
+            lead: components["schemas"]["EnrichLeadBodyLeadStruct"];
+            /** @description Override delivery URL; defaults to the project's registered lead.enriched webhook */
+            webhook_url?: string;
+        };
+        EnrichLeadBodyLeadStruct: {
+            /** @description Preferred / hinted brand */
+            brand?: string;
+            company?: string;
+            email?: string;
+            /** @description Lead full name (minimum input) */
+            name: string;
+            /** @description Lead phone (minimum input) */
+            phone?: string;
+            /** @description Raw inquiry text, if any */
+            raw?: string;
+            /** @description Vertical key (default real_estate) */
+            vertical?: string;
+        };
+        EnrichLeadResp: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/EnrichLeadResp.json
+             */
+            readonly $schema?: string;
+            job_id: string;
+            status: string;
+        };
+        EnrichPersonInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/EnrichPersonInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description ISO country (e.g. PH) — coverage caveats apply outside US/EU */
+            country?: string;
+            /** @description Known email address (contact-resolution identifier) */
+            email?: string;
+            /** @description Current employer / company */
+            employer?: string;
+            /** @description LinkedIn profile URL — the Crustdata identifier; strongly preferred */
+            linkedin_url?: string;
+            /** @description Full name */
+            name?: string;
+            /** @description Contact fields desired: "email", "phone". Defaults to both. */
+            want?: string[] | null;
+        };
+        EnrichPersonOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/EnrichPersonOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description True when served from the ScyllaDB cache (no vendor was billed). */
+            cache_hit: boolean;
+            /** @description Resolved contact points (Fiber/Apollo). null when unresolved. */
+            contact: components["schemas"]["ContactResult"];
+            /**
+             * Format: int64
+             * @description Best-effort estimate of vendor credits consumed (0 on cache hit).
+             */
+            credits_used: number;
+            /** @description Vendors actually invoked in this run. */
+            providers_used: string[] | null;
+            /** @description Person/company research (Crustdata). null when unresolved. */
+            research: components["schemas"]["EnrichResult"];
+            /** @description Per-step waterfall trace for transparency. */
+            steps: components["schemas"]["Step"][] | null;
+        };
+        EnrichResult: {
+            citations: string[] | null;
+            confidence: string;
+            coverage_note?: string;
+            employer_guess?: string;
+            role_signals: string[] | null;
+            summary: string;
+            tier: string;
+            wealth_signals: components["schemas"]["WealthSignal"][] | null;
+        };
         EnterpriseContract: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/EnterpriseContract.json
+             * @example /api/v1/schemas/EnterpriseContract.json
              */
             readonly $schema?: string;
             autoRenew: boolean;
@@ -6919,6 +10352,16 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        EpochMetric: {
+            /** Format: double */
+            accuracy: number;
+            /** Format: double */
+            auc: number;
+            /** Format: int64 */
+            epoch: number;
+            /** Format: double */
+            log_loss: number;
+        };
         ErrorDetail: {
             /** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
             location?: string;
@@ -6931,7 +10374,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ErrorModel.json
+             * @example /api/v1/schemas/ErrorModel.json
              */
             readonly $schema?: string;
             /**
@@ -6965,6 +10408,22 @@ export interface components {
              * @example https://example.com/errors/example
              */
             type: string;
+        };
+        EvResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/EvResponseBody.json
+             */
+            readonly $schema?: string;
+            /** Format: double */
+            expected_value: number;
+            prob_served_from: string;
+            /** Format: double */
+            probability: number;
+            /** Format: double */
+            value: number;
+            value_served_from: string;
         };
         EvalAgentConfigOverride: {
             /** @description Behavioral constraints */
@@ -7005,7 +10464,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/EvalOnlyRequest.json
+             * @example /api/v1/schemas/EvalOnlyRequest.json
              */
             readonly $schema?: string;
             /** @description Optional adaptation-eval template UUID */
@@ -7021,7 +10480,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/EvalRun.json
+             * @example /api/v1/schemas/EvalRun.json
              */
             readonly $schema?: string;
             adaptation_result: unknown;
@@ -7066,7 +10525,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/EvalRunEvent.json
+             * @example /api/v1/schemas/EvalRunEvent.json
              */
             readonly $schema?: string;
             /** @description Adaptation-evaluation result payload (final_status only) */
@@ -7084,7 +10543,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/EvalTemplate.json
+             * @example /api/v1/schemas/EvalTemplate.json
              */
             readonly $schema?: string;
             categories: components["schemas"]["EvalCategory"][] | null;
@@ -7109,7 +10568,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/EvaluateAcceptedBody.json
+             * @example /api/v1/schemas/EvaluateAcceptedBody.json
              */
             readonly $schema?: string;
             /** @description Eval run UUID — poll GET /eval-runs/{runId} for the result */
@@ -7117,11 +10576,20 @@ export interface components {
             /** @description Initial run status (always "pending") */
             status: string;
         };
+        EvaluateMLOPERequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/EvaluateMLOPERequest.json
+             */
+            readonly $schema?: string;
+            logged: components["schemas"]["LoggedTuple"][] | null;
+        };
         EvaluateRequest: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/EvaluateRequest.json
+             * @example /api/v1/schemas/EvaluateRequest.json
              */
             readonly $schema?: string;
             /** @description Optional adaptation-eval template UUID; defaults to tenant's first adaptation template */
@@ -7156,21 +10624,104 @@ export interface components {
              */
             session_index?: number;
         };
+        EvidenceStats: {
+            /** Format: int64 */
+            attribution_window_days: number;
+            /** Format: int64 */
+            episodes_included: number;
+            /** Format: int64 */
+            episodes_truncated: number;
+            /** Format: int64 */
+            leads_skipped_no_identity: number;
+            /** Format: int64 */
+            lost_leads: number;
+            /** Format: int64 */
+            lost_leads_truncated: number;
+            /** Format: int64 */
+            pack_chars: number;
+            used_fallback_attribution_window: boolean;
+            /** Format: int64 */
+            window_days: number;
+            /** Format: int64 */
+            won_leads: number;
+            /** Format: int64 */
+            won_leads_truncated: number;
+        };
         FactHistoryResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/FactHistoryResponse.json
+             * @example /api/v1/schemas/FactHistoryResponse.json
              */
             readonly $schema?: string;
             current: components["schemas"]["AtomicFact"];
             previous_versions: components["schemas"]["AtomicFact"][] | null;
         };
+        FeatureWeight: {
+            name: string;
+            /** Format: double */
+            weight: number;
+        };
+        FeedbackResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/FeedbackResponse.json
+             */
+            readonly $schema?: string;
+            bandit_error?: string;
+            /** Format: int64 */
+            bandit_n?: number;
+            bandit_updated: boolean;
+            converted: boolean;
+            message: string;
+            ok: boolean;
+            outcome_recorded: boolean;
+            use_case: string;
+        };
+        FleetActivityBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/FleetActivityBody.json
+             */
+            readonly $schema?: string;
+            items: components["schemas"]["FleetActivityItem"][] | null;
+        };
+        FleetActivityItem: {
+            action: string;
+            agent_id: string;
+            agent_name: string;
+            contact_name: string;
+            id: string;
+            summary: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        ForecastResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ForecastResponseBody.json
+             */
+            readonly $schema?: string;
+            assumptions: string[] | null;
+            /** Format: double */
+            expected_revenue: number;
+            /** Format: int64 */
+            open_leads: number;
+            /** Format: double */
+            p10: number;
+            /** Format: double */
+            p50: number;
+            /** Format: double */
+            p90: number;
+        };
         ForkAgentInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ForkAgentInputBody.json
+             * @example /api/v1/schemas/ForkAgentInputBody.json
              */
             readonly $schema?: string;
             /** @description Display name for the forked agent */
@@ -7180,7 +10731,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ForkResponse.json
+             * @example /api/v1/schemas/ForkResponse.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -7192,7 +10743,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ForkStatusResponse.json
+             * @example /api/v1/schemas/ForkStatusResponse.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -7211,7 +10762,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/GenerateAndCreateInputBody.json
+             * @example /api/v1/schemas/GenerateAndCreateInputBody.json
              */
             readonly $schema?: string;
             /** @description Pre-existing agent UUID (optional) */
@@ -7237,7 +10788,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/GenerateBioInputBody.json
+             * @example /api/v1/schemas/GenerateBioInputBody.json
              */
             readonly $schema?: string;
             /** @description Current bio to improve upon */
@@ -7261,7 +10812,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/GenerateBioOutputBody.json
+             * @example /api/v1/schemas/GenerateBioOutputBody.json
              */
             readonly $schema?: string;
             /** @description Generated bio text */
@@ -7278,7 +10829,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/GenerateCharacterInputBody.json
+             * @example /api/v1/schemas/GenerateCharacterInputBody.json
              */
             readonly $schema?: string;
             /** @description Pre-existing agent UUID (optional) */
@@ -7302,7 +10853,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/GenerateImageInputBody.json
+             * @example /api/v1/schemas/GenerateImageInputBody.json
              */
             readonly $schema?: string;
             /** @description Model to use (default: gemini-3.1-flash-image-preview) */
@@ -7320,7 +10871,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/GenerateImageOutputBody.json
+             * @example /api/v1/schemas/GenerateImageOutputBody.json
              */
             readonly $schema?: string;
             /** @description GCS URI of the image */
@@ -7339,11 +10890,26 @@ export interface components {
             /** @description Whether image was generated */
             success: boolean;
         };
+        GenerateMLWinLossReportRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/GenerateMLWinLossReportRequest.json
+             */
+            readonly $schema?: string;
+            /** @description Regenerate even if a report already exists for this (project, window). */
+            force?: boolean;
+            /**
+             * Format: int64
+             * @description Report lookback window in days. Defaults to 90.
+             */
+            window_days?: number;
+        };
         GenerateSeedMemoriesInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/GenerateSeedMemoriesInputBody.json
+             * @example /api/v1/schemas/GenerateSeedMemoriesInputBody.json
              */
             readonly $schema?: string;
             /** @description Agent display name */
@@ -7377,7 +10943,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/GenerateSeedMemoriesOutputBody.json
+             * @example /api/v1/schemas/GenerateSeedMemoriesOutputBody.json
              */
             readonly $schema?: string;
             /** @description Generated seed memories */
@@ -7387,7 +10953,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/GetAgentModelsOutputBody.json
+             * @example /api/v1/schemas/GetAgentModelsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Default LLM model */
@@ -7397,11 +10963,27 @@ export interface components {
             /** @description Available provider/model combinations */
             providers: components["schemas"]["AgentModelsModelEntry"][] | null;
         };
+        GetBuiltinAgentSessionResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/GetBuiltinAgentSessionResponse.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            billed_cache_creation_tokens: number;
+            /** Format: int64 */
+            billed_cache_read_tokens: number;
+            /** Format: int64 */
+            billed_input_tokens: number;
+            /** Format: int64 */
+            billed_output_tokens: number;
+        };
         GetSkillLoadCountOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/GetSkillLoadCountOutputBody.json
+             * @example /api/v1/schemas/GetSkillLoadCountOutputBody.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -7412,7 +10994,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/GetToolSchemasOutputBody.json
+             * @example /api/v1/schemas/GetToolSchemasOutputBody.json
              */
             readonly $schema?: string;
             /** @description Available tools for this agent */
@@ -7422,7 +11004,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/Goal.json
+             * @example /api/v1/schemas/Goal.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -7446,10 +11028,59 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/GoalsResponse.json
+             * @example /api/v1/schemas/GoalsResponse.json
              */
             readonly $schema?: string;
             goals: components["schemas"]["Goal"][] | null;
+        };
+        GroundingAvailabilityBody: {
+            /** @description RFC3339 or YYYY-MM-DD */
+            from?: string;
+            require_open_slot?: boolean;
+            /** @description RFC3339 or YYYY-MM-DD */
+            to?: string;
+        };
+        GroundingAvailabilityInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/GroundingAvailabilityInputBody.json
+             */
+            readonly $schema?: string;
+            availability: components["schemas"]["GroundingAvailabilityBody"];
+            item_ids: string[] | null;
+        };
+        GroundingAvailabilityOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/GroundingAvailabilityOutputBody.json
+             */
+            readonly $schema?: string;
+            items: components["schemas"]["ResultItem"][] | null;
+        };
+        GroundingFiltersBody: {
+            attributes?: {
+                [key: string]: unknown;
+            };
+            item_type?: string;
+            /** Format: double */
+            price_max?: number;
+        };
+        GroundingQueryInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/GroundingQueryInputBody.json
+             */
+            readonly $schema?: string;
+            availability?: components["schemas"]["GroundingAvailabilityBody"];
+            filters?: components["schemas"]["GroundingFiltersBody"];
+            query?: string;
+            /** @description KB scope mode: project_only|cascade|union|org_only */
+            scope?: string;
+            /** Format: int64 */
+            top_k?: number;
         };
         GroupResult: {
             group: string;
@@ -7457,11 +11088,27 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        GuidanceOutput: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/GuidanceOutput.json
+             */
+            readonly $schema?: string;
+            active: components["schemas"]["AgentGuidance"];
+            history: components["schemas"]["AgentGuidance"][] | null;
+        };
+        GuideAgent: {
+            agent_id: string;
+            agent_name: string;
+            criteria: string[] | null;
+            questions: string[] | null;
+        };
         Habit: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/Habit.json
+             * @example /api/v1/schemas/Habit.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -7491,16 +11138,71 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/HabitsResponse.json
+             * @example /api/v1/schemas/HabitsResponse.json
              */
             readonly $schema?: string;
             habits: components["schemas"]["Habit"][] | null;
+        };
+        Handoff: {
+            carry: string[] | null;
+            from: string;
+            mode: string;
+            to: string;
+            when: string;
+        };
+        HandoffSuggestBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/HandoffSuggestBody.json
+             */
+            readonly $schema?: string;
+            /** @description Stable contact/lead identifier. */
+            contact_id: string;
+            /** @description Bandit context features (e.g. days since last reply, sentiment, deal stage). Required, nonempty — handoff timing has no meaningful context-free default. */
+            context: {
+                [key: string]: unknown;
+            };
+        };
+        HandoffSuggestResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/HandoffSuggestResponse.json
+             */
+            readonly $schema?: string;
+            action_id?: string;
+            approval_enqueued: boolean;
+            approval_id?: string;
+            gated: boolean;
+            /** Format: int64 */
+            have?: number;
+            /** Format: int64 */
+            needed?: number;
+            /** Format: double */
+            propensity?: number;
+        };
+        HyperParams: {
+            /** Format: double */
+            gamma: number;
+            /** Format: double */
+            lambda: number;
+            /** Format: double */
+            learning_rate: number;
+            /** Format: int64 */
+            max_depth: number;
+            /** Format: double */
+            min_child_weight: number;
+            /** Format: int64 */
+            n_estimators: number;
+            /** Format: double */
+            subsample: number;
         };
         ImportJob: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ImportJob.json
+             * @example /api/v1/schemas/ImportJob.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -7538,11 +11240,114 @@ export interface components {
             /** Format: int64 */
             warmth_score: number;
         };
+        ImportRowError: {
+            reason: string;
+            /** Format: int64 */
+            row_index: number;
+        };
+        Importance: {
+            /** Format: double */
+            gain: number;
+            name: string;
+        };
+        IngestContact: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/IngestContact.json
+             */
+            readonly $schema?: string;
+            contact_ref: string;
+            /** Format: date-time */
+            created_at: string;
+            crm_owner_id?: string;
+            display_name?: string;
+            email?: string;
+            id: string;
+            kind: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+            phone_e164?: string;
+            project_id: string;
+            tenant_id: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        IngestContactInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/IngestContactInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Stable external contact identifier the adapter owns; upsert key within the project */
+            contact_ref: string;
+            /** @description CRM-side owner/user id (e.g. Salesforce OwnerId) for write-back routing */
+            crm_owner_id?: string;
+            display_name?: string;
+            email?: string;
+            /**
+             * @description Registry kind: rep (the tenant's own salesperson) or lead_contact (an end customer)
+             * @enum {string}
+             */
+            kind: "rep" | "lead_contact";
+            /** @description Free-form registry metadata (channel identities, desk, brand assignments, …) */
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /** @description E.164 phone number, e.g. +639171234567 */
+            phone_e164?: string;
+        };
+        IngestEventInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/IngestEventInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Stable external contact identifier (see POST /ingest/contacts) */
+            contact_ref?: string;
+            /**
+             * Format: uuid
+             * @description Adapter-chosen idempotency key (UUID); replaying the same event_id into the same project is a no-op
+             */
+            event_id: string;
+            /** @description Stable external lead identifier (CRM record id, …) */
+            lead_ref?: string;
+            /**
+             * Format: date-time
+             * @description When the event happened in the source system (RFC 3339)
+             */
+            occurred_at: string;
+            /** @description Type-specific event body, stored verbatim and fanned out to subscribers */
+            payload?: {
+                [key: string]: unknown;
+            };
+            /**
+             * @description DomainEvent v1 type (closed enum)
+             * @enum {string}
+             */
+            type: "lead.created" | "lead.updated" | "lead.stage_changed" | "inventory.updated" | "price.changed" | "message.received" | "outcome.recorded";
+        };
+        IngestEventOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/IngestEventOutputBody.json
+             */
+            readonly $schema?: string;
+            duplicate: boolean;
+            /** @description The stored event's idempotency key */
+            event_id: string;
+            /** @description The stored event's type */
+            type: string;
+        };
         InitiateComposioConnectInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/InitiateComposioConnectInputBody.json
+             * @example /api/v1/schemas/InitiateComposioConnectInputBody.json
              */
             readonly $schema?: string;
             /** @description Composio app slug (e.g. gmail, slack, github) */
@@ -7552,7 +11357,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/InitiateComposioConnectOutputBody.json
+             * @example /api/v1/schemas/InitiateComposioConnectOutputBody.json
              */
             readonly $schema?: string;
             connected_account_id: string;
@@ -7601,6 +11406,17 @@ export interface components {
             UpdatedAt: string;
             UserID: string;
         };
+        InstanceHeartbeatInputBody: {
+            /** @description Currently-deployed release tag, e.g. from SONZAI_VERSION */
+            app_version?: string;
+            /** @description Free-form basic vitals; not persisted beyond this request in v1 */
+            vitals?: {
+                [key: string]: unknown;
+            };
+        };
+        InstanceHeartbeatOutputBody: {
+            ok: boolean;
+        };
         InteractionPreferences: {
             conversation_pace: string;
             emotional_expression: string;
@@ -7631,7 +11447,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/InterestsResponse.json
+             * @example /api/v1/schemas/InterestsResponse.json
              */
             readonly $schema?: string;
             interests: components["schemas"]["Interest"][] | null;
@@ -7654,7 +11470,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/InventoryReadResponse.json
+             * @example /api/v1/schemas/InventoryReadResponse.json
              */
             readonly $schema?: string;
             groups?: components["schemas"]["GroupResult"][] | null;
@@ -7670,7 +11486,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/InventoryWriteRequest.json
+             * @example /api/v1/schemas/InventoryWriteRequest.json
              */
             readonly $schema?: string;
             action: string;
@@ -7687,7 +11503,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/InventoryWriteResponse.json
+             * @example /api/v1/schemas/InventoryWriteResponse.json
              */
             readonly $schema?: string;
             candidates?: components["schemas"]["KbCandidate"][] | null;
@@ -7696,6 +11512,56 @@ export interface components {
             inventory_item_id?: string;
             kb_resolution?: components["schemas"]["KbResolutionInfo"];
             status: string;
+        };
+        InvokeInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/InvokeInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Task payload passed verbatim to the agent (e.g. lead fields: name, linkedin_url, employer, country, inquiry) */
+            input: {
+                [key: string]: unknown;
+            };
+            /** @description Optional session title for traceability */
+            title?: string;
+        };
+        ItemAvailability: {
+            /** Format: date-time */
+            as_of: string;
+            next_open_slots?: string[] | null;
+            status: string;
+        };
+        JobDTO: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/JobDTO.json
+             */
+            readonly $schema?: string;
+            /** Format: date-time */
+            created_at: string;
+            error?: string;
+            job_id: string;
+            params?: {
+                [key: string]: unknown;
+            };
+            progress: components["schemas"]["JobProgressDTO"];
+            result?: {
+                [key: string]: unknown;
+            };
+            status: string;
+            tenant_id?: string;
+            type: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        JobProgressDTO: {
+            message?: string;
+            /** Format: int64 */
+            pct?: number;
+            stage?: string;
         };
         JobUser: {
             /** Format: date-time */
@@ -7719,7 +11585,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KBAnalyticsRule.json
+             * @example /api/v1/schemas/KBAnalyticsRule.json
              */
             readonly $schema?: string;
             config: unknown;
@@ -7760,11 +11626,16 @@ export interface components {
             /** Format: int64 */
             total_leads: number;
         };
+        KBDocType: {
+            expected_relationships?: string[] | null;
+            root_entity_type: string;
+            type: string;
+        };
         KBDocument: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KBDocument.json
+             * @example /api/v1/schemas/KBDocument.json
              */
             readonly $schema?: string;
             checksum: string;
@@ -7825,7 +11696,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KBEntitySchema.json
+             * @example /api/v1/schemas/KBEntitySchema.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -7840,11 +11711,18 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
         };
+        KBEntityType: {
+            aliases_field?: string;
+            is_root_candidate: boolean;
+            key_fields: string[] | null;
+            properties?: components["schemas"]["KBSchemaProperty"][] | null;
+            type: string;
+        };
         KBNode: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KBNode.json
+             * @example /api/v1/schemas/KBNode.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -7889,7 +11767,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KBNodeWithScope.json
+             * @example /api/v1/schemas/KBNodeWithScope.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -7944,6 +11822,47 @@ export interface components {
             };
             type: string;
         };
+        KBRelationType: {
+            from: string;
+            properties?: components["schemas"]["KBSchemaProperty"][] | null;
+            supersession_identity: string[] | null;
+            to: string;
+            type: string;
+        };
+        KBSchema: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KBSchema.json
+             */
+            readonly $schema?: string;
+            config: components["schemas"]["KBSchemaConfig"];
+            /** Format: date-time */
+            created_at: string;
+            created_by?: string;
+            doc_types: components["schemas"]["KBDocType"][] | null;
+            entity_types: components["schemas"]["KBEntityType"][] | null;
+            project_id: string;
+            relationship_types: components["schemas"]["KBRelationType"][] | null;
+            /** Format: int64 */
+            schema_version: number;
+            status: string;
+            template_lineage?: string;
+            vertical_template?: string;
+        };
+        KBSchemaConfig: {
+            /** Format: double */
+            abstain_below_confidence?: number;
+            /** Format: double */
+            classify_auto_threshold?: number;
+            classify_model?: string;
+            /** Format: double */
+            extract_min_provenance_confidence?: number;
+            extract_model?: string;
+            ingestion_verifier_model?: string;
+            schema_propose_model?: string;
+            use_document_ai_preprocessor?: boolean;
+        };
         KBSchemaField: {
             description?: string;
             enum_values?: string[] | null;
@@ -7952,11 +11871,17 @@ export interface components {
             required: boolean;
             type: string;
         };
+        KBSchemaProperty: {
+            description?: string;
+            name: string;
+            required: boolean;
+            type: string;
+        };
         KBSearchResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KBSearchResponse.json
+             * @example /api/v1/schemas/KBSearchResponse.json
              */
             readonly $schema?: string;
             query: string;
@@ -8024,7 +11949,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbAgentCreateNodeOutputBody.json
+             * @example /api/v1/schemas/KbAgentCreateNodeOutputBody.json
              */
             readonly $schema?: string;
             /** @description The created node */
@@ -8034,7 +11959,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbAgentDeleteNodeOutputBody.json
+             * @example /api/v1/schemas/KbAgentDeleteNodeOutputBody.json
              */
             readonly $schema?: string;
             /** @description True on successful soft-delete */
@@ -8044,7 +11969,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbAgentUpdateNodeOutputBody.json
+             * @example /api/v1/schemas/KbAgentUpdateNodeOutputBody.json
              */
             readonly $schema?: string;
             /** @description The updated node */
@@ -8054,7 +11979,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbBulkUpdateInputBody.json
+             * @example /api/v1/schemas/KbBulkUpdateInputBody.json
              */
             readonly $schema?: string;
             /** @description Source identifier (defaults to 'bulk_api') */
@@ -8068,7 +11993,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbBulkUpdateOutputBody.json
+             * @example /api/v1/schemas/KbBulkUpdateOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -8106,11 +12031,49 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        KbCompareEntity: {
+            key: {
+                [key: string]: unknown;
+            };
+            type: string;
+        };
+        KbCompareInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbCompareInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Entities to compare (e.g. list of hospitals). */
+            entities: components["schemas"]["KbCompareEntity"][] | null;
+            /** @description Dot-path of the property to extract from each fact (e.g. 'price'). */
+            property_path: string;
+            /** @description Target entity all the listed entities should be related to (e.g. procedure 'MRI'). */
+            target_entity: components["schemas"]["KbCompareEntity"];
+            /** @description Relation type connecting the entities to the target (e.g. 'hospital_offers_procedure'). */
+            via_relation: string;
+        };
+        KbCompareOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbCompareOutputBody.json
+             */
+            readonly $schema?: string;
+            rows: components["schemas"]["KbCompareRow"][] | null;
+        };
+        KbCompareRow: {
+            entity: components["schemas"]["KbCompareEntity"];
+            fact?: components["schemas"]["KbFactDTO"];
+            missing: boolean;
+            missing_reason?: string;
+            value?: unknown;
+        };
         KbCreateAnalyticsRuleInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbCreateAnalyticsRuleInputBody.json
+             * @example /api/v1/schemas/KbCreateAnalyticsRuleInputBody.json
              */
             readonly $schema?: string;
             /** @description Rule configuration object */
@@ -8128,7 +12091,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbCreateOrgNodeInputBody.json
+             * @example /api/v1/schemas/KbCreateOrgNodeInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -8149,7 +12112,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbCreateSchemaInputBody.json
+             * @example /api/v1/schemas/KbCreateSchemaInputBody.json
              */
             readonly $schema?: string;
             /** @description Human-readable description */
@@ -8175,7 +12138,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbDocCostOutputBody.json
+             * @example /api/v1/schemas/KbDocCostOutputBody.json
              */
             readonly $schema?: string;
             document_ai_rows: components["schemas"]["KbDocCostBreakdown"][] | null;
@@ -8184,11 +12147,33 @@ export interface components {
             /** Format: double */
             total_cost_usd: number;
         };
+        KbFactDTO: {
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            effective_date: string;
+            /** Format: double */
+            extraction_confidence: number;
+            fact_id: string;
+            from_node_id: string;
+            is_active: boolean;
+            properties: {
+                [key: string]: unknown;
+            };
+            relation_type: string;
+            source_document_id: string;
+            /** Format: int64 */
+            source_page: number;
+            source_snippet: string;
+            to_node_id: string;
+            /** Format: int64 */
+            version: number;
+        };
         KbGetConversionStatsOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbGetConversionStatsOutputBody.json
+             * @example /api/v1/schemas/KbGetConversionStatsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Conversion statistics */
@@ -8199,11 +12184,44 @@ export interface components {
              */
             total: number;
         };
+        KbGetEntityOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbGetEntityOutputBody.json
+             */
+            readonly $schema?: string;
+            entity_key: {
+                [key: string]: unknown;
+            };
+            entity_node_id: string;
+            entity_type: string;
+            incoming_facts: components["schemas"]["KbFactDTO"][] | null;
+            outgoing_facts: components["schemas"]["KbFactDTO"][] | null;
+        };
+        KbGetFactHistoryOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbGetFactHistoryOutputBody.json
+             */
+            readonly $schema?: string;
+            versions: components["schemas"]["KbFactDTO"][] | null;
+        };
+        KbGetFactOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbGetFactOutputBody.json
+             */
+            readonly $schema?: string;
+            fact: components["schemas"]["KbFactDTO"];
+        };
         KbGetNodeHistoryOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbGetNodeHistoryOutputBody.json
+             * @example /api/v1/schemas/KbGetNodeHistoryOutputBody.json
              */
             readonly $schema?: string;
             /** @description Version history entries */
@@ -8218,7 +12236,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbGetNodeOutputBody.json
+             * @example /api/v1/schemas/KbGetNodeOutputBody.json
              */
             readonly $schema?: string;
             /** @description Version history (when requested) */
@@ -8234,7 +12252,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbGetRecommendationsOutputBody.json
+             * @example /api/v1/schemas/KbGetRecommendationsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Scored recommendations */
@@ -8249,7 +12267,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbGetStatsOutputBody.json
+             * @example /api/v1/schemas/KbGetStatsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Document counts by status */
@@ -8275,7 +12293,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbGetTrendRankingsOutputBody.json
+             * @example /api/v1/schemas/KbGetTrendRankingsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Ranked trends */
@@ -8290,7 +12308,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbGetTrendsOutputBody.json
+             * @example /api/v1/schemas/KbGetTrendsOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -8305,7 +12323,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbInsertFactsInputBody.json
+             * @example /api/v1/schemas/KbInsertFactsInputBody.json
              */
             readonly $schema?: string;
             /** @description Entities to insert or update */
@@ -8319,7 +12337,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbInsertFactsOutputBody.json
+             * @example /api/v1/schemas/KbInsertFactsOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -8346,7 +12364,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbListAnalyticsRulesOutputBody.json
+             * @example /api/v1/schemas/KbListAnalyticsRulesOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of analytics rules */
@@ -8361,7 +12379,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbListDocumentsOutputBody.json
+             * @example /api/v1/schemas/KbListDocumentsOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of documents */
@@ -8372,11 +12390,21 @@ export interface components {
              */
             total: number;
         };
+        KbListFactsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbListFactsOutputBody.json
+             */
+            readonly $schema?: string;
+            facts: components["schemas"]["KbFactDTO"][] | null;
+            next_page_token?: string;
+        };
         KbListNodesOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbListNodesOutputBody.json
+             * @example /api/v1/schemas/KbListNodesOutputBody.json
              */
             readonly $schema?: string;
             /** @description True when the underlying scan was truncated by limit */
@@ -8388,7 +12416,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbListOrgNodesOutputBody.json
+             * @example /api/v1/schemas/KbListOrgNodesOutputBody.json
              */
             readonly $schema?: string;
             nodes: components["schemas"]["KBNode"][] | null;
@@ -8399,7 +12427,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbListSchemasOutputBody.json
+             * @example /api/v1/schemas/KbListSchemasOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of schemas */
@@ -8410,11 +12438,59 @@ export interface components {
              */
             total: number;
         };
+        KbMultimodalSchemaActivateOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbMultimodalSchemaActivateOutputBody.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            active_version: number;
+            status: string;
+        };
+        KbMultimodalSchemaCreateOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbMultimodalSchemaCreateOutputBody.json
+             */
+            readonly $schema?: string;
+            schema: components["schemas"]["KBSchema"];
+        };
+        KbMultimodalSchemaListOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbMultimodalSchemaListOutputBody.json
+             */
+            readonly $schema?: string;
+            schemas: components["schemas"]["KBSchema"][] | null;
+        };
+        KbPatchClassificationInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbPatchClassificationInputBody.json
+             */
+            readonly $schema?: string;
+            root_entity: components["schemas"]["RootEntityStruct"];
+        };
+        KbPatchClassificationOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbPatchClassificationOutputBody.json
+             */
+            readonly $schema?: string;
+            document_id: string;
+            status: string;
+        };
         KbPromoteNodeInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbPromoteNodeInputBody.json
+             * @example /api/v1/schemas/KbPromoteNodeInputBody.json
              */
             readonly $schema?: string;
             /** @description Target tenant; server rejects if it does not match the authenticated tenant. */
@@ -8424,7 +12500,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbRecordFeedbackInputBody.json
+             * @example /api/v1/schemas/KbRecordFeedbackInputBody.json
              */
             readonly $schema?: string;
             /** @description Feedback action enum: converted, dismissed, clicked, ignored, etc. */
@@ -8447,10 +12523,21 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbRecordFeedbackOutputBody.json
+             * @example /api/v1/schemas/KbRecordFeedbackOutputBody.json
              */
             readonly $schema?: string;
             /** @description Result status */
+            status: string;
+        };
+        KbReingestOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbReingestOutputBody.json
+             */
+            readonly $schema?: string;
+            document_id: string;
+            mode: string;
             status: string;
         };
         KbResolutionInfo: {
@@ -8465,7 +12552,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbRunAnalyticsRuleOutputBody.json
+             * @example /api/v1/schemas/KbRunAnalyticsRuleOutputBody.json
              */
             readonly $schema?: string;
             /** @description Human-readable message */
@@ -8479,7 +12566,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbSearchResponse.json
+             * @example /api/v1/schemas/KbSearchResponse.json
              */
             readonly $schema?: string;
             query: string;
@@ -8494,11 +12581,25 @@ export interface components {
             source?: string;
             type: string;
         };
+        KbTraverseOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/KbTraverseOutputBody.json
+             */
+            readonly $schema?: string;
+            facts: components["schemas"]["KbTraversedFact"][] | null;
+        };
+        KbTraversedFact: {
+            /** Format: int64 */
+            depth: number;
+            fact: components["schemas"]["KbFactDTO"];
+        };
         KbUpdateAnalyticsRuleInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbUpdateAnalyticsRuleInputBody.json
+             * @example /api/v1/schemas/KbUpdateAnalyticsRuleInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated rule configuration */
@@ -8514,7 +12615,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbUpdateSchemaInputBody.json
+             * @example /api/v1/schemas/KbUpdateSchemaInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated description */
@@ -8532,7 +12633,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/KbUploadDocumentOutputBody.json
+             * @example /api/v1/schemas/KbUploadDocumentOutputBody.json
              */
             readonly $schema?: string;
             /** @description SHA-256 hex digest */
@@ -8551,22 +12652,162 @@ export interface components {
             /** @description Processing status */
             status: string;
         };
+        KnowledgeHit: {
+            content: string;
+            label: string;
+            node_id: string;
+            /** Format: double */
+            score: number;
+        };
+        LeadAssignmentBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/LeadAssignmentBody.json
+             */
+            readonly $schema?: string;
+            assignment_id: string;
+            /** Format: date-time */
+            claimed_at?: string;
+            /** Format: date-time */
+            completed_at?: string;
+            features?: unknown;
+            lead_ref: string;
+            /** Format: date-time */
+            offered_at: string;
+            policy: string;
+            prior_assignment_id?: string;
+            /** Format: double */
+            propensity?: number;
+            rep_user_id: string;
+            /** Format: date-time */
+            sla_expires_at: string;
+            state: string;
+        };
+        LearnInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/LearnInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Optional evidence payload: recent critiques (research_grader/qualifier_critic outputs) and outcomes (won/lost). Required for agents without a server-side critique store. */
+            evidence?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Format: double
+             * @description Optional metric value at activation (prior version's recent metric).
+             */
+            metric_baseline?: number;
+            /** @description Optional metric the new version is judged on (e.g. research_grade | won_rate | calibration_gap_abs). */
+            metric_name?: string;
+        };
+        LearnMLNBARequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/LearnMLNBARequest.json
+             */
+            readonly $schema?: string;
+            action_features?: {
+                [key: string]: unknown;
+            };
+            action_id: string;
+            context?: {
+                [key: string]: unknown;
+            };
+            /** Format: double */
+            propensity?: number;
+            /** Format: double */
+            reward: number;
+        };
+        LearnResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/LearnResponse.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            n: number;
+            ok: boolean;
+        };
+        LearnResult: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/LearnResult.json
+             */
+            readonly $schema?: string;
+            changed: boolean;
+            guidance?: components["schemas"]["AgentGuidance"];
+            reason?: string;
+            violations?: string[] | null;
+        };
         ListAllFactsResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListAllFactsResponse.json
+             * @example /api/v1/schemas/ListAllFactsResponse.json
              */
             readonly $schema?: string;
             facts: components["schemas"]["StoredFact"][] | null;
             /** Format: int64 */
             total: number;
         };
+        ListApprovalsResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListApprovalsResponse.json
+             */
+            readonly $schema?: string;
+            items: components["schemas"]["ApprovalItemBody"][] | null;
+            /** Format: int64 */
+            pending_count: number;
+        };
+        ListBYOKKeysOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListBYOKKeysOutputBody.json
+             */
+            readonly $schema?: string;
+            keys: components["schemas"]["BYOKKeyResponse"][] | null;
+        };
+        ListBuiltinAgentSessionsResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListBuiltinAgentSessionsResponse.json
+             */
+            readonly $schema?: string;
+            sessions: components["schemas"]["SessionBody"][] | null;
+        };
+        ListBuiltinAgentsResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListBuiltinAgentsResponse.json
+             */
+            readonly $schema?: string;
+            agents: components["schemas"]["CatalogEntry"][] | null;
+        };
+        ListChannelsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListChannelsOutputBody.json
+             */
+            readonly $schema?: string;
+            channels: components["schemas"]["ChannelDTO"][] | null;
+        };
         ListComposioAuditOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListComposioAuditOutputBody.json
+             * @example /api/v1/schemas/ListComposioAuditOutputBody.json
              */
             readonly $schema?: string;
             entries: components["schemas"]["ActionLogEntry"][] | null;
@@ -8575,7 +12816,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListComposioAvailableActionsOutputBody.json
+             * @example /api/v1/schemas/ListComposioAvailableActionsOutputBody.json
              */
             readonly $schema?: string;
             apps: components["schemas"]["AvailableActionsApp"][] | null;
@@ -8584,7 +12825,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListComposioConnectionsOutputBody.json
+             * @example /api/v1/schemas/ListComposioConnectionsOutputBody.json
              */
             readonly $schema?: string;
             connections: components["schemas"]["Connection"][] | null;
@@ -8593,7 +12834,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListConversationMessagesOutputBody.json
+             * @example /api/v1/schemas/ListConversationMessagesOutputBody.json
              */
             readonly $schema?: string;
             has_more: boolean;
@@ -8605,7 +12846,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListConversationsOutputBody.json
+             * @example /api/v1/schemas/ListConversationsOutputBody.json
              */
             readonly $schema?: string;
             conversations: components["schemas"]["ConversationBody"][] | null;
@@ -8615,11 +12856,20 @@ export interface components {
             /** Format: int64 */
             total: number;
         };
+        ListCustomAgentsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListCustomAgentsOutputBody.json
+             */
+            readonly $schema?: string;
+            agents: components["schemas"]["CustomAgentDTO"][] | null;
+        };
         ListCustomStatesOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListCustomStatesOutputBody.json
+             * @example /api/v1/schemas/ListCustomStatesOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of custom states */
@@ -8629,7 +12879,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListCustomToolsOutputBody.json
+             * @example /api/v1/schemas/ListCustomToolsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Developer-defined custom tools */
@@ -8639,7 +12889,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListEnabledSkillsOutputBody.json
+             * @example /api/v1/schemas/ListEnabledSkillsOutputBody.json
              */
             readonly $schema?: string;
             skills: string[] | null;
@@ -8648,17 +12898,27 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListEvalTemplatesOutputBody.json
+             * @example /api/v1/schemas/ListEvalTemplatesOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of eval templates */
             templates: components["schemas"]["EvalTemplate"][] | null;
         };
+        ListEventsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListEventsOutputBody.json
+             */
+            readonly $schema?: string;
+            events: components["schemas"]["StoredEvent"][] | null;
+            next_cursor?: string;
+        };
         ListFactsResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListFactsResponse.json
+             * @example /api/v1/schemas/ListFactsResponse.json
              */
             readonly $schema?: string;
             facts: components["schemas"]["StoredFact"][] | null;
@@ -8670,7 +12930,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListImportJobUsersOutputBody.json
+             * @example /api/v1/schemas/ListImportJobUsersOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -8685,7 +12945,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListImportJobsOutputBody.json
+             * @example /api/v1/schemas/ListImportJobsOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -8700,45 +12960,122 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListInstancesOutputBody.json
+             * @example /api/v1/schemas/ListInstancesOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of agent instances */
             instances: components["schemas"]["AgentInstance"][] | null;
         };
+        ListJobsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListJobsOutputBody.json
+             */
+            readonly $schema?: string;
+            jobs: components["schemas"]["JobDTO"][] | null;
+            next_cursor?: string;
+        };
+        ListLeadAssignmentsResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListLeadAssignmentsResponse.json
+             */
+            readonly $schema?: string;
+            assignments: components["schemas"]["LeadAssignmentBody"][] | null;
+        };
+        ListLeadEnrichmentJobsResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListLeadEnrichmentJobsResponse.json
+             */
+            readonly $schema?: string;
+            jobs: components["schemas"]["EnrichJobListItem"][] | null;
+        };
         ListMCPCatalogOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListMCPCatalogOutputBody.json
+             * @example /api/v1/schemas/ListMCPCatalogOutputBody.json
              */
             readonly $schema?: string;
             /** @description Catalog entries */
             entries: components["schemas"]["MCPCatalogEntry"][] | null;
         };
+        ListPermanentRoutesResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListPermanentRoutesResponse.json
+             */
+            readonly $schema?: string;
+            routes: components["schemas"]["PermanentRouteBody"][] | null;
+            /** Format: int64 */
+            total: number;
+        };
+        ListPipelinesOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListPipelinesOutputBody.json
+             */
+            readonly $schema?: string;
+            pipelines: components["schemas"]["PipelineDTO"][] | null;
+        };
+        ListProjectDepthScoresResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListProjectDepthScoresResponse.json
+             */
+            readonly $schema?: string;
+            scores: components["schemas"]["DepthBody"][] | null;
+            /** Format: int64 */
+            total: number;
+        };
         ListProjectSkillsOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListProjectSkillsOutputBody.json
+             * @example /api/v1/schemas/ListProjectSkillsOutputBody.json
              */
             readonly $schema?: string;
             skills: components["schemas"]["Skill"][] | null;
+        };
+        ListRunsOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListRunsOutputBody.json
+             */
+            readonly $schema?: string;
+            runs: components["schemas"]["PipelineRun"][] | null;
         };
         ListSchedulesOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListSchedulesOutputBody.json
+             * @example /api/v1/schemas/ListSchedulesOutputBody.json
              */
             readonly $schema?: string;
             schedules: components["schemas"]["ScheduleDTO"][] | null;
+        };
+        ListTenantDomainsResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ListTenantDomainsResponse.json
+             */
+            readonly $schema?: string;
+            domains: components["schemas"]["DomainBody"][] | null;
         };
         ListUserConversationsOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListUserConversationsOutputBody.json
+             * @example /api/v1/schemas/ListUserConversationsOutputBody.json
              */
             readonly $schema?: string;
             messages: components["schemas"]["ConversationMessage"][] | null;
@@ -8748,7 +13085,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListUserPersonasOutputBody.json
+             * @example /api/v1/schemas/ListUserPersonasOutputBody.json
              */
             readonly $schema?: string;
             /** @description Personas owned by the caller's tenant (auto-seeded with defaults) */
@@ -8758,7 +13095,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListVoicesResponse.json
+             * @example /api/v1/schemas/ListVoicesResponse.json
              */
             readonly $schema?: string;
             voices: components["schemas"]["VoiceInfo"][] | null;
@@ -8767,7 +13104,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListWebhooksOutputBody.json
+             * @example /api/v1/schemas/ListWebhooksOutputBody.json
              */
             readonly $schema?: string;
             /** @description List of registered webhooks */
@@ -8777,7 +13114,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListWisdomAttributedOutputBody.json
+             * @example /api/v1/schemas/ListWisdomAttributedOutputBody.json
              */
             readonly $schema?: string;
             facts: components["schemas"]["AttributedFact"][] | null;
@@ -8786,7 +13123,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListWisdomAuditOutputBody.json
+             * @example /api/v1/schemas/ListWisdomAuditOutputBody.json
              */
             readonly $schema?: string;
             entries: components["schemas"]["DisclosureEntry"][] | null;
@@ -8795,7 +13132,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ListWisdomRelationsOutputBody.json
+             * @example /api/v1/schemas/ListWisdomRelationsOutputBody.json
              */
             readonly $schema?: string;
             relations: components["schemas"]["AttributedRelation"][] | null;
@@ -8810,6 +13147,69 @@ export interface components {
             content: string;
             name: string;
             when_to_use?: string;
+        };
+        LoggedTuple: {
+            action_id: string;
+            context?: {
+                [key: string]: unknown;
+            };
+            /** Format: double */
+            propensity: number;
+            /** Format: double */
+            reward: number;
+        };
+        LookalikeProfileBody: {
+            company?: string;
+            industry?: string;
+            location?: string;
+            notes?: string;
+            role?: string;
+        };
+        LookalikeRankItem: {
+            lead_ref: string;
+            /** Format: double */
+            lookalike_score: number;
+        };
+        LookalikeRankResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/LookalikeRankResponse.json
+             */
+            readonly $schema?: string;
+            items: components["schemas"]["LookalikeRankItem"][] | null;
+        };
+        LookalikeScoreBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/LookalikeScoreBody.json
+             */
+            readonly $schema?: string;
+            /** @description Score an existing lead by its lead_outcomes lead_ref — looks up its cached enrichment dossier. Mutually exclusive with profile. */
+            lead_ref?: string;
+            /** @description Score an explicit profile directly. Mutually exclusive with lead_ref. */
+            profile?: components["schemas"]["LookalikeProfileBody"];
+        };
+        LookalikeScoreResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/LookalikeScoreResponse.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: int64
+             * @description Number of won profiles that contributed to the centroid this request scored against.
+             */
+            centroid_won_profiles: number;
+            /**
+             * Format: double
+             * @description Cosine similarity to the project's won-deal centroid, mapped to [0,1].
+             */
+            lookalike_score: number;
+            /** @description True when the score came from a lead_ref's cached enrichment dossier; false when an explicit profile was supplied. */
+            used_cached_dossier: boolean;
         };
         MCPCatalogAuth: {
             /** @description sm:// reference (read only) */
@@ -8832,7 +13232,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/MCPCatalogCreateBody.json
+             * @example /api/v1/schemas/MCPCatalogCreateBody.json
              */
             readonly $schema?: string;
             auth: components["schemas"]["MCPCatalogAuth"];
@@ -8850,7 +13250,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/MCPCatalogEntry.json
+             * @example /api/v1/schemas/MCPCatalogEntry.json
              */
             readonly $schema?: string;
             auth: components["schemas"]["MCPCatalogAuth"];
@@ -8867,7 +13267,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/MCPCatalogToolsResponse.json
+             * @example /api/v1/schemas/MCPCatalogToolsResponse.json
              */
             readonly $schema?: string;
             tools: components["schemas"]["MCPToolDTO"][] | null;
@@ -8876,7 +13276,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/MCPCatalogUpdateBody.json
+             * @example /api/v1/schemas/MCPCatalogUpdateBody.json
              */
             readonly $schema?: string;
             auth?: components["schemas"]["MCPCatalogAuth"];
@@ -8889,7 +13289,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/MCPCatalogUsagesResponse.json
+             * @example /api/v1/schemas/MCPCatalogUsagesResponse.json
              */
             readonly $schema?: string;
             agent_ids: string[] | null;
@@ -8907,7 +13307,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/MCPProbeResponseBody.json
+             * @example /api/v1/schemas/MCPProbeResponseBody.json
              */
             readonly $schema?: string;
             error?: string;
@@ -8924,11 +13324,23 @@ export interface components {
             };
             name: string;
         };
+        ManifestVersionOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ManifestVersionOutputBody.json
+             */
+            readonly $schema?: string;
+            manifest: unknown;
+            tenant_id: string;
+            /** Format: int64 */
+            version: number;
+        };
         MeResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/MeResponse.json
+             * @example /api/v1/schemas/MeResponse.json
              */
             readonly $schema?: string;
             email: string;
@@ -8974,7 +13386,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/MemoryResponse.json
+             * @example /api/v1/schemas/MemoryResponse.json
              */
             readonly $schema?: string;
             contents?: {
@@ -8997,11 +13409,78 @@ export interface components {
             topics?: string[] | null;
             user_id?: string;
         };
+        MoatIndexBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/MoatIndexBody.json
+             */
+            readonly $schema?: string;
+            comparison: components["schemas"]["MoatIndexComparison"];
+            components: components["schemas"]["MoatIndexComponents"];
+            /** Format: double */
+            moat_index: number;
+            /** Format: double */
+            moat_index_delta: number;
+            /** Format: double */
+            moat_index_prev: number;
+        };
+        MoatIndexComparison: {
+            /** Format: double */
+            last_month: number;
+            /** Format: double */
+            last_quarter: number;
+        };
+        MoatIndexComponents: {
+            /** Format: double */
+            breadth: number;
+            /** Format: double */
+            depth_quality: number;
+            /** Format: double */
+            risk: number;
+            /** Format: double */
+            trend: number;
+        };
+        ModelExportOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ModelExportOutputBody.json
+             */
+            readonly $schema?: string;
+            artifact?: unknown;
+            artifact_b64?: string;
+            calibration?: components["schemas"]["ArtifactCalibration"];
+            /** Format: date-time */
+            exported_at: string;
+            feature_schema: string[] | null;
+            format: string;
+            served_from?: string;
+            sha256: string;
+            use_case: string;
+            /** Format: int64 */
+            version: number;
+        };
+        ModelView: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ModelView.json
+             */
+            readonly $schema?: string;
+            metrics?: components["schemas"]["EpochMetric"];
+            /** Format: int64 */
+            n: number;
+            /** Format: int64 */
+            pending: number;
+            trained: boolean;
+            weights: components["schemas"]["FeatureWeight"][] | null;
+        };
         MoodAggregateResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/MoodAggregateResponse.json
+             * @example /api/v1/schemas/MoodAggregateResponse.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -9044,7 +13523,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/MoodHistoryResponse.json
+             * @example /api/v1/schemas/MoodHistoryResponse.json
              */
             readonly $schema?: string;
             entries: components["schemas"]["MoodHistoryEntry"][] | null;
@@ -9053,7 +13532,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/MoodResponse.json
+             * @example /api/v1/schemas/MoodResponse.json
              */
             readonly $schema?: string;
             mood: components["schemas"]["MoodState"];
@@ -9095,11 +13574,37 @@ export interface components {
             /** Format: double */
             valence: number;
         };
+        NBAResult: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/NBAResult.json
+             */
+            readonly $schema?: string;
+            action_values: components["schemas"]["ActionValue"][] | null;
+            recommended_action: string;
+            /** Format: double */
+            score_0_100: number;
+            /** Format: double */
+            value: number;
+        };
+        NbaInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/NbaInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Lead facts (financing/budget/timeline known flags, engagement, value_tier, band, touchpoints, elapsed). */
+            features: {
+                [key: string]: unknown;
+            };
+        };
         Node: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/Node.json
+             * @example /api/v1/schemas/Node.json
              */
             readonly $schema?: string;
             AgentID: string;
@@ -9138,11 +13643,111 @@ export interface components {
             status: string;
             user_id?: string;
         };
+        OPEResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/OPEResponse.json
+             */
+            readonly $schema?: string;
+            /** Format: double */
+            ci_high: number;
+            /** Format: double */
+            ci_low: number;
+            /** Format: double */
+            dr: number;
+            /** Format: double */
+            ess: number;
+            estimator_ci: string;
+            /** Format: double */
+            ips: number;
+            /** Format: int64 */
+            n: number;
+            /** Format: double */
+            snips: number;
+        };
+        Objection: {
+            cohort: string;
+            frequency_hint: string;
+            objection: string;
+        };
+        OfferLeadAssignmentRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/OfferLeadAssignmentRequest.json
+             */
+            readonly $schema?: string;
+            /** @description Eligible rep user ids to distribute among */
+            candidates: string[] | null;
+            /** @description Optional context/ML signals captured at offer time */
+            features?: {
+                [key: string]: unknown;
+            };
+            /** @description Caller-owned external key for the unit of work (CRM lead id, ticket id, shift id, ...) */
+            lead_ref: string;
+            /** @description Distribution policy: round_robin (default) or load_balanced */
+            policy?: string;
+            /**
+             * Format: int64
+             * @description Offer window in seconds before re-offer to the next candidate (default 900)
+             */
+            sla_seconds?: number;
+        };
+        OfferLeadAssignmentResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/OfferLeadAssignmentResponse.json
+             */
+            readonly $schema?: string;
+            assignment: components["schemas"]["LeadAssignmentBody"];
+            /** @description True when the lead already had an active assignment; assignment is then the pre-existing one */
+            deduplicated: boolean;
+        };
+        OfferSuggestBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/OfferSuggestBody.json
+             */
+            readonly $schema?: string;
+            /** @description Stable contact/lead identifier — report the outcome via POST /builtin-agents/ml/offer_optimization/feedback with the returned action_id so the bandit learns the margin-weighted reward. */
+            contact_id: string;
+            /** @description Optional bandit context features (e.g. this contact's engagement signals, deal stage). */
+            context?: {
+                [key: string]: unknown;
+            };
+        };
+        OfferSuggestResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/OfferSuggestResponse.json
+             */
+            readonly $schema?: string;
+            gated: boolean;
+            /** Format: int64 */
+            have?: number;
+            /** Format: int64 */
+            needed?: number;
+            suggestion: components["schemas"]["OfferSuggestionBody"];
+        };
+        OfferSuggestionBody: {
+            action_id: string;
+            channel?: string;
+            /** Format: double */
+            cost_hint?: number;
+            intrusiveness?: string;
+            label?: string;
+            /** Format: double */
+            propensity: number;
+        };
         OmnichannelConversationDTO: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/OmnichannelConversationDTO.json
+             * @example /api/v1/schemas/OmnichannelConversationDTO.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -9186,11 +13791,33 @@ export interface components {
             role: string;
             session_id?: string;
         };
+        OnboardProjectVerticalRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/OnboardProjectVerticalRequest.json
+             */
+            readonly $schema?: string;
+            /** @description When true, seed per-vertical starter guidance for agents without active guidance. */
+            seed_guidance?: boolean;
+            /** @description Vertical slug (required): real_estate | insurance | auto. */
+            vertical: string;
+        };
+        OnboardSummary: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/OnboardSummary.json
+             */
+            readonly $schema?: string;
+            seeded_agents: string[] | null;
+            vertical_config: components["schemas"]["VerticalConfig"];
+        };
         OrgBillingCheckoutInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/OrgBillingCheckoutInputBody.json
+             * @example /api/v1/schemas/OrgBillingCheckoutInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -9205,7 +13832,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/OrgBillingSubscribeInputBody.json
+             * @example /api/v1/schemas/OrgBillingSubscribeInputBody.json
              */
             readonly $schema?: string;
             /** @description Enterprise contract UUID to subscribe to */
@@ -9215,7 +13842,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/OrgBillingURLBody.json
+             * @example /api/v1/schemas/OrgBillingURLBody.json
              */
             readonly $schema?: string;
             url: string;
@@ -9224,7 +13851,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/OrgBillingVoucherInputBody.json
+             * @example /api/v1/schemas/OrgBillingVoucherInputBody.json
              */
             readonly $schema?: string;
             /** @description Voucher code to redeem */
@@ -9250,7 +13877,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/OrgUsageSummaryBody.json
+             * @example /api/v1/schemas/OrgUsageSummaryBody.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -9280,11 +13907,21 @@ export interface components {
             /** Format: int64 */
             totalTokens: number;
         };
+        OverridePermanentRouteRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/OverridePermanentRouteRequest.json
+             */
+            readonly $schema?: string;
+            /** @description The override agent ID */
+            agent_id: string;
+        };
         PaginatedAgentsResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/PaginatedAgentsResponse.json
+             * @example /api/v1/schemas/PaginatedAgentsResponse.json
              */
             readonly $schema?: string;
             has_more: boolean;
@@ -9297,7 +13934,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/PaginatedDeliveryAttemptsResponse.json
+             * @example /api/v1/schemas/PaginatedDeliveryAttemptsResponse.json
              */
             readonly $schema?: string;
             attempts: components["schemas"]["WebhookDeliveryAttempt"][] | null;
@@ -9308,7 +13945,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/PaginatedEvalRunsResponse.json
+             * @example /api/v1/schemas/PaginatedEvalRunsResponse.json
              */
             readonly $schema?: string;
             has_more: boolean;
@@ -9319,7 +13956,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/PaginatedProjectsResponse.json
+             * @example /api/v1/schemas/PaginatedProjectsResponse.json
              */
             readonly $schema?: string;
             has_more: boolean;
@@ -9330,7 +13967,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/PatchChannelConnectionInputBody.json
+             * @example /api/v1/schemas/PatchChannelConnectionInputBody.json
              */
             readonly $schema?: string;
             default_agent_id?: string;
@@ -9341,7 +13978,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/PatchConversationInputBody.json
+             * @example /api/v1/schemas/PatchConversationInputBody.json
              */
             readonly $schema?: string;
             /** @description Reassign to agent id */
@@ -9353,7 +13990,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/PatchScheduleInputBody.json
+             * @example /api/v1/schemas/PatchScheduleInputBody.json
              */
             readonly $schema?: string;
             active_window?: unknown;
@@ -9368,6 +14005,24 @@ export interface components {
         PendingCapability: {
             capability: string;
             context?: string;
+        };
+        PermanentRouteBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PermanentRouteBody.json
+             */
+            readonly $schema?: string;
+            agent_id: string;
+            /** Format: date-time */
+            classified_at: string;
+            contact_name: string;
+            id: string;
+            overridden: boolean;
+            override_agent_id: string;
+            project_id: string;
+            tier: string;
+            user_id: string;
         };
         PersonalityDelta: {
             /** Format: double */
@@ -9450,7 +14105,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/PersonalityResponse.json
+             * @example /api/v1/schemas/PersonalityResponse.json
              */
             readonly $schema?: string;
             evolution: components["schemas"]["PersonalityDelta"][] | null;
@@ -9465,6 +14120,158 @@ export interface components {
             timestamp?: string;
             trait_name: string;
             trigger_types: string[] | null;
+        };
+        Phrase: {
+            phrasing: string;
+            situation: string;
+        };
+        PipelineDTO: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PipelineDTO.json
+             */
+            readonly $schema?: string;
+            /** Format: date-time */
+            created_at: string;
+            description?: string;
+            name: string;
+            pipeline_id: string;
+            project_id: string;
+            steps: components["schemas"]["PipelineStep"][] | null;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        PipelineFlowBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PipelineFlowBody.json
+             */
+            readonly $schema?: string;
+            stages: components["schemas"]["PipelineStage"][] | null;
+        };
+        PipelineRun: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PipelineRun.json
+             */
+            readonly $schema?: string;
+            completed: boolean;
+            /** Format: date-time */
+            created_at: string;
+            error?: string;
+            final_findings: unknown;
+            pipeline_id: string;
+            requested_by?: string;
+            run_id: string;
+            status: string;
+            steps: components["schemas"]["PipelineStepResult"][] | null;
+            /** Format: double */
+            total_cost_usd: number;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        PipelineStage: {
+            /** Format: int64 */
+            count: number;
+            stage: string;
+        };
+        PipelineStep: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PipelineStep.json
+             */
+            readonly $schema?: string;
+            kind?: string;
+            slug: string;
+            title?: string;
+            write_kb?: boolean;
+        };
+        PipelineStepResult: {
+            /** Format: double */
+            cost_usd: number;
+            error?: string;
+            findings: unknown;
+            kb_write?: string;
+            kb_write_error?: string;
+            slug: string;
+            summary?: string;
+            title?: string;
+        };
+        PipelineWriteBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PipelineWriteBody.json
+             */
+            readonly $schema?: string;
+            description?: string;
+            name: string;
+            /** @description Ordered agent steps (each {slug, title?}); slug is a built-in or custom agent */
+            steps?: components["schemas"]["PipelineStep"][] | null;
+        };
+        PolicyEntry: {
+            archetype: string;
+            recommended_action: string;
+            /** Format: double */
+            value: number;
+        };
+        PolicyView: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PolicyView.json
+             */
+            readonly $schema?: string;
+            actions: string[] | null;
+            /** Format: double */
+            avg_return: number;
+            /** Format: int64 */
+            episodes: number;
+            features: string[] | null;
+            policy: components["schemas"]["PolicyEntry"][] | null;
+            trained: boolean;
+        };
+        PredictMLExpectedValueRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PredictMLExpectedValueRequest.json
+             */
+            readonly $schema?: string;
+            features: {
+                [key: string]: unknown;
+            };
+        };
+        PredictMLScoringRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PredictMLScoringRequest.json
+             */
+            readonly $schema?: string;
+            features: {
+                [key: string]: unknown;
+            };
+        };
+        PredictResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PredictResponse.json
+             */
+            readonly $schema?: string;
+            calibration_method: string;
+            /** Format: int64 */
+            model_version: number;
+            /** Format: double */
+            raw: number;
+            /** Format: double */
+            score: number;
+            served_from: string;
         };
         Preferences: {
             conversation_pace?: string;
@@ -9543,7 +14350,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/PrimeUserRequest.json
+             * @example /api/v1/schemas/PrimeUserRequest.json
              */
             readonly $schema?: string;
             /** @description Raw content blocks for LLM fact extraction. */
@@ -9578,7 +14385,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ProactiveNotificationsResponse.json
+             * @example /api/v1/schemas/ProactiveNotificationsResponse.json
              */
             readonly $schema?: string;
             notifications: components["schemas"]["ProactiveNotificationEntry"][] | null;
@@ -9587,7 +14394,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ProcessInputBody.json
+             * @example /api/v1/schemas/ProcessInputBody.json
              */
             readonly $schema?: string;
             /** @description Agent instance scope */
@@ -9614,7 +14421,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ProcessResponse.json
+             * @example /api/v1/schemas/ProcessResponse.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -9644,7 +14451,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/Project.json
+             * @example /api/v1/schemas/Project.json
              */
             readonly $schema?: string;
             business_name: string;
@@ -9679,7 +14486,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ProjectNotificationsListOutputBody.json
+             * @example /api/v1/schemas/ProjectNotificationsListOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -9712,7 +14519,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ProjectSkillBody.json
+             * @example /api/v1/schemas/ProjectSkillBody.json
              */
             readonly $schema?: string;
             /** @description Full markdown playbook body */
@@ -9730,11 +14537,95 @@ export interface components {
             eff_date: string;
             source?: string;
         };
+        PushConversationMessageInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PushConversationMessageInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Agent UUID or name authoring the message */
+            agent_id: string;
+            /**
+             * @description Restrict delivery to one channel; defaults to the first identity found (whatsapp, messenger, instagram)
+             * @enum {string}
+             */
+            channel_type?: "whatsapp" | "messenger" | "instagram";
+            /** @description Pin the outbound channel connection UUID; defaults to the conversation's or the project's connection for the channel */
+            connection_id?: string;
+            /** @description Message text */
+            content: string;
+            /** @description Project UUID; defaults to authenticated project/default project */
+            project_id?: string;
+            /** @description Platform user id to deliver to (channel identity owner) */
+            user_id: string;
+        };
+        PushConversationMessageOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PushConversationMessageOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Provider message id */
+            channel_message_id?: string;
+            /** @description Channel the message was delivered on */
+            channel_type: string;
+            /** @description Durable conversation the message was recorded under */
+            conversation_id?: string;
+            /** @description Provider delivery status (sent|delivered|read|failed) */
+            delivery_status: string;
+            /** @description Channel-native recipient id (e.g. WhatsApp phone) */
+            external_id: string;
+            /** @description Conversation session the outbound turn was recorded under */
+            session_id?: string;
+            /** @description True when the 24h window was closed and the send used the connection's approved re-engagement template */
+            used_template: boolean;
+        };
+        PutBYOKKeyInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/PutBYOKKeyInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Plaintext API key from the provider. Stored encrypted; never returned. */
+            api_key: string;
+        };
+        QueryResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/QueryResponse.json
+             */
+            readonly $schema?: string;
+            /** Format: date-time */
+            as_of: string;
+            items: components["schemas"]["ResultItem"][] | null;
+            knowledge: components["schemas"]["KnowledgeHit"][] | null;
+        };
+        RLTrainResult: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/RLTrainResult.json
+             */
+            readonly $schema?: string;
+            algo?: string;
+            /** Format: int64 */
+            episodes: number;
+            /** Format: double */
+            final_avg_return: number;
+            /** Format: double */
+            kl_divergence?: number;
+            policy: components["schemas"]["PolicyEntry"][] | null;
+            return_history: number[] | null;
+        };
         RecentShiftsResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/RecentShiftsResponse.json
+             * @example /api/v1/schemas/RecentShiftsResponse.json
              */
             readonly $schema?: string;
             shifts: components["schemas"]["PersonalityShift"][] | null;
@@ -9747,11 +14638,77 @@ export interface components {
             /** @description RFC3339 UTC timestamp of when /process received the turn */
             timestamp: string;
         };
+        Recommendation: {
+            detail: string;
+            expected_impact: string;
+            title: string;
+        };
+        RecordMLFeedbackRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/RecordMLFeedbackRequest.json
+             */
+            readonly $schema?: string;
+            action_features?: {
+                [key: string]: unknown;
+            };
+            action_id?: string;
+            context?: {
+                [key: string]: unknown;
+            };
+            converted?: boolean;
+            /** @description Alternative to converted/reward: a realized event name matched against the tenant manifest's objective.success_events. */
+            event?: string;
+            features?: {
+                [key: string]: unknown;
+            };
+            note?: string;
+            /** Format: int64 */
+            predicted_score?: number;
+            /** Format: double */
+            propensity?: number;
+            /** Format: double */
+            reward?: number;
+            subject_id?: string;
+            /**
+             * Format: double
+             * @description Realized deal value for this outcome (P1 EV ranking / deal_value regression label). Wins over deriving it from the tenant manifest's objective.value_field.
+             */
+            value?: number;
+        };
+        RecordOutcomeInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/RecordOutcomeInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Lead features used to derive the calibration segment (budget, financing, timeline, …) */
+            features?: {
+                [key: string]: unknown;
+            };
+            /** @description Stable lead identifier (primed user ID, CRM ref, …) */
+            lead_ref: string;
+            /** @description Optional human note */
+            note?: string;
+            /** @description Realized outcome, e.g. won | lost | site_visit | reserved */
+            outcome: string;
+            /** @description Band the agent assigned: Hot | Warm | Nurture */
+            predicted_band: string;
+            /**
+             * Format: int64
+             * @description Score the agent assigned at qualification time (0–100)
+             */
+            predicted_score: number;
+            /** @description Optional free-text signal note for the outcome */
+            score_signal?: string;
+        };
         RedeemVoucherResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/RedeemVoucherResponse.json
+             * @example /api/v1/schemas/RedeemVoucherResponse.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -9765,7 +14722,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/RegenerateAvatarInputBody.json
+             * @example /api/v1/schemas/RegenerateAvatarInputBody.json
              */
             readonly $schema?: string;
             /** @description Avatar art style override */
@@ -9775,7 +14732,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/RegenerateAvatarOutputBody.json
+             * @example /api/v1/schemas/RegenerateAvatarOutputBody.json
              */
             readonly $schema?: string;
             /** @description Public URL of generated avatar */
@@ -9803,7 +14760,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/RelationshipsResponse.json
+             * @example /api/v1/schemas/RelationshipsResponse.json
              */
             readonly $schema?: string;
             relationships: components["schemas"]["RelationshipEntry"][] | null;
@@ -9812,7 +14769,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ReplaceWisdomAttributedInputBody.json
+             * @example /api/v1/schemas/ReplaceWisdomAttributedInputBody.json
              */
             readonly $schema?: string;
             /** Format: double */
@@ -9829,16 +14786,24 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ReplaceWisdomAttributedOutputBody.json
+             * @example /api/v1/schemas/ReplaceWisdomAttributedOutputBody.json
              */
             readonly $schema?: string;
             fact: components["schemas"]["AttributedFact"];
+        };
+        Report: {
+            caveats: string[] | null;
+            objection_taxonomy: components["schemas"]["Objection"][] | null;
+            phrases_that_lost: components["schemas"]["Phrase"][] | null;
+            phrases_that_worked: components["schemas"]["Phrase"][] | null;
+            recommendations: components["schemas"]["Recommendation"][] | null;
+            stall_points: string[] | null;
         };
         ResetInstanceOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ResetInstanceOutputBody.json
+             * @example /api/v1/schemas/ResetInstanceOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -9854,11 +14819,21 @@ export interface components {
              */
             nodes_deleted: number;
         };
+        ResetLearningResp: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ResetLearningResp.json
+             */
+            readonly $schema?: string;
+            /** @description Resources successfully cleared (subset of rl_policy, score_model, lead_outcomes, agent_guidance). */
+            reset: string[] | null;
+        };
         ResetMemoryResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ResetMemoryResponse.json
+             * @example /api/v1/schemas/ResetMemoryResponse.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -9874,20 +14849,83 @@ export interface components {
             status: string;
             success: boolean;
         };
+        ResolveApprovalRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ResolveApprovalRequest.json
+             */
+            readonly $schema?: string;
+            /** @description approve, reject, or take_over */
+            action: string;
+        };
+        ResultItem: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/ResultItem.json
+             */
+            readonly $schema?: string;
+            availability: components["schemas"]["ItemAvailability"];
+            item: components["schemas"]["CatalogItem"];
+            kb_snippets?: string[] | null;
+        };
+        RevivalItemBody: {
+            agent_id: string;
+            contact_id: string;
+            /** Format: double */
+            dormancy_days: number;
+            /** Format: double */
+            expected_value?: number;
+            reason: string;
+            /** Format: double */
+            revival_score: number;
+        };
+        RevivalQueueBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/RevivalQueueBody.json
+             */
+            readonly $schema?: string;
+            computed_at: string;
+            items: components["schemas"]["RevivalItemBody"][] | null;
+        };
         RevokeAPIKeyOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/RevokeAPIKeyOutputBody.json
+             * @example /api/v1/schemas/RevokeAPIKeyOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
+        };
+        RlTrainInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/RlTrainInputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: int64
+             * @description Training episodes (default 3000, max 50000)
+             */
+            episodes?: number;
+        };
+        RootEntityStruct: {
+            /** @description Root entity key fields per schema entity_types[].key_fields. */
+            key: {
+                [key: string]: unknown;
+            };
+            /** @description Root entity type from the active schema. */
+            type: string;
         };
         RotateSigningSecretOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/RotateSigningSecretOutputBody.json
+             * @example /api/v1/schemas/RotateSigningSecretOutputBody.json
              */
             readonly $schema?: string;
             /** @description The new HMAC signing secret */
@@ -9899,7 +14937,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/RunEvalRequest.json
+             * @example /api/v1/schemas/RunEvalRequest.json
              */
             readonly $schema?: string;
             /** @description Optional adaptation-eval template UUID; defaults to the tenant's first adaptation template */
@@ -9919,11 +14957,25 @@ export interface components {
             /** @description Synthetic user persona */
             user_persona?: components["schemas"]["UserPersona"];
         };
+        RunPipelineInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/RunPipelineInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Initial input passed to the first step */
+            input?: {
+                [key: string]: unknown;
+            };
+            /** @description User id to notify with results on completion (research pipelines). Callers with a bound end-user identity may only name themselves; API-key callers (trusted tenant backends) may name any of their reps. */
+            requested_by?: string;
+        };
         RunningBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/RunningBody.json
+             * @example /api/v1/schemas/RunningBody.json
              */
             readonly $schema?: string;
             /** @description Eval run UUID — stream progress via GET /eval-runs/{runId}/events */
@@ -9935,7 +14987,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ScheduleDTO.json
+             * @example /api/v1/schemas/ScheduleDTO.json
              */
             readonly $schema?: string;
             active_window?: string;
@@ -9958,7 +15010,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ScheduleWakeupInputBody.json
+             * @example /api/v1/schemas/ScheduleWakeupInputBody.json
              */
             readonly $schema?: string;
             /** @description Type of check to perform on wakeup */
@@ -9985,7 +15037,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ScheduleWakeupOutputBody.json
+             * @example /api/v1/schemas/ScheduleWakeupOutputBody.json
              */
             readonly $schema?: string;
             /** @description ISO 8601 timestamp when the wakeup is scheduled */
@@ -9997,7 +15049,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/SearchResponse.json
+             * @example /api/v1/schemas/SearchResponse.json
              */
             readonly $schema?: string;
             results: components["schemas"]["SearchResult"][] | null;
@@ -10057,11 +15109,26 @@ export interface components {
             /** Format: double */
             importance: number;
         };
+        SegmentCal: {
+            /** Format: int64 */
+            adjust: number;
+            /** Format: int64 */
+            conversions: number;
+            /** Format: int64 */
+            n: number;
+            /** Format: double */
+            p_hat: number;
+            segment: string;
+        };
+        SendBucket: {
+            day_type: string;
+            daypart: string;
+        };
         SendConversationMessageInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/SendConversationMessageInputBody.json
+             * @example /api/v1/schemas/SendConversationMessageInputBody.json
              */
             readonly $schema?: string;
             attachments?: unknown;
@@ -10080,7 +15147,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ServiceUsageSummary.json
+             * @example /api/v1/schemas/ServiceUsageSummary.json
              */
             readonly $schema?: string;
             byOperation: components["schemas"]["ServiceUsageByOp"][] | null;
@@ -10090,11 +15157,56 @@ export interface components {
             /** Format: int64 */
             totalEvents: number;
         };
+        SessionBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/SessionBody.json
+             */
+            readonly $schema?: string;
+            agent: string;
+            byok: boolean;
+            /** Format: double */
+            cost_usd: number;
+            /** Format: date-time */
+            created_at: string;
+            id: string;
+            model: string;
+            status: string;
+            title: string;
+        };
         SessionConfig: {
             name: string;
             /** Format: int64 */
             time_gap_hours: number;
             turns: components["schemas"]["Turn"][] | null;
+        };
+        SessionEndStatusOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/SessionEndStatusOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Echo of the resolved agent_id. */
+            agent_id: string;
+            /**
+             * Format: int64
+             * @description 1-based attempt counter (bumps on JetStream redeliveries).
+             */
+            attempt?: number;
+            /** @description RFC3339 timestamp the handler saw the enqueue. */
+            enqueued_at: string;
+            /** @description Populated on state=failed with the dispatch or terminal reason. */
+            error?: string;
+            /** @description Present on terminal states (done/failed). */
+            finished_at?: string;
+            /** @description Echo of the session_id so callers can correlate. */
+            session_id: string;
+            /** @description Present once the worker has picked the message up. */
+            started_at?: string;
+            /** @description One of: pending | processing | done | failed. */
+            state: string;
         };
         SessionMessage: {
             /** @description Non-empty when this message was authored by a human operator */
@@ -10138,16 +15250,35 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/SetAccountConfigOutputBody.json
+             * @example /api/v1/schemas/SetAccountConfigOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
+        };
+        SetAgentLearningEnabledRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/SetAgentLearningEnabledRequest.json
+             */
+            readonly $schema?: string;
+            /** @description true → closed loop enabled (default); false → auto-apply disabled. */
+            enabled: boolean;
+        };
+        SetAgentLearningEnabledResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/SetAgentLearningEnabledResponse.json
+             */
+            readonly $schema?: string;
+            enabled: boolean;
         };
         SetAgentStatusInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/SetAgentStatusInputBody.json
+             * @example /api/v1/schemas/SetAgentStatusInputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the agent should be active */
@@ -10157,18 +15288,27 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/SetAgentStatusOutputBody.json
+             * @example /api/v1/schemas/SetAgentStatusOutputBody.json
              */
             readonly $schema?: string;
             agent_id: string;
             is_active: boolean;
             success: boolean;
         };
+        SetBYOKActiveInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/SetBYOKActiveInputBody.json
+             */
+            readonly $schema?: string;
+            is_active: boolean;
+        };
         SetCustomLLMConfigInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/SetCustomLLMConfigInputBody.json
+             * @example /api/v1/schemas/SetCustomLLMConfigInputBody.json
              */
             readonly $schema?: string;
             /** @description Plaintext API key for the endpoint (encrypted at rest) */
@@ -10186,16 +15326,28 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/SetProjectConfigOutputBody.json
+             * @example /api/v1/schemas/SetProjectConfigOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
+        };
+        SetProjectVerticalRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/SetProjectVerticalRequest.json
+             */
+            readonly $schema?: string;
+            /** @description Optional override merged onto the default config (non-empty fields win). */
+            config?: components["schemas"]["VerticalConfig"];
+            /** @description Vertical slug (real_estate | insurance | auto). */
+            slug: string;
         };
         SetSessionToolsOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/SetSessionToolsOutputBody.json
+             * @example /api/v1/schemas/SetSessionToolsOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the tools were registered successfully */
@@ -10215,7 +15367,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/SignificantMomentsResponse.json
+             * @example /api/v1/schemas/SignificantMomentsResponse.json
              */
             readonly $schema?: string;
             moments: components["schemas"]["SignificantMoment"][] | null;
@@ -10237,11 +15389,24 @@ export interface components {
             /** Format: int64 */
             simulated_duration_hours: number;
         };
+        SimulateMLRoundsRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/SimulateMLRoundsRequest.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            rounds?: number;
+            scenario?: string;
+            /** Format: int64 */
+            seed?: number;
+        };
         SimulateRequest: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/SimulateRequest.json
+             * @example /api/v1/schemas/SimulateRequest.json
              */
             readonly $schema?: string;
             /** @description Simulator configuration (durations, proactivity, consolidation) */
@@ -10257,11 +15422,53 @@ export interface components {
             /** @description Synthetic user persona (defaults to DefaultUserPersona) */
             user_persona?: components["schemas"]["UserPersona"];
         };
+        SimulateRoundPoint: {
+            /** Format: double */
+            auc: number;
+            /** Format: double */
+            ci_high: number;
+            /** Format: double */
+            ci_low: number;
+            /** Format: int64 */
+            n: number;
+            /** Format: double */
+            nba_reward: number;
+            /** Format: double */
+            nba_value: number;
+            /** Format: double */
+            ope_dr: number;
+            /** Format: int64 */
+            round: number;
+        };
+        SimulateRoundsResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/SimulateRoundsResponse.json
+             */
+            readonly $schema?: string;
+            action_labels: {
+                [key: string]: string;
+            };
+            model: unknown;
+            ope: components["schemas"]["SimulateRoundsResponseOPEStruct"];
+            policy: unknown;
+            scenario: string;
+            series: components["schemas"]["SimulateRoundPoint"][] | null;
+        };
+        SimulateRoundsResponseOPEStruct: {
+            /** Format: double */
+            ci_high: number;
+            /** Format: double */
+            ci_low: number;
+            /** Format: double */
+            dr: number;
+        };
         SimulateRunningBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/SimulateRunningBody.json
+             * @example /api/v1/schemas/SimulateRunningBody.json
              */
             readonly $schema?: string;
             /** @description Eval run UUID — stream progress via GET /eval-runs/{runId}/events */
@@ -10273,7 +15480,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/Skill.json
+             * @example /api/v1/schemas/Skill.json
              */
             readonly $schema?: string;
             author: string;
@@ -10296,7 +15503,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/SpeechToTextInputBody.json
+             * @example /api/v1/schemas/SpeechToTextInputBody.json
              */
             readonly $schema?: string;
             /** @description Base64-encoded audio data */
@@ -10306,11 +15513,22 @@ export interface components {
             /** @description Language code for transcription */
             language?: string;
         };
+        StartChatInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/StartChatInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Built-in agent slug */
+            agent: string;
+            title?: string;
+        };
         StartSessionInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/StartSessionInputBody.json
+             * @example /api/v1/schemas/StartSessionInputBody.json
              */
             readonly $schema?: string;
             /** @description Optional agent instance identifier */
@@ -10332,11 +15550,25 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/StartSessionOutputBody.json
+             * @example /api/v1/schemas/StartSessionOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the session was started successfully */
             success: boolean;
+        };
+        Step: {
+            outcome: string;
+            step: string;
+        };
+        StoredEvent: {
+            contact_ref?: string;
+            /** Format: date-time */
+            created_at: string;
+            event_id: string;
+            lead_ref?: string;
+            /** Format: date-time */
+            occurred_at: string;
+            type: string;
         };
         StoredFact: {
             /** Format: double */
@@ -10362,7 +15594,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/Storefront.json
+             * @example /api/v1/schemas/Storefront.json
              */
             readonly $schema?: string;
             accent_color: string;
@@ -10394,7 +15626,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/StorefrontAgent.json
+             * @example /api/v1/schemas/StorefrontAgent.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -10420,7 +15652,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/StorefrontGetOutputBody.json
+             * @example /api/v1/schemas/StorefrontGetOutputBody.json
              */
             readonly $schema?: string;
             slug: string;
@@ -10430,7 +15662,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/StorefrontListAgentsOutputBody.json
+             * @example /api/v1/schemas/StorefrontListAgentsOutputBody.json
              */
             readonly $schema?: string;
             agents: components["schemas"]["StorefrontAgent"][] | null;
@@ -10439,7 +15671,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/StorefrontUpdateInputBody.json
+             * @example /api/v1/schemas/StorefrontUpdateInputBody.json
              */
             readonly $schema?: string;
             /** @description open | code | invite */
@@ -10468,7 +15700,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/StorefrontUpsertAgentInputBody.json
+             * @example /api/v1/schemas/StorefrontUpsertAgentInputBody.json
              */
             readonly $schema?: string;
             /** @description Avatar image URL */
@@ -10487,6 +15719,19 @@ export interface components {
             /** @description URL slug for the agent within the storefront */
             slug?: string;
         };
+        StreamMLRoundsRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/StreamMLRoundsRequest.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            rounds?: number;
+            scenario?: string;
+            /** Format: int64 */
+            seed?: number;
+        };
         StructuredImportSpec: {
             column_mapping: {
                 [key: string]: components["schemas"]["ColumnMappingSpec"];
@@ -10499,7 +15744,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/SummariesResponse.json
+             * @example /api/v1/schemas/SummariesResponse.json
              */
             readonly $schema?: string;
             summaries: components["schemas"]["MemorySummary"][] | null;
@@ -10508,7 +15753,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/SupportTicket.json
+             * @example /api/v1/schemas/SupportTicket.json
              */
             readonly $schema?: string;
             assigned_to?: string;
@@ -10536,7 +15781,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/SupportTicketComment.json
+             * @example /api/v1/schemas/SupportTicketComment.json
              */
             readonly $schema?: string;
             author_email: string;
@@ -10564,7 +15809,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/Tenant.json
+             * @example /api/v1/schemas/Tenant.json
              */
             readonly $schema?: string;
             clerk_org_id?: string;
@@ -10600,7 +15845,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/TenantBillingProfile.json
+             * @example /api/v1/schemas/TenantBillingProfile.json
              */
             readonly $schema?: string;
             billingMode: string;
@@ -10635,7 +15880,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/TestChannelConnectionInputBody.json
+             * @example /api/v1/schemas/TestChannelConnectionInputBody.json
              */
             readonly $schema?: string;
             message: string;
@@ -10645,7 +15890,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/TextToSpeechInputBody.json
+             * @example /api/v1/schemas/TextToSpeechInputBody.json
              */
             readonly $schema?: string;
             /** @description Language code (e.g. en-US) */
@@ -10661,7 +15906,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/TicketDetailResponse.json
+             * @example /api/v1/schemas/TicketDetailResponse.json
              */
             readonly $schema?: string;
             history?: components["schemas"]["SupportTicketHistory"][] | null;
@@ -10671,7 +15916,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/TicketListResponse.json
+             * @example /api/v1/schemas/TicketListResponse.json
              */
             readonly $schema?: string;
             has_more: boolean;
@@ -10693,6 +15938,14 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
         };
+        Tier: {
+            agent_id: string;
+            agent_name: string;
+            criteria: unknown;
+            label: string;
+            name: string;
+            prompt: string;
+        };
         TimeMachineMoodSnapshot: {
             /** Format: double */
             affiliation: number;
@@ -10708,7 +15961,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/TimeMachineResponse.json
+             * @example /api/v1/schemas/TimeMachineResponse.json
              */
             readonly $schema?: string;
             current_personality: components["schemas"]["Big5Assessment"];
@@ -10721,7 +15974,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/TimelineResponse.json
+             * @example /api/v1/schemas/TimelineResponse.json
              */
             readonly $schema?: string;
             sessions: components["schemas"]["TimelineSession"][] | null;
@@ -10740,7 +15993,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ToggleEnabledSkillInputBody.json
+             * @example /api/v1/schemas/ToggleEnabledSkillInputBody.json
              */
             readonly $schema?: string;
             /** @description Target state — true = enabled, false = disabled */
@@ -10752,7 +16005,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/ToggleEnabledSkillOutputBody.json
+             * @example /api/v1/schemas/ToggleEnabledSkillOutputBody.json
              */
             readonly $schema?: string;
             enabled: boolean;
@@ -10770,6 +16023,83 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        TrainInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/TrainInputBody.json
+             */
+            readonly $schema?: string;
+            /**
+             * Format: int64
+             * @description Training epochs (default 50, max 1000)
+             */
+            epochs?: number;
+        };
+        TrainMLScoringRequest: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/TrainMLScoringRequest.json
+             */
+            readonly $schema?: string;
+            /** Format: int64 */
+            optimize_budget?: number;
+            rows: components["schemas"]["TrainRow"][] | null;
+        };
+        TrainResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/TrainResponse.json
+             */
+            readonly $schema?: string;
+            /** Format: double */
+            auc: number;
+            best_params: {
+                [key: string]: unknown;
+            };
+            /** Format: double */
+            brier: number;
+            /** Format: double */
+            brier_baseline: number;
+            /** Format: double */
+            brier_uncalibrated: number;
+            calibration_method: string;
+            /** Format: double */
+            ece: number;
+            importances: components["schemas"]["Importance"][] | null;
+            /** Format: double */
+            logloss: number;
+            /** Format: int64 */
+            model_version: number;
+            /** Format: int64 */
+            n: number;
+            /** Format: int64 */
+            trials: number;
+        };
+        TrainResult: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/TrainResult.json
+             */
+            readonly $schema?: string;
+            algo?: string;
+            final: components["schemas"]["EpochMetric"];
+            history: components["schemas"]["EpochMetric"][] | null;
+            /** Format: int64 */
+            n: number;
+            tuning?: components["schemas"]["TuningResult"];
+            weights: components["schemas"]["FeatureWeight"][] | null;
+        };
+        TrainRow: {
+            features: {
+                [key: string]: unknown;
+            };
+            /** Format: int64 */
+            label: number;
+        };
         TraitPrecision: {
             /** Format: date-time */
             last_updated_at: string;
@@ -10778,11 +16108,28 @@ export interface components {
             /** Format: double */
             precision: number;
         };
+        TransitionInputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/TransitionInputBody.json
+             */
+            readonly $schema?: string;
+            /** @description The acting rep's user id. Must match the assignment's rep_user_id (the rep the lead was offered to) — this binds the action to the rep on whose behalf it is performed. A mismatch returns 403, even for a caller otherwise authorized for the tenant/project. */
+            rep_user_id: string;
+        };
+        TrialResult: {
+            /** Format: double */
+            cv_auc: number;
+            /** Format: double */
+            cv_logloss: number;
+            params: components["schemas"]["HyperParams"];
+        };
         TriggerConsolidationInputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/TriggerConsolidationInputBody.json
+             * @example /api/v1/schemas/TriggerConsolidationInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -10797,7 +16144,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/TriggerConsolidationOutputBody.json
+             * @example /api/v1/schemas/TriggerConsolidationOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the consolidation was triggered successfully */
@@ -10807,7 +16154,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/TriggerEventInputBody.json
+             * @example /api/v1/schemas/TriggerEventInputBody.json
              */
             readonly $schema?: string;
             /** @description Human-readable event description */
@@ -10831,7 +16178,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/TriggerEventOutputBody.json
+             * @example /api/v1/schemas/TriggerEventOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the event was accepted for processing */
@@ -10839,14 +16186,134 @@ export interface components {
             /** @description Unique identifier for the accepted event */
             event_id: string;
         };
+        TuningResult: {
+            /** Format: double */
+            best_cv_auc: number;
+            chosen: components["schemas"]["HyperParams"];
+            summary?: components["schemas"]["TrialResult"][] | null;
+            /** Format: int64 */
+            trials: number;
+        };
         Turn: {
             user_message: string;
+        };
+        TurnFetchNextContext: {
+            /** @description Optional language code (e.g. en, ja). */
+            language?: string;
+            /** @description Optional supplementary memory-search query used by the context builder. */
+            query?: string;
+            /** @description Optional IANA timezone. */
+            timezone?: string;
+        };
+        TurnMessage: {
+            /** @description Message content; null for assistant messages that only call tools */
+            content?: string;
+            /**
+             * @description Message role
+             * @enum {string}
+             */
+            role: "user" | "assistant" | "tool" | "system";
+            /** @description Set when role=tool to link the result to its assistant tool_calls entry */
+            tool_call_id?: string;
+            /** @description Set when an assistant message invokes tools */
+            tool_calls?: components["schemas"]["TurnToolCall"][] | null;
+        };
+        TurnMood: {
+            /**
+             * Format: double
+             * @description Proposed affiliation delta from this turn
+             */
+            affiliation: number;
+            /**
+             * Format: double
+             * @description Proposed arousal delta from this turn
+             */
+            arousal: number;
+            /** @description Free-text rationale from the analyzer */
+            reason?: string;
+            /**
+             * Format: double
+             * @description Proposed tension delta from this turn
+             */
+            tension: number;
+            /** @description Mood trigger type (e.g. emotional_response) */
+            trigger_type?: string;
+            /**
+             * Format: double
+             * @description Proposed valence delta from this turn
+             */
+            valence: number;
+        };
+        TurnRequestBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/TurnRequestBody.json
+             */
+            readonly $schema?: string;
+            /** @description When set, /turn fetches an enriched context (same shape as GET /context) and includes it in the response under next_context. */
+            fetchNextContext?: components["schemas"]["TurnFetchNextContext"];
+            /** @description Optional agent instance scope */
+            instanceId?: string;
+            /** @description New-turn messages (just the latest exchange — not the full history). Tool messages allowed. */
+            messages: components["schemas"]["TurnMessage"][] | null;
+            /** @description Per-call caller-supplied LLM model paired with provider. */
+            model?: string;
+            /** @description Per-call caller-supplied LLM provider (e.g. anthropic). Both provider and model must be set together to take effect. */
+            provider?: string;
+            /** @description Optional user display name; threaded through to per-turn extraction */
+            userDisplayName?: string;
+            /** @description ID of the user submitting the turn */
+            userId: string;
+            /** @description Optional IANA timezone (e.g. America/Los_Angeles); threaded through to per-turn extraction */
+            userTimezone?: string;
+        };
+        TurnResponseBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/TurnResponseBody.json
+             */
+            readonly $schema?: string;
+            /** @description Idempotency key for the deferred pipeline. Use it to poll GET /agents/{agentId}/turns/{extractionId}/status. */
+            extraction_id: string;
+            /** @description State of the deferred work item at response time. "queued" right after submit; the worker transitions through running → done|failed. */
+            extraction_status: string;
+            /** @description Sync mood-only extraction. nil when the analyzer didn't produce a mood update or wasn't wired. */
+            mood?: components["schemas"]["TurnMood"];
+            /** @description Enriched agent context. Only present when fetchNextContext was supplied on the request. */
+            next_context?: unknown;
+            /** @description Always true on a 200; failures surface as non-200 error responses. */
+            success: boolean;
+        };
+        TurnStatusOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/TurnStatusOutputBody.json
+             */
+            readonly $schema?: string;
+            /** @description Populated on state=failed. */
+            error?: string;
+            /** @description Echo of the extraction_id. */
+            extraction_id: string;
+            /** @description queued | running | done | failed */
+            state: string;
+        };
+        TurnToolCall: {
+            function: components["schemas"]["TurnToolCallFunction"];
+            id: string;
+            type: string;
+        };
+        TurnToolCallFunction: {
+            arguments: string;
+            name: string;
         };
         UpcomingScheduleOutputBody: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpcomingScheduleOutputBody.json
+             * @example /api/v1/schemas/UpcomingScheduleOutputBody.json
              */
             readonly $schema?: string;
             upcoming: string[] | null;
@@ -10855,7 +16322,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentPostProcessingModelInputBody.json
+             * @example /api/v1/schemas/UpdateAgentPostProcessingModelInputBody.json
              */
             readonly $schema?: string;
             /** @description Model for post-processing. Empty string clears the override. */
@@ -10867,7 +16334,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentPostProcessingModelOutputBody.json
+             * @example /api/v1/schemas/UpdateAgentPostProcessingModelOutputBody.json
              */
             readonly $schema?: string;
             post_processing_model: string;
@@ -10878,7 +16345,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentProfileInputBody.json
+             * @example /api/v1/schemas/UpdateAgentProfileInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated bio */
@@ -10898,7 +16365,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentProfileOutputBody.json
+             * @example /api/v1/schemas/UpdateAgentProfileOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -10907,7 +16374,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentProjectInputBody.json
+             * @example /api/v1/schemas/UpdateAgentProjectInputBody.json
              */
             readonly $schema?: string;
             /** @description Project UUID to assign; null/omitted to detach */
@@ -10917,7 +16384,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateAgentProjectOutputBody.json
+             * @example /api/v1/schemas/UpdateAgentProjectOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -10926,11 +16393,15 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateCapabilitiesInputBody.json
+             * @example /api/v1/schemas/UpdateCapabilitiesInputBody.json
              */
             readonly $schema?: string;
             /** @description Enable/disable agent-authored skills (sonzai_create_skill / sonzai_update_skill tools). Requires skills to also be enabled — otherwise force-cleared to false. */
             autoLearnSkills?: boolean;
+            /** @description Enable/disable the catalog_book_viewing tool (creates a TTL'd booking hold against a catalog item/slot). Off by default. */
+            catalogBooking?: boolean;
+            /** @description Enable/disable the sales-inventory grounding layer: the proactive context-builder block plus the catalog_search/catalog_item_details tools. Off by default. */
+            catalogGrounding?: boolean;
             /** @description Enable/disable per-agent Composio SaaS integrations (Gmail, Calendar, Slack, GitHub, Linear, etc.). Tools are declared dynamically based on which apps the admin has connected for the agent. */
             composio?: boolean;
             /** @description Enable/disable image generation */
@@ -10973,7 +16444,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateConstellationNodeInputBody.json
+             * @example /api/v1/schemas/UpdateConstellationNodeInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated description */
@@ -10992,7 +16463,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateCustomStateInputBody.json
+             * @example /api/v1/schemas/UpdateCustomStateInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated content type */
@@ -11004,7 +16475,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateCustomToolInputBody.json
+             * @example /api/v1/schemas/UpdateCustomToolInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated description */
@@ -11016,7 +16487,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateCustomToolOutputBody.json
+             * @example /api/v1/schemas/UpdateCustomToolOutputBody.json
              */
             readonly $schema?: string;
             success: boolean;
@@ -11025,7 +16496,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateEvalTemplateInputBody.json
+             * @example /api/v1/schemas/UpdateEvalTemplateInputBody.json
              */
             readonly $schema?: string;
             /** @description Evaluation categories */
@@ -11053,7 +16524,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateFactInputBody.json
+             * @example /api/v1/schemas/UpdateFactInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -11081,7 +16552,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateGoalInputBody.json
+             * @example /api/v1/schemas/UpdateGoalInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated description */
@@ -11104,7 +16575,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateHabitInputBody.json
+             * @example /api/v1/schemas/UpdateHabitInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated category */
@@ -11125,7 +16596,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateInstanceInputBody.json
+             * @example /api/v1/schemas/UpdateInstanceInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated description */
@@ -11139,7 +16610,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateMetadataRequest.json
+             * @example /api/v1/schemas/UpdateMetadataRequest.json
              */
             readonly $schema?: string;
             company?: string;
@@ -11155,7 +16626,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateMoodInputBody.json
+             * @example /api/v1/schemas/UpdateMoodInputBody.json
              */
             readonly $schema?: string;
             /**
@@ -11183,7 +16654,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdatePayload.json
+             * @example /api/v1/schemas/UpdatePayload.json
              */
             readonly $schema?: string;
             label?: components["schemas"]["CASPair"];
@@ -11195,7 +16666,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdatePersonalityBody.json
+             * @example /api/v1/schemas/UpdatePersonalityBody.json
              */
             readonly $schema?: string;
             /** @description Big Five personality scores to set */
@@ -11207,7 +16678,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdatePersonalityOutputBody.json
+             * @example /api/v1/schemas/UpdatePersonalityOutputBody.json
              */
             readonly $schema?: string;
             /** @description Whether the update was applied */
@@ -11217,7 +16688,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateProjectInputBody.json
+             * @example /api/v1/schemas/UpdateProjectInputBody.json
              */
             readonly $schema?: string;
             /** @description Public-facing display name for this business / project. Replaces the legacy game_name field; either is accepted, business_name wins when both are set. */
@@ -11235,7 +16706,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateProjectSkillInputBody.json
+             * @example /api/v1/schemas/UpdateProjectSkillInputBody.json
              */
             readonly $schema?: string;
             /** @description Updated markdown body; unchanged if omitted */
@@ -11249,7 +16720,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateUserMetadataHumaOutputBody.json
+             * @example /api/v1/schemas/UpdateUserMetadataHumaOutputBody.json
              */
             readonly $schema?: string;
             /**
@@ -11264,7 +16735,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpdateUserPersonaInputBody.json
+             * @example /api/v1/schemas/UpdateUserPersonaInputBody.json
              */
             readonly $schema?: string;
             /** @description Free-text description */
@@ -11278,7 +16749,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpsertCustomStateByKeyInputBody.json
+             * @example /api/v1/schemas/UpsertCustomStateByKeyInputBody.json
              */
             readonly $schema?: string;
             /** @description Content type (text or json, defaults to text) */
@@ -11298,7 +16769,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpsertWebhookForTenantInputBody.json
+             * @example /api/v1/schemas/UpsertWebhookForTenantInputBody.json
              */
             readonly $schema?: string;
             /** @description Optional Authorization header value sent with each delivery */
@@ -11310,7 +16781,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpsertWebhookInputBody.json
+             * @example /api/v1/schemas/UpsertWebhookInputBody.json
              */
             readonly $schema?: string;
             /** @description Optional Authorization header value sent with each delivery */
@@ -11322,7 +16793,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UpsertWebhookOutputBody.json
+             * @example /api/v1/schemas/UpsertWebhookOutputBody.json
              */
             readonly $schema?: string;
             /** @description HMAC signing secret (only returned on first registration) */
@@ -11361,7 +16832,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UsageResponse.json
+             * @example /api/v1/schemas/UsageResponse.json
              */
             readonly $schema?: string;
             byProject: components["schemas"]["UsageByProject"][] | null;
@@ -11402,7 +16873,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UserOverlayDetailResponse.json
+             * @example /api/v1/schemas/UserOverlayDetailResponse.json
              */
             readonly $schema?: string;
             base: components["schemas"]["PersonalityProfile"];
@@ -11424,7 +16895,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UserOverlaysListResponse.json
+             * @example /api/v1/schemas/UserOverlaysListResponse.json
              */
             readonly $schema?: string;
             overlays: components["schemas"]["UserOverlayResponse"][] | null;
@@ -11438,7 +16909,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UserPersonaRecord.json
+             * @example /api/v1/schemas/UserPersonaRecord.json
              */
             readonly $schema?: string;
             /** Format: date-time */
@@ -11456,7 +16927,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UserPrimingMetadata.json
+             * @example /api/v1/schemas/UserPrimingMetadata.json
              */
             readonly $schema?: string;
             AgentID: string;
@@ -11490,12 +16961,28 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/UsersResponse.json
+             * @example /api/v1/schemas/UsersResponse.json
              */
             readonly $schema?: string;
             has_more: boolean;
             next_cursor?: string;
             users: components["schemas"]["UserEntry"][] | null;
+        };
+        VerticalConfig: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/VerticalConfig.json
+             */
+            readonly $schema?: string;
+            brands?: string[] | null;
+            intent_signals: string[] | null;
+            label: string;
+            notes?: string;
+            qualify_fields: string[] | null;
+            segment_features: string[] | null;
+            slug: string;
+            value_signals: string[] | null;
         };
         VoiceConfig: {
             language?: string;
@@ -11509,7 +16996,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/VoiceLiveWSTokenInputBody.json
+             * @example /api/v1/schemas/VoiceLiveWSTokenInputBody.json
              */
             readonly $schema?: string;
             /** @description Pre-compiled system prompt for the voice session */
@@ -11525,7 +17012,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/VoiceLiveWSTokenOutputBody.json
+             * @example /api/v1/schemas/VoiceLiveWSTokenOutputBody.json
              */
             readonly $schema?: string;
             /** @description Short-lived authentication token */
@@ -11553,10 +17040,16 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/WakeupsResponse.json
+             * @example /api/v1/schemas/WakeupsResponse.json
              */
             readonly $schema?: string;
             wakeups: components["schemas"]["WakeupEntry"][] | null;
+        };
+        WealthSignal: {
+            signal: string;
+            source: string;
+            /** Format: double */
+            weight?: number;
         };
         Webhook: {
             auth_header?: string;
@@ -11587,11 +17080,33 @@ export interface components {
             status: string;
             webhook_url: string;
         };
+        WinlossReportResponse: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/WinlossReportResponse.json
+             */
+            readonly $schema?: string;
+            /** @description true when this is a previously-generated report returned unchanged (idempotence); false when freshly generated. */
+            cached: boolean;
+            /** Format: date-time */
+            created_at: string;
+            evidence_stats: components["schemas"]["EvidenceStats"];
+            project_id: string;
+            report: components["schemas"]["Report"];
+            report_id: string;
+            /** @description Envelope sanitizations applied to the model output (e.g. over-cap arrays dropped). Present only on a fresh generation. */
+            violations?: string[] | null;
+            /** Format: date-time */
+            window_end: string;
+            /** Format: date-time */
+            window_start: string;
+        };
         WisdomAuditResponse: {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/WisdomAuditResponse.json
+             * @example /api/v1/schemas/WisdomAuditResponse.json
              */
             readonly $schema?: string;
             content: string;
@@ -11627,7 +17142,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/WisdomImportInputBody.json
+             * @example /api/v1/schemas/WisdomImportInputBody.json
              */
             readonly $schema?: string;
             /** @description JSON array or CSV string (verbatim). Column order for CSV: entity_type,entity_id,category,value,confidence,entity_display_name,source_ref */
@@ -11649,7 +17164,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/WisdomImportResponse.json
+             * @example /api/v1/schemas/WisdomImportResponse.json
              */
             readonly $schema?: string;
             /** Format: int64 */
@@ -11662,7 +17177,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchAdvanceTimeJobBody.json
+             * @example /api/v1/schemas/WorkbenchAdvanceTimeJobBody.json
              */
             readonly $schema?: string;
             agent_id?: string;
@@ -11692,7 +17207,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchGenerateBioBody.json
+             * @example /api/v1/schemas/WorkbenchGenerateBioBody.json
              */
             readonly $schema?: string;
             bio: string;
@@ -11724,7 +17239,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchGenerateCharacterBody.json
+             * @example /api/v1/schemas/WorkbenchGenerateCharacterBody.json
              */
             readonly $schema?: string;
             agent_id?: string;
@@ -11773,7 +17288,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchGenerateSeedMemoriesBody.json
+             * @example /api/v1/schemas/WorkbenchGenerateSeedMemoriesBody.json
              */
             readonly $schema?: string;
             memories: components["schemas"]["WorkbenchSeedMemoryItem"][] | null;
@@ -11782,7 +17297,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchPrepareBody.json
+             * @example /api/v1/schemas/WorkbenchPrepareBody.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -11794,7 +17309,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchResetAgentBody.json
+             * @example /api/v1/schemas/WorkbenchResetAgentBody.json
              */
             readonly $schema?: string;
             agent_id: string;
@@ -11812,7 +17327,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchSessionEndBody.json
+             * @example /api/v1/schemas/WorkbenchSessionEndBody.json
              */
             readonly $schema?: string;
             ok: boolean;
@@ -11821,7 +17336,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchSimulateUserBody.json
+             * @example /api/v1/schemas/WorkbenchSimulateUserBody.json
              */
             readonly $schema?: string;
             end_session: boolean;
@@ -11910,7 +17425,7 @@ export interface components {
             /**
              * Format: uri
              * @description A URL to the JSON Schema for this object.
-             * @example https://api.sonz.ai/api/v1/schemas/WorkbenchStateResponse.json
+             * @example /api/v1/schemas/WorkbenchStateResponse.json
              */
             readonly $schema?: string;
             big5?: components["schemas"]["WorkbenchStateBig5"];
@@ -11923,6 +17438,16 @@ export interface components {
             /** Format: double */
             next_event_hours: number;
             relationship?: components["schemas"]["WorkbenchStateRelation"];
+        };
+        WorkspaceSessionOutputBody: {
+            /**
+             * Format: uri
+             * @description A URL to the JSON Schema for this object.
+             * @example /api/v1/schemas/WorkspaceSessionOutputBody.json
+             */
+            readonly $schema?: string;
+            token: string;
+            workspace_url: string;
         };
     };
     responses: never;
@@ -13069,6 +18594,38 @@ export interface operations {
             };
         };
     };
+    getContactDepth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agentId: string;
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DepthBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     getContext: {
         parameters: {
             query: {
@@ -13370,6 +18927,37 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getAgentDepthDistribution: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DepthDistributionBody"];
+                };
             };
             /** @description Error */
             default: {
@@ -15739,6 +21327,44 @@ export interface operations {
             };
         };
     };
+    submitTurn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+                /** @description Session identifier */
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TurnRequestBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TurnResponseBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     simulateAgent: {
         parameters: {
             query?: never;
@@ -16180,6 +21806,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DeleteCustomToolOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getTurnStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Agent UUID or URL-encoded agent name */
+                agentId: string;
+                /** @description Extraction ID returned by POST /turn */
+                extractionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TurnStatusOutputBody"];
                 };
             };
             /** @description Error */
@@ -18033,6 +23693,1347 @@ export interface operations {
             };
         };
     };
+    listApprovals: {
+        parameters: {
+            query?: {
+                /** @description Filter by type: message, goal, handoff, or all (default) */
+                type?: string;
+                /** @description Max items (default 50, max 200) */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListApprovalsResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    createApproval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateApprovalRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalItemBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    resolveApproval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Approval item ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveApprovalRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalItemBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listBuiltinAgents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListBuiltinAgentsResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listLeadEnrichmentJobs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListLeadEnrichmentJobsResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    enqueueLeadEnrichment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrichLeadBody"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnrichLeadResp"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getLeadEnrichment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Enrichment job id */
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnrichJobView"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getLeadScoreCalibration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Calibration"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getLeadScoreModel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelView"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    trainLeadScoreModel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainResult"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    recommendLeadScoreNBA: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NbaInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NBAResult"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    recordLeadScoreOutcome: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordOutcomeInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Calibration"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    resetLeadScoreLearning: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResetLearningResp"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getLeadScoreRLPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyView"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    trainLeadScoreRLPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RlTrainInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RLTrainResult"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    setAgentLearningEnabled: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetAgentLearningEnabledRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetAgentLearningEnabledResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    recordMLFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordMLFeedbackRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    decideMLNBA: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecideMLNBARequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecideResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    learnMLNBA: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LearnMLNBARequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearnResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    evaluateMLOPE: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EvaluateMLOPERequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OPEResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    predictMLScoring: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PredictMLScoringRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PredictResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    trainMLScoring: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainMLScoringRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    simulateMLRounds: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimulateMLRoundsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulateRoundsResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    streamMLRounds: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StreamMLRoundsRequest"];
+            };
+        };
+        responses: {
+            /** @description SSE event stream. `round` frames contain the completed point and cumulative series; `result` contains the full final response. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": unknown;
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    onboardProjectVertical: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardProjectVerticalRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OnboardSummary"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listBuiltinAgentSessions: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListBuiltinAgentSessionsResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    startBuiltinAgentSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartChatInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getBuiltinAgentSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GetBuiltinAgentSessionResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    sendBuiltinAgentMessage: {
+        parameters: {
+            query?: {
+                /** @description true → SSE of live agent events ending in a final result event */
+                stream?: boolean;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatMsgInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getProjectVertical: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerticalConfig"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    setProjectVertical: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetProjectVerticalRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerticalConfig"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getBuiltinAgentGuidance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuidanceOutput"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    rollbackBuiltinAgentGuidance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentGuidance"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    invokeBuiltinAgent: {
+        parameters: {
+            query?: {
+                /** @description true → stream live agent progress as SSE; false → block and return JSON */
+                stream?: boolean;
+            };
+            header?: never;
+            path: {
+                /** @description Built-in agent slug, e.g. lead_research */
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvokeInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    learnBuiltinAgentGuidance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Built-in agent slug to improve (lead_score | lead_research | lead_qualifier | …) */
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LearnInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearnResult"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listChannels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListChannelsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    createChannel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChannelWriteBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deliverToChannels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChannelDeliverBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelDeliverOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getChannel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Channel UUID */
+                channelId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    updateChannel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Channel UUID */
+                channelId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChannelWriteBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteChannel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Channel UUID */
+                channelId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     listConversations: {
         parameters: {
             query?: {
@@ -18074,6 +25075,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ListConversationsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    pushConversationMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PushConversationMessageInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PushConversationMessageOutputBody"];
                 };
             };
             /** @description Error */
@@ -18343,6 +25377,199 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OmnichannelConversationDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listCustomAgents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListCustomAgentsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    createCustomAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CustomAgentWriteBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomAgentDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getCustomAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Custom agent UUID */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomAgentDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    updateCustomAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Custom agent UUID */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CustomAgentWriteBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomAgentDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteCustomAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Custom agent UUID */
+                agentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    enrichPerson: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrichPersonInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnrichPersonOutputBody"];
                 };
             };
             /** @description Error */
@@ -18656,6 +25883,452 @@ export interface operations {
             };
         };
     };
+    upsertIngestContact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestContactInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IngestContact"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listDomainEvents: {
+        parameters: {
+            query: {
+                /** @description RFC 3339 lower bound: return events stored at/after this time */
+                since: string;
+                /** @description Max events per page */
+                limit?: number;
+                /** @description Opaque pagination cursor from a prior page's next_cursor (overrides since when set) */
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListEventsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    ingestDomainEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestEventInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IngestEventOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listJobs: {
+        parameters: {
+            query?: {
+                /** @description Filter by job type */
+                type?: string;
+                /** @description Filter by status: queued|running|succeeded|failed|cancelled */
+                status?: string;
+                /** @description Max jobs to return (default 25, max 200) */
+                limit?: number;
+                /** @description Opaque pagination cursor from a previous response */
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListJobsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    enqueueJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateJobInputBody"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Job UUID */
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    cancelJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Job UUID */
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listLeadAssignments: {
+        parameters: {
+            query?: {
+                /** @description Only assignments offered to this rep */
+                rep_user_id?: string;
+                /** @description Only assignments in this state */
+                state?: "" | "offered" | "claimed" | "expired" | "reassigned" | "released" | "completed";
+                /** @description Max rows (default 50, max 200) */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListLeadAssignmentsResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    offerLeadAssignment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OfferLeadAssignmentRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferLeadAssignmentResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getLeadAssignment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Assignment id */
+                assignmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadAssignmentBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    claimLeadAssignment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Assignment id */
+                assignmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransitionInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadAssignmentBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    completeLeadAssignment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Assignment id */
+                assignmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransitionInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadAssignmentBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    releaseLeadAssignment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Assignment id */
+                assignmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransitionInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadAssignmentBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     getMyOrg: {
         parameters: {
             query?: never;
@@ -18685,6 +26358,355 @@ export interface operations {
             };
         };
     };
+    suggestMLContactTiming: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactTimingSuggestBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactTimingSuggestResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    predictMLExpectedValue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PredictMLExpectedValueRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvResponseBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    forecastMLPipeline: {
+        parameters: {
+            query?: {
+                /** @description Lookback window in days for 'open pipeline' (not yet converted, created within this window). Defaults to the tenant manifest's objective.attribution_window_days, else 90. */
+                window_days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ForecastResponseBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    suggestMLHandoffTiming: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HandoffSuggestBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HandoffSuggestResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    rankLookalike: {
+        parameters: {
+            query?: {
+                /** @description Max leads to return. Defaults to 20. */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LookalikeRankResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    scoreLookalike: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LookalikeScoreBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LookalikeScoreResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    suggestMLOffer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OfferSuggestBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferSuggestResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getMLRevivalQueue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RevivalQueueBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    computeMLRevivalQueue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RevivalQueueBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    generateMLWinLossReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateMLWinLossReportRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WinlossReportResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getMLWinLossLatest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WinlossReportResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     listModels: {
         parameters: {
             query?: never;
@@ -18701,6 +26723,106 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CachedModelsPayload"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    exportModel: {
+        parameters: {
+            query?: {
+                /** @description Export format: omitted/"sonzai-gbdt-v1" (default, in-process Go GBDT) or "onnx" (proxies the ml-service ONNX artifact). */
+                format?: string;
+            };
+            header?: never;
+            path: {
+                useCase: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelExportOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    onboardingClaim: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimResult"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    onboardingClaimLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClaimLinkInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimLinkOutputBody"];
                 };
             };
             /** @description Error */
@@ -19118,6 +27240,307 @@ export interface operations {
             };
         };
     };
+    listPipelines: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListPipelinesOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    createPipeline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PipelineWriteBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getPipeline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Pipeline UUID */
+                pipelineId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    updatePipeline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Pipeline UUID */
+                pipelineId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PipelineWriteBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deletePipeline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Pipeline UUID */
+                pipelineId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    runPipeline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Pipeline UUID */
+                pipelineId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunPipelineInputBody"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineRun"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listPipelineRuns: {
+        parameters: {
+            query?: {
+                /** @description Max runs to return (default 25) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Pipeline UUID */
+                pipelineId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListRunsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getPipelineRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Pipeline UUID */
+                pipelineId: string;
+                /** @description Run UUID */
+                runId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineRun"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    appendPipelineStep: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Pipeline UUID */
+                pipelineId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PipelineStep"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     listProjects: {
         parameters: {
             query?: {
@@ -19272,6 +27695,876 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DeleteProjectOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getProjectAtRiskContacts: {
+        parameters: {
+            query?: {
+                /** @description Max items (default 10, max 50) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AtRiskContactsBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogListBookings: {
+        parameters: {
+            query?: {
+                /** @description Filter by catalog item */
+                item_id?: string;
+                /** @description Filter by end-user id */
+                user_id?: string;
+                /** @description Filter by status (hold|confirmed|cancelled|expired) */
+                status?: string;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogListBookingsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogCreateBooking: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description ID of the agent brokering this hold, if agent-initiated. */
+                "X-Agent-Id"?: string;
+            };
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogBookingWriteBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogBooking"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogGetBooking: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog booking UUID */
+                bookingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogBooking"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogCancelBooking: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog booking UUID */
+                bookingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogBooking"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogConfirmBooking: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog booking UUID */
+                bookingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogConfirmBookingInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogBooking"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogImport: {
+        parameters: {
+            query: {
+                /** @description Target item_type — a catalog_schemas entry must already exist for it */
+                item_type: string;
+                /** @description If true, returns the proposed mapping + preview rows without writing anything */
+                dry_run?: boolean;
+                /** @description JSON-encoded []ColumnMapping to apply directly, skipping LLM proposal (required when dry_run=false unless a mapping was already confirmed client-side) */
+                mapping?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": unknown;
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogImportOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogListItems: {
+        parameters: {
+            query?: {
+                /** @description Filter by item_type */
+                item_type?: string;
+                /** @description Filter by status */
+                status?: string;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogListItemsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogCreateItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogItemWriteBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogItem"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogSyncItems: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogSyncInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogSyncResult"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogGetItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog item UUID */
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogItem"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogDeleteItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog item UUID */
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogUpdateItem: {
+        parameters: {
+            query: {
+                /** @description Expected current version (optimistic concurrency) */
+                version: number;
+            };
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog item UUID */
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogItemWriteBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogItem"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogListSlots: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog item UUID */
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogListSlotsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogCreateSlot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog item UUID */
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogSlotWriteBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogSlot"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogPatchItemStatus: {
+        parameters: {
+            query: {
+                /** @description Expected current version (optimistic concurrency) */
+                version: number;
+            };
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog item UUID */
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogPatchStatusInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogItem"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogListSchemas: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogListSchemasOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogCreateSchema: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogSchemaWriteBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogSchema"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogGetSchema: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog schema UUID */
+                schemaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogSchema"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogDeleteSchema: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog schema UUID */
+                schemaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogUpdateSchema: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog schema UUID */
+                schemaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogUpdateSchemaInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogSchema"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogGetSlot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog slot UUID */
+                slotId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogSlot"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogDeleteSlot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog slot UUID */
+                slotId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    catalogUpdateSlot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog slot UUID */
+                slotId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogUpdateSlotInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogSlot"];
                 };
             };
             /** @description Error */
@@ -19472,6 +28765,245 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChannelConnectionDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listChannelsForProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListChannelsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    createChannelForProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChannelWriteBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deliverToChannelsForProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChannelDeliverBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelDeliverOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getChannelForProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Channel UUID */
+                channelId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    updateChannelForProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Channel UUID */
+                channelId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChannelWriteBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteChannelForProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Channel UUID */
+                channelId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getProjectCohorts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CohortsBody"];
                 };
             };
             /** @description Error */
@@ -19709,6 +29241,185 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listProjectDepthScores: {
+        parameters: {
+            query?: {
+                /** @description Max items (default 100, max 500) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListProjectDepthScoresResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getProjectFleetActivity: {
+        parameters: {
+            query?: {
+                /** @description Max items (default 20, max 100) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FleetActivityBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    groundingBatchAvailability: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GroundingAvailabilityInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GroundingAvailabilityOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    groundingItemDetail: {
+        parameters: {
+            query?: {
+                /** @description RFC3339 or YYYY-MM-DD */
+                from?: string;
+                /** @description RFC3339 or YYYY-MM-DD */
+                to?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+                /** @description Catalog item UUID */
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultItem"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    groundingQuery: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GroundingQueryInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QueryResponse"];
+                };
             };
             /** @description Error */
             default: {
@@ -20253,6 +29964,42 @@ export interface operations {
             };
         };
     };
+    kbCompare: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KbCompareInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbCompareOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     kbListDocuments: {
         parameters: {
             query?: {
@@ -20393,6 +30140,44 @@ export interface operations {
             };
         };
     };
+    kbPatchDocumentClassification: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+                /** @description Document UUID. */
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KbPatchClassificationInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbPatchClassificationOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     kbGetDocumentCost: {
         parameters: {
             query?: never;
@@ -20414,6 +30199,113 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["KbDocCostOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbReingestDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+                /** @description Document UUID. */
+                documentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbReingestOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbGetEntity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+                /** @description Entity type (e.g. 'hospital'). */
+                entityType: string;
+                /** @description URL-encoded JSON of the entity's key fields (e.g. '%7B%22name%22%3A%22Mt+Elizabeth%22%7D'). */
+                entityKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbGetEntityOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbListFacts: {
+        parameters: {
+            query?: {
+                /** @description Max facts to return (default 50, max 500). */
+                limit?: number;
+                /** @description Opaque pagination cursor returned by the previous response. */
+                page_token?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbListFactsOutputBody"];
                 };
             };
             /** @description Error */
@@ -20450,6 +30342,186 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["KbInsertFactsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbGetActiveFact: {
+        parameters: {
+            query?: {
+                /** @description Fact tuple component. */
+                from_node_id?: string;
+                /** @description Fact tuple component. */
+                to_node_id?: string;
+                /** @description Fact tuple component. */
+                relation_type?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbGetFactOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbGetFactHistory: {
+        parameters: {
+            query?: {
+                /** @description Fact tuple component. */
+                from_node_id?: string;
+                /** @description Fact tuple component. */
+                to_node_id?: string;
+                /** @description Fact tuple component. */
+                relation_type?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbGetFactHistoryOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbListMultimodalSchemas: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbMultimodalSchemaListOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbCreateMultimodalSchema: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["KBSchema"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbMultimodalSchemaCreateOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    kbActivateMultimodalSchema: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+                /** @description Schema version to activate. */
+                version: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbMultimodalSchemaActivateOutputBody"];
                 };
             };
             /** @description Error */
@@ -20986,6 +31058,49 @@ export interface operations {
             };
         };
     };
+    kbTraverse: {
+        parameters: {
+            query?: {
+                /** @description Starting entity type. */
+                from_type?: string;
+                /** @description Starting entity key (URL-encoded JSON). */
+                from_key?: string;
+                /** @description Relation to traverse. */
+                relation_type?: string;
+                /** @description outbound | inbound | both (default outbound). */
+                direction?: string;
+                /** @description Traversal depth (default 1, max 3). */
+                max_depth?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Project UUID. */
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbTraverseOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     listMCPCatalog: {
         parameters: {
             query?: never;
@@ -21299,6 +31414,68 @@ export interface operations {
             };
         };
     };
+    getProjectMoat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DepthDistributionBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getProjectMoatIndex: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MoatIndexBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
     listProjectNotifications: {
         parameters: {
             query?: {
@@ -21398,6 +31575,205 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AcknowledgeAllProjectNotificationsOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listPermanentRoutes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListPermanentRoutesResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    classifyContact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClassifyContactRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PermanentRouteBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    overridePermanentRoute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OverridePermanentRouteRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PermanentRouteBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getProjectPipelineFlow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineFlowBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getRoutingConfig: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Config"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    putRoutingConfig: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Config"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Config"];
                 };
             };
             /** @description Error */
@@ -21745,6 +32121,205 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RotateSigningSecretOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listBYOKKeys: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Project UUID */
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListBYOKKeysOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    putBYOKKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+                /** @description Provider name */
+                provider: "openai" | "gemini" | "xai" | "openrouter" | "anthropic";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PutBYOKKeyInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BYOKKeyResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteBYOKKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+                provider: "openai" | "gemini" | "xai" | "openrouter" | "anthropic";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    setBYOKActive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+                provider: "openai" | "gemini" | "xai" | "openrouter" | "anthropic";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetBYOKActiveInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BYOKKeyResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    testBYOKKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+                provider: "openai" | "gemini" | "xai" | "openrouter" | "anthropic";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BYOKKeyResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getSessionEndStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description UUID returned by POST /sessions/end when the server is in async=true mode. */
+                processingId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionEndStatusOutputBody"];
                 };
             };
             /** @description Error */
@@ -22162,6 +32737,231 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Tenant"][] | null;
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    listTenantDomains: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListTenantDomainsResponse"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    createTenantDomain: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTenantDomainRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DomainBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    deleteTenantDomain: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                domain: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    verifyTenantDomain: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                domain: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DomainBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    getTenantManifest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManifestVersionOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    putTenantManifest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": unknown;
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManifestVersionOutputBody"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ErrorModel"];
+                };
+            };
+        };
+    };
+    mintWorkspaceSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceSessionOutputBody"];
                 };
             };
             /** @description Error */
