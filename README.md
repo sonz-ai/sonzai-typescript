@@ -51,6 +51,9 @@ API keys are sent as `Authorization: Bearer <key>`.
 const client = new Sonzai({
   apiKey: "sk-...",              // or SONZAI_API_KEY env var
   baseUrl: "https://api.sonz.ai", // or SONZAI_BASE_URL env var
+  runtimeBaseUrl: "https://app-runtime.example.com", // or SONZAI_RUNTIME_BASE_URL
+  runtimeApiKey: "adapter-token", // or SONZAI_RUNTIME_API_KEY; defaults to apiKey
+  runtimeTenantId: "tenant-id",   // sent as X-Sonzai-Tenant-ID to runtime routes
   timeout: 30_000,               // request timeout (ms)
   maxRetries: 2,                 // retries for idempotent failures
   defaultHeaders: { "X-My": "hdr" },
@@ -70,6 +73,7 @@ client.evalRuns           // eval/simulation runs, reconnectable streaming
 client.voices             // global voice catalog
 client.webhooks           // webhook registration and rotation
 client.conversations      // omnichannel inbox, messages, handoff, SSE events
+client.crm                // runtime-local CRM adapter import and change feed
 client.channelConnections // Meta channel connections for WhatsApp / Messenger / Instagram
 client.projects           // project management & API keys
 client.userPersonas       // user persona CRUD
@@ -79,6 +83,38 @@ client.projectConfig      // project-scoped config
 client.accountConfig      // tenant-scoped config
 client.customLLM          // bring-your-own-model (BYOM)
 client.projectNotifications
+```
+
+### Runtime CRM
+
+`client.crm` targets a deployed app-runtime instance under `/api/rt/crm/*`, not
+`api.sonz.ai`. Authenticate with the runtime `ADAPTER_TOKEN`. If the runtime is
+not pinned to one tenant, set `runtimeTenantId` so the SDK sends
+`X-Sonzai-Tenant-ID`.
+
+```ts
+const client = new Sonzai({
+  apiKey: "sk-platform-key",
+  runtimeBaseUrl: "https://runtime.customer.example",
+  runtimeApiKey: "adapter-token",
+  runtimeTenantId: "tenant-123",
+});
+
+await client.crm.import({
+  contacts: [
+    {
+      external_ref: "sf-contact-001",
+      first_name: "Ada",
+      last_name: "Lovelace",
+      emails: [{ value: "ada@example.com", kind: "work" }],
+      source: "salesforce",
+    },
+  ],
+});
+
+for await (const event of client.crm.iterateEvents({ limit: 100 })) {
+  console.log(event.cursor, event.event, event.entity_id);
+}
 ```
 
 Agent sub-resources:

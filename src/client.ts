@@ -7,6 +7,7 @@ import { Channels } from "./resources/channels.js";
 import { Conversations } from "./resources/conversations.js";
 import { BYOK } from "./resources/byok.js";
 import { Composio } from "./resources/composio.js";
+import { Crm } from "./resources/crm.js";
 import { CustomAgents } from "./resources/custom-agents.js";
 import { CustomLLM } from "./resources/custom-llm.js";
 import { Pipelines } from "./resources/pipelines.js";
@@ -86,6 +87,49 @@ function resolveBaseUrl(config?: SonzaiConfig): string {
   return DEFAULT_BASE_URL;
 }
 
+function resolveRuntimeBaseUrl(config?: SonzaiConfig): string | undefined {
+  if (config?.runtimeBaseUrl) return config.runtimeBaseUrl;
+
+  if (typeof process !== "undefined" && process.env) {
+    const url = process.env.SONZAI_RUNTIME_BASE_URL;
+    if (url) return url;
+  }
+
+  if (typeof Deno !== "undefined") {
+    try {
+      const url = Deno.env.get("SONZAI_RUNTIME_BASE_URL");
+      if (url) return url;
+    } catch {
+      // Permission denied
+    }
+  }
+
+  return undefined;
+}
+
+function resolveRuntimeApiKey(
+  config: SonzaiConfig | undefined,
+  apiKey: string,
+): string {
+  if (config?.runtimeApiKey) return config.runtimeApiKey;
+
+  if (typeof process !== "undefined" && process.env) {
+    const key = process.env.SONZAI_RUNTIME_API_KEY;
+    if (key) return key;
+  }
+
+  if (typeof Deno !== "undefined") {
+    try {
+      const key = Deno.env.get("SONZAI_RUNTIME_API_KEY");
+      if (key) return key;
+    } catch {
+      // Permission denied
+    }
+  }
+
+  return apiKey;
+}
+
 // Deno type shim for TypeScript compilation
 declare const Deno:
   | {
@@ -162,6 +206,12 @@ export class Sonzai {
   readonly channels: Channels;
   /** Omnichannel conversations — inbox, messages, handoff, read state, and SSE events. */
   readonly conversations: Conversations;
+  /**
+   * Runtime-local CRM adapter surface. Served by app-runtime under
+   * `/api/rt/crm/*`; configure `runtimeBaseUrl` and authenticate with the
+   * runtime adapter token.
+   */
+  readonly crm: Crm;
   /** Project-scoped Meta channel connections (WhatsApp / Messenger / Instagram). */
   readonly channelConnections: ChannelConnections;
   /** Project-scoped configuration (key-value store). */
@@ -235,6 +285,8 @@ export class Sonzai {
   constructor(config?: SonzaiConfig) {
     const apiKey = resolveApiKey(config);
     const baseUrl = resolveBaseUrl(config);
+    const runtimeBaseUrl = resolveRuntimeBaseUrl(config);
+    const runtimeApiKey = resolveRuntimeApiKey(config, apiKey);
 
     this.http = new HTTPClient({
       baseUrl,
@@ -244,6 +296,22 @@ export class Sonzai {
       defaultHeaders: config?.defaultHeaders,
       customFetch: config?.customFetch,
     });
+    const runtimeHeaders = {
+      ...config?.defaultHeaders,
+      ...(config?.runtimeTenantId
+        ? { "X-Sonzai-Tenant-ID": config.runtimeTenantId }
+        : {}),
+    };
+    const runtimeHttp = runtimeBaseUrl
+      ? new HTTPClient({
+          baseUrl: runtimeBaseUrl,
+          apiKey: runtimeApiKey,
+          timeout: config?.timeout ?? DEFAULT_TIMEOUT,
+          maxRetries: config?.maxRetries ?? DEFAULT_MAX_RETRIES,
+          defaultHeaders: runtimeHeaders,
+          customFetch: config?.customFetch,
+        })
+      : undefined;
 
     this.agents = new Agents(this.http);
     this.builtinAgents = new BuiltinAgents(this.http);
@@ -258,6 +326,7 @@ export class Sonzai {
     this.webhooks = new Webhooks(this.http);
     this.channels = new Channels(this.http);
     this.conversations = new Conversations(this.http);
+    this.crm = new Crm(runtimeHttp);
     this.channelConnections = new ChannelConnections(this.http);
     this.projectConfig = new ProjectConfig(this.http);
     this.accountConfig = new AccountConfig(this.http);

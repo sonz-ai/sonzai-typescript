@@ -2271,6 +2271,9 @@ export interface WebhookDeliveryAttempt {
 export interface SonzaiConfig {
 	apiKey?: string;
 	baseUrl?: string;
+	runtimeBaseUrl?: string;
+	runtimeApiKey?: string;
+	runtimeTenantId?: string;
 	timeout?: number;
 	maxRetries?: number;
 	defaultHeaders?: Record<string, string>;
@@ -4319,6 +4322,181 @@ export interface ListIngestEventsOptions {
  */
 export interface ListIngestEventsResult {
 	events: IngestedEvent[];
+	next_cursor?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Runtime CRM (client.crm)
+// ---------------------------------------------------------------------------
+
+export interface CrmContact {
+	id: string;
+	tenant_id?: string;
+	project_id?: string;
+	first_name?: string;
+	last_name?: string;
+	emails: unknown;
+	phones: unknown;
+	lead_ref?: string;
+	owner_user_id?: string;
+	source?: string;
+	external_ref?: string;
+	custom: unknown;
+	archived: boolean;
+	created_at: string;
+	updated_at: string;
+	deleted_at?: string;
+}
+
+export interface CrmCompany {
+	id: string;
+	tenant_id?: string;
+	project_id?: string;
+	name: string;
+	domain?: string;
+	custom: unknown;
+	archived: boolean;
+	created_at: string;
+	updated_at: string;
+	deleted_at?: string;
+}
+
+export interface CrmPipeline {
+	id: string;
+	tenant_id?: string;
+	project_id?: string;
+	name: string;
+	is_default: boolean;
+	archived: boolean;
+	created_at: string;
+	updated_at: string;
+	deleted_at?: string;
+}
+
+export interface CrmStage {
+	id: string;
+	pipeline_id: string;
+	tenant_id?: string;
+	name: string;
+	kind: string;
+	sort_order: number;
+	archived: boolean;
+	created_at: string;
+	updated_at: string;
+	deleted_at?: string;
+}
+
+export interface CrmDeal {
+	id: string;
+	tenant_id?: string;
+	project_id?: string;
+	contact_id?: string;
+	company_id?: string;
+	pipeline_id: string;
+	stage_id: string;
+	catalog_item_id?: string;
+	value_cents?: number;
+	currency?: string;
+	owner_user_id?: string;
+	lead_ref?: string;
+	custom: unknown;
+	archived: boolean;
+	created_at: string;
+	updated_at: string;
+	deleted_at?: string;
+}
+
+export interface CrmDealStageHistory {
+	id: string;
+	deal_id: string;
+	tenant_id?: string;
+	from_stage_id?: string;
+	to_stage_id: string;
+	moved_by_user_id?: string;
+	moved_at: string;
+}
+
+export interface CrmActivity {
+	id: string;
+	tenant_id?: string;
+	project_id?: string;
+	kind: string;
+	contact_id?: string;
+	deal_id?: string;
+	body?: string;
+	payload?: unknown;
+	due_at?: string;
+	done_at?: string;
+	author_user_id?: string;
+	archived: boolean;
+	created_at: string;
+	updated_at: string;
+	deleted_at?: string;
+}
+
+export interface CrmCustomField {
+	id: string;
+	tenant_id?: string;
+	object_type: string;
+	field_key: string;
+	label: string;
+	field_type: string;
+	options?: unknown;
+	required: boolean;
+	archived: boolean;
+	created_at: string;
+	updated_at: string;
+	deleted_at?: string;
+}
+
+export interface CrmEvent {
+	cursor: string;
+	tenant_id?: string;
+	event: string;
+	entity_id?: string;
+	entity_type?: string;
+	payload: unknown;
+	at: string;
+}
+
+export interface CrmBoardStage extends CrmStage {
+	deals: CrmDeal[];
+}
+
+export interface CrmBoard {
+	pipeline: CrmPipeline;
+	stages: CrmBoardStage[];
+}
+
+export interface CrmImportItem {
+	project_id?: string;
+	external_ref: string;
+	first_name?: string;
+	last_name?: string;
+	emails?: unknown;
+	phones?: unknown;
+	lead_ref?: string;
+	owner_user_id?: string;
+	source?: string;
+	custom?: unknown;
+}
+
+export interface CrmImportContactsOptions {
+	contacts: CrmImportItem[];
+}
+
+export interface CrmImportResult {
+	imported: number;
+	contacts: CrmContact[];
+}
+
+export interface CrmEventsOptions {
+	cursor?: string;
+	limit?: number;
+}
+
+export interface CrmEventsPage {
+	events: CrmEvent[];
 	next_cursor?: string;
 }
 
