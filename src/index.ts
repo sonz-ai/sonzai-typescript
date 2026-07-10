@@ -5,6 +5,32 @@ export { Session } from "./resources/session-handle.js";
 export type { ScheduleUpcomingOptions } from "./resources/schedules.js";
 export type { BYOKProvider } from "./resources/byok.js";
 export { redactChannelConnectionSecrets } from "./resources/channel-connections.js";
+export {
+	RUNTIME_USAGE_SCHEMA_VERSION,
+	canonicalRuntimeUsageReport,
+	signRuntimeUsageReport,
+} from "./resources/runtime.js";
+export type {
+	RuntimeBillingMode,
+	RuntimeBackendAgentArtifact,
+	RuntimeCompletedTurn,
+	RuntimeContextBundle,
+	RuntimeContextBundleInput,
+	RuntimeConversation,
+	RuntimeConversationOptions,
+	RuntimeToolCall,
+	RuntimeTurnMessage,
+	RuntimeTurnReport,
+	RuntimeTurnReportResult,
+	RuntimeUsageCounter,
+	RuntimeUsageReport,
+	RuntimeUsageReportResult,
+} from "./resources/runtime.js";
+export { Routing } from "./resources/routing.js";
+export type {
+	ClassifyContactInput,
+	RoutingConfig,
+} from "./resources/routing.js";
 
 // Errors
 export {

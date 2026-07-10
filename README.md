@@ -3,7 +3,9 @@
 [![npm version](https://img.shields.io/npm/v/@sonzai-labs/agents.svg)](https://www.npmjs.com/package/@sonzai-labs/agents)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-The official TypeScript SDK for the [Sonzai Mind Layer API](https://sonz.ai). Build AI agents with persistent memory, evolving personality, and proactive behaviors.
+The official TypeScript SDK for the [Sonzai Mind Layer API](https://sonz.ai).
+Build tenant runtimes that use Sonzai memory while calling their LLM provider
+directly.
 
 **Zero runtime dependencies.** Uses the native `fetch` API. Works with Node.js (>=18), Bun, and Deno. Ships both ESM and CJS builds with full type definitions.
 
@@ -26,13 +28,22 @@ import { Sonzai } from "@sonzai-labs/agents";
 
 const client = new Sonzai({ apiKey: "your-api-key" }); // or set SONZAI_API_KEY
 
-const response = await client.agents.chat({
-  agent: "your-agent-id",
-  messages: [{ role: "user", content: "Hello! What's your favorite hobby?" }],
-  userId: "user-123",
+const bundle = await client.runtime.contextBundle("your-agent-id", {
+  user_id: "user-123",
+  session_id: "session-123",
+  current_message: "Hello!",
 });
-console.log(response.content);
+
+// Invoke OpenAI, Gemini, OpenRouter, or your BYOM endpoint here, from your
+// runtime. Provider credentials and quota never pass through platform-api.
+console.log(bundle.system_prompt_parts, bundle.memory_context);
 ```
+
+`client.runtime` intentionally has no completion method. After calling the
+provider directly, use `reportTurns(...)` to persist the transcript and
+`signRuntimeUsageReport(...)` + `submitUsageReport(...)` for attributed
+billing. Standard usage is provider benchmark cost × 1.33; BYOK/BYOM usage is
+a 33% Sonzai service fee.
 
 ## Authentication
 
@@ -83,6 +94,8 @@ client.projectConfig      // project-scoped config
 client.accountConfig      // tenant-scoped config
 client.customLLM          // bring-your-own-model (BYOM)
 client.projectNotifications
+client.runtime            // context, artifacts, transcripts, signed metering
+client.routing            // routing policies and permanent contact routes
 ```
 
 ### Runtime CRM

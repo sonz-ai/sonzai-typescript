@@ -3,6 +3,28 @@
 All notable changes to `@sonzai-labs/agents` are documented here. The project
 follows [Semantic Versioning](https://semver.org/). Dates are `YYYY-MM-DD`.
 
+## 1.9.0 — 2026-07-10
+
+### Added
+
+- `client.runtime`: per-turn context bundles, transcript read/write,
+  provider-neutral backend-agent artifacts, and signed invoice-grade usage
+  ingestion for custom runtimes. The resource intentionally has no completion
+  method; LLM calls execute directly in the tenant runtime.
+- Usage-report schema v2 and cross-language canonical HMAC helpers with
+  tenant/project/agent/provider/model attribution, cache token fields,
+  idempotent report IDs, billing mode, and unreported-turn accounting.
+- `client.routing`: typed routing policy, guide/handoff/channel configuration,
+  contact classification, and permanent-route operations.
+- `client.request(...)` as a typed transport escape hatch for new platform
+  operations between convenience-resource releases.
+
+### Changed
+
+- Standard usage represents provider benchmark cost × 1.33. BYOK/BYOM usage
+  represents a 33% Sonzai service fee because the tenant pays its provider
+  directly.
+
 ## 1.8.0 — 2026-07-10
 
 ### Added
