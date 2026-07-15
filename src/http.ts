@@ -8,6 +8,7 @@ import {
   RateLimitError,
   SonzaiError,
 } from "./errors.js";
+import { isChunkEnvelope } from "./sse-chunk.js";
 
 export interface HTTPClientOptions {
   baseUrl: string;
@@ -298,6 +299,12 @@ export class HTTPClient {
       // exceed 64 KB) are handled correctly without any explicit buffer configuration.
       let buffer = "";
 
+      // Chunk reassembly state: when the producer splits a payload across
+      // multiple SSE events using the __chunk envelope, we buffer the
+      // partial `data` strings here until all fragments arrive.
+      let chunkBuffer: string[] = [];
+      let chunkTotal = 0;
+
       try {
         while (true) {
           const { done, value } = await reader.read();
@@ -309,36 +316,66 @@ export class HTTPClient {
           buffer = lines.pop() ?? "";
 
           for (const line of lines) {
-            const trimmed = line.trim();
-            if (!trimmed) continue;
-            if (trimmed === "data: [DONE]") return;
-            if (trimmed.startsWith("data: ")) {
-              try {
-                yield JSON.parse(trimmed.slice(6));
-              } catch (e) {
-                console.warn(
-                  "[sonzai-sdk] Malformed SSE JSON event skipped:",
-                  trimmed.slice(6),
-                  e,
-                );
+            const parsed = this.parseSSELine(line);
+            if (parsed === "done") return;
+            if (parsed === null) continue;
+
+            if (isChunkEnvelope(parsed)) {
+              const { index, total } = parsed.__chunk;
+              // Reset buffer on first chunk or if total changed (new sequence)
+              if (index === 0 || total !== chunkTotal) {
+                chunkBuffer = [];
+                chunkTotal = total;
               }
+              chunkBuffer[index] = parsed.data;
+
+              // All chunks received — reassemble and yield
+              if (chunkBuffer.length === chunkTotal && chunkBuffer.every((s) => s !== undefined)) {
+                const assembled = chunkBuffer.join("");
+                chunkBuffer = [];
+                chunkTotal = 0;
+                try {
+                  yield JSON.parse(assembled);
+                } catch (e) {
+                  console.warn(
+                    "[sonzai-sdk] Malformed reassembled chunk JSON skipped:",
+                    assembled.slice(0, 200),
+                    e,
+                  );
+                }
+              }
+            } else {
+              yield parsed;
             }
           }
         }
 
         // Process remaining buffer
         if (buffer.trim()) {
-          const trimmed = buffer.trim();
-          if (trimmed === "data: [DONE]") return;
-          if (trimmed.startsWith("data: ")) {
-            try {
-              yield JSON.parse(trimmed.slice(6));
-            } catch (e) {
-              console.warn(
-                "[sonzai-sdk] Malformed SSE JSON event skipped:",
-                trimmed.slice(6),
-                e,
-              );
+          const parsed = this.parseSSELine(buffer);
+          if (parsed === "done") return;
+          if (parsed !== null) {
+            if (isChunkEnvelope(parsed)) {
+              const { index, total } = parsed.__chunk;
+              if (index === 0 || total !== chunkTotal) {
+                chunkBuffer = [];
+                chunkTotal = total;
+              }
+              chunkBuffer[index] = parsed.data;
+              if (chunkBuffer.length === chunkTotal && chunkBuffer.every((s) => s !== undefined)) {
+                const assembled = chunkBuffer.join("");
+                try {
+                  yield JSON.parse(assembled);
+                } catch (e) {
+                  console.warn(
+                    "[sonzai-sdk] Malformed reassembled chunk JSON skipped:",
+                    assembled.slice(0, 200),
+                    e,
+                  );
+                }
+              }
+            } else {
+              yield parsed;
             }
           }
         }
@@ -509,6 +546,30 @@ export class HTTPClient {
       if (timer) clearTimeout(timer);
       controller?.abort();
     }
+  }
+
+  /**
+   * Parses a single SSE text line.
+   *
+   * @returns The parsed JSON object, the string `"done"` for the terminal
+   *          `[DONE]` sentinel, or `null` for blank / non-data lines.
+   */
+  private parseSSELine(raw: string): Record<string, unknown> | "done" | null {
+    const trimmed = raw.trim();
+    if (!trimmed) return null;
+    if (trimmed === "data: [DONE]") return "done";
+    if (trimmed.startsWith("data: ")) {
+      try {
+        return JSON.parse(trimmed.slice(6)) as Record<string, unknown>;
+      } catch (e) {
+        console.warn(
+          "[sonzai-sdk] Malformed SSE JSON event skipped:",
+          trimmed.slice(6),
+          e,
+        );
+      }
+    }
+    return null;
   }
 
   private buildUrl(

@@ -32,6 +32,10 @@ export type {
 	RoutingConfig,
 } from "./resources/routing.js";
 
+// SSE chunking utilities
+export { chunkPayload, DEFAULT_MAX_CHUNK_SIZE } from "./sse-chunk.js";
+export type { SSEChunkEnvelope } from "./sse-chunk.js";
+
 // Errors
 export {
 	SonzaiError,

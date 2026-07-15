@@ -6,7 +6,10 @@ import {
   AuthenticationError,
   NotFoundError,
   BadRequestError,
+  chunkPayload,
+  DEFAULT_MAX_CHUNK_SIZE,
 } from "../src/index.js";
+import type { SSEChunkEnvelope } from "../src/index.js";
 
 const BASE_URL = "https://api.test.sonz.ai";
 
@@ -467,5 +470,211 @@ describe("Error Handling", () => {
     await expect(client().agents.memory.list("agent-1")).rejects.toThrow(
       BadRequestError,
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// SSE Chunked Events — chunkPayload producer
+// ---------------------------------------------------------------------------
+
+describe("chunkPayload", () => {
+  it("returns a single un-enveloped frame for small payloads", () => {
+    const payload = { greeting: "hello" };
+    const frames = chunkPayload(payload);
+    expect(frames).toHaveLength(1);
+    expect(frames[0]).toBe(`data: ${JSON.stringify(payload)}\n\n`);
+    // Should NOT contain __chunk
+    expect(frames[0]).not.toContain("__chunk");
+  });
+
+  it("splits large payloads into chunk-enveloped frames", () => {
+    // Create a payload larger than 64 bytes to force chunking at a small limit
+    const payload = { big: "x".repeat(200) };
+    const frames = chunkPayload(payload, 64);
+    expect(frames.length).toBeGreaterThan(1);
+
+    // Each frame should be a valid SSE data line with __chunk envelope
+    for (const frame of frames) {
+      expect(frame).toMatch(/^data: .+\n\n$/);
+      const parsed = JSON.parse(frame.slice(6, -2)) as SSEChunkEnvelope;
+      expect(parsed.__chunk).toBeDefined();
+      expect(typeof parsed.__chunk.index).toBe("number");
+      expect(typeof parsed.__chunk.total).toBe("number");
+      expect(parsed.__chunk.total).toBe(frames.length);
+      expect(typeof parsed.data).toBe("string");
+    }
+
+    // Reassemble and verify roundtrip
+    const reassembled = frames
+      .map((f) => JSON.parse(f.slice(6, -2)) as SSEChunkEnvelope)
+      .sort((a, b) => a.__chunk.index - b.__chunk.index)
+      .map((e) => e.data)
+      .join("");
+    expect(JSON.parse(reassembled)).toEqual(payload);
+  });
+
+  it("uses DEFAULT_MAX_CHUNK_SIZE when no limit is specified", () => {
+    expect(DEFAULT_MAX_CHUNK_SIZE).toBe(256 * 1024);
+    // A small payload with the default limit should not chunk
+    const frames = chunkPayload({ a: 1 });
+    expect(frames).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// SSE Chunked Events — streamSSE reassembly
+// ---------------------------------------------------------------------------
+
+describe("SSE Chunked Reassembly", () => {
+  it("reassembles chunked events into a single yielded object", async () => {
+    const original = {
+      choices: [{ delta: { content: "Hello world" }, finish_reason: "stop", index: 0 }],
+      usage: { promptTokens: 10, completionTokens: 5, totalTokens: 15 },
+    };
+    const json = JSON.stringify(original);
+    // Split into 3 chunks manually
+    const chunkSize = Math.ceil(json.length / 3);
+    const chunks = [
+      json.slice(0, chunkSize),
+      json.slice(chunkSize, chunkSize * 2),
+      json.slice(chunkSize * 2),
+    ];
+
+    const sseBody = chunks
+      .map((data, i) =>
+        `data: ${JSON.stringify({ __chunk: { index: i, total: 3 }, data })}\n`,
+      )
+      .join("\n")
+      + "\ndata: [DONE]\n\n";
+
+    server.use(
+      http.post(`${BASE_URL}/api/v1/agents/agent-1/chat`, () => {
+        return new HttpResponse(sseBody, {
+          headers: { "Content-Type": "text/event-stream" },
+        });
+      }),
+    );
+
+    const events: Record<string, unknown>[] = [];
+    for await (const event of client().agents.chatStream({
+      agent: "agent-1",
+      messages: [{ role: "user", content: "Hi" }],
+    })) {
+      events.push(event as Record<string, unknown>);
+    }
+
+    expect(events).toHaveLength(1);
+    expect(events[0]).toEqual(original);
+  });
+
+  it("passes non-chunked events through unchanged", async () => {
+    const body = [
+      'data: {"choices":[{"delta":{"content":"Hi"},"finish_reason":null,"index":0}]}',
+      "",
+      'data: {"choices":[{"delta":{"content":"!"},"finish_reason":"stop","index":0}]}',
+      "",
+      "data: [DONE]",
+      "",
+    ].join("\n");
+
+    server.use(
+      http.post(`${BASE_URL}/api/v1/agents/agent-1/chat`, () => {
+        return new HttpResponse(body, {
+          headers: { "Content-Type": "text/event-stream" },
+        });
+      }),
+    );
+
+    const events: Record<string, unknown>[] = [];
+    for await (const event of client().agents.chatStream({
+      agent: "agent-1",
+      messages: [{ role: "user", content: "Hi" }],
+    })) {
+      events.push(event as Record<string, unknown>);
+    }
+
+    expect(events).toHaveLength(2);
+  });
+
+  it("handles mixed chunked and normal events", async () => {
+    // Normal event first, then a chunked event, then another normal event
+    const normalEvent1 = { choices: [{ delta: { content: "A" }, finish_reason: null, index: 0 }] };
+    const largePayload = {
+      choices: [{ delta: { content: "Large content here" }, finish_reason: null, index: 0 }],
+      extra: "x".repeat(100),
+    };
+    const normalEvent2 = { choices: [{ delta: { content: "B" }, finish_reason: "stop", index: 0 }] };
+
+    const largeJson = JSON.stringify(largePayload);
+    const mid = Math.ceil(largeJson.length / 2);
+    const chunk0 = largeJson.slice(0, mid);
+    const chunk1 = largeJson.slice(mid);
+
+    const sseBody = [
+      `data: ${JSON.stringify(normalEvent1)}`,
+      "",
+      `data: ${JSON.stringify({ __chunk: { index: 0, total: 2 }, data: chunk0 })}`,
+      "",
+      `data: ${JSON.stringify({ __chunk: { index: 1, total: 2 }, data: chunk1 })}`,
+      "",
+      `data: ${JSON.stringify(normalEvent2)}`,
+      "",
+      "data: [DONE]",
+      "",
+    ].join("\n");
+
+    server.use(
+      http.post(`${BASE_URL}/api/v1/agents/agent-1/chat`, () => {
+        return new HttpResponse(sseBody, {
+          headers: { "Content-Type": "text/event-stream" },
+        });
+      }),
+    );
+
+    const events: Record<string, unknown>[] = [];
+    for await (const event of client().agents.chatStream({
+      agent: "agent-1",
+      messages: [{ role: "user", content: "Hi" }],
+    })) {
+      events.push(event as Record<string, unknown>);
+    }
+
+    expect(events).toHaveLength(3);
+    expect(events[0]).toEqual(normalEvent1);
+    expect(events[1]).toEqual(largePayload);
+    expect(events[2]).toEqual(normalEvent2);
+  });
+
+  it("roundtrips chunkPayload -> streamSSE reassembly", async () => {
+    const original = {
+      choices: [{ delta: { content: "a]b".repeat(100) }, finish_reason: "stop", index: 0 }],
+      usage: { promptTokens: 50, completionTokens: 300, totalTokens: 350 },
+    };
+
+    // Produce chunked frames via chunkPayload with a small limit
+    const frames = chunkPayload(original, 64);
+    expect(frames.length).toBeGreaterThan(1); // confirm it actually chunked
+
+    // Build SSE body from the frames (each frame is already "data: ...\n\n")
+    const sseBody = frames.join("") + "data: [DONE]\n\n";
+
+    server.use(
+      http.post(`${BASE_URL}/api/v1/agents/agent-1/chat`, () => {
+        return new HttpResponse(sseBody, {
+          headers: { "Content-Type": "text/event-stream" },
+        });
+      }),
+    );
+
+    const events: Record<string, unknown>[] = [];
+    for await (const event of client().agents.chatStream({
+      agent: "agent-1",
+      messages: [{ role: "user", content: "Hi" }],
+    })) {
+      events.push(event as Record<string, unknown>);
+    }
+
+    expect(events).toHaveLength(1);
+    expect(events[0]).toEqual(original);
   });
 });
